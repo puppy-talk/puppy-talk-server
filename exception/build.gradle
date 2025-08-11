@@ -1,0 +1,11 @@
+plugins {
+    id 'java-library'
+}
+
+java {
+    sourceCompatibility = '21'
+}
+
+dependencies {
+    api project(':model')
+}

@@ -1,0 +1,27 @@
+version: '3.8'
+
+# 개발자를 위한 Docker Compose 설정
+# MySQL만 컨테이너로 실행하고, 애플리케이션은 로컬에서 실행
+services:
+  mysql:
+    container_name: puppy-talk-mysql-dev
+    image: mysql:8.0.32
+    ports:
+      - "3306:3306"
+    restart: always
+    environment:
+      MYSQL_DATABASE: puppy_talk_db
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_PASSWORD: 1234
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_dev_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+
+volumes:
+  mysql_dev_data:

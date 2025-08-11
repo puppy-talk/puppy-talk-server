@@ -1,2 +1,11 @@
-rootProject.name = 'class-registration'
+rootProject.name = 'puppy-talk-server'
+
+include 'model'
+include 'exception'
+include 'service'
+include 'infrastructure'
+include 'repository-jdbc'
+include 'api'
+include 'application-api'
+include 'schema'
 
