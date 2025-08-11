@@ -16,7 +16,7 @@ java {
 
 dependencies {
     api project(':model')
-    
+
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 }

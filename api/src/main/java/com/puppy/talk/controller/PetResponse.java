@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class PetResponse {
+
     private final Long id;
     private final String name;
     private final String breed;
@@ -14,10 +15,10 @@ public class PetResponse {
 
     public static PetResponse from(Pet pet) {
         return PetResponse.builder()
-                .id(pet.getIdentity().getId())
-                .name(pet.getName())
-                .breed(pet.getBreed())
-                .age(pet.getAge())
-                .build();
+            .id(pet.getIdentity().getId())
+            .name(pet.getName())
+            .breed(pet.getBreed())
+            .age(pet.getAge())
+            .build();
     }
 }

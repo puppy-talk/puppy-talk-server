@@ -21,16 +21,15 @@ dependencies {
     implementation project(':api')
     implementation project(':repository-jdbc')
     implementation project(':schema')
-    
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    
+
     runtimeOnly 'mysql:mysql-connector-java:8.0.33'
-    
+
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'com.h2database:h2'
 }

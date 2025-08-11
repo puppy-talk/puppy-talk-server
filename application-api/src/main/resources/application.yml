@@ -19,9 +19,9 @@ spring:
     activate:
       on-profile: local
   datasource:
-    url: jdbc:mysql://localhost:3306/puppy_talk_db?useSSL=false&allowPublicKeyRetrieval=true
-    username: root
-    password: 1234
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/puppy_talk_db?useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:1234}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 ---
