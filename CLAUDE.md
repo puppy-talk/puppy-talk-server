@@ -1,249 +1,139 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 ## 개요
 
-Claude Code로 작업할 때 참고할 수 있는 Java Spring Boot 멀티모듈 프로젝트 구조입니다. **Hexagonal Architecture (Ports and
-Adapters Architecture)** 패턴을 기반으로 합니다.
+Java Spring Boot 멀티모듈 프로젝트로 **Hexagonal Architecture (Ports and Adapters Architecture)** 패턴을 기반으로 합니다. Puppy Talk 서버는 Pet 도메인을 중심으로 한 RESTful API를 제공합니다.
 
-## 아키텍처 원칙 (Claude Code 참고용)
+## 주요 개발 명령어
 
-### Hexagonal Architecture 레이어 구분
-
-- **Domain Layer**: 순수 비즈니스 로직 - 외부 의존성 없음
-- **Driving Side (Primary)**: HTTP 요청을 받는 컨트롤러 등
-- **Driven Side (Secondary)**: 데이터베이스, 외부 API 호출 등
-
-### Claude Code 작업 시 주의사항
-
-- 각 모듈의 역할과 의존 방향을 항상 확인
-- 새로운 기능 구현 시 적절한 모듈에 코드 배치
-- 테스트 코드도 모듈별로 분리하여 작성
-
-## 모듈 구조 (Claude Code 탐색 가이드)
-
-```
-project-root/
-├── model/                  # 🎯 도메인 모델 - 비즈니스 객체 정의
-├── exception/              # 🚨 예외 처리 - 도메인 특화 예외
-├── service/                # 🔧 비즈니스 로직 - 핵심 기능 구현
-├── infrastructure/         # 🔌 인터페이스 - 외부 시스템 연결 규약
-├── repository-jdbc/        # 💾 데이터 접근 - DB 연동 구현체
-├── api/                   # 🌐 API 계층 - 컨트롤러 및 DTO
-├── application-{type}/     # 🚀 부트스트랩 - 애플리케이션 시작점
-├── schema/                # 📊 DB 스키마 - 테이블 구조 정의
-├── .claude/               # 🤖 Claude Code 설정
-│   └── commands/          # 프로젝트별 slash commands
-└── docs/                  # 📝 문서화
-```
-
-## 각 모듈 상세 (Claude Code 작업 가이드)
-
-### Domain Layer (순수 비즈니스 로직)
-
-#### model 모듈
-
-- **목적**: 도메인의 핵심 비즈니스 모델 정의
-- **포함 요소**:
-    - 도메인 엔티티 (핵심 비즈니스 객체들)
-    - 도메인 Identity 클래스들
-    - 공통 속성 클래스들 (감사 정보 등)
-- **의존성**: 순수 도메인 - 외부 의존성 없음
-- **테스트**: 도메인 로직이 있는 경우 단위 테스트 필수
-
-#### exception 모듈
-
-- **목적**: 비즈니스 로직에서 발생하는 도메인 예외 정의
-- **포함 요소**:
-    - 도메인별 NotFound 예외들
-    - 비즈니스 규칙 위반 예외들
-    - 기타 도메인 특화 예외들
-
-### Service Layer (비즈니스 로직 구현)
-
-#### service 모듈
-
-- **목적**: 비즈니스 로직 구현 및 유스케이스 정의
-- **포함 요소**:
-    - 도메인 서비스들 (조회, 생성, 수정, 삭제 등)
-    - AutoConfiguration 클래스들
-- **원칙**:
-    - Persistence나 Network 모듈과 직접 참조 금지
-    - Infrastructure 포트를 통한 간접 참조만 허용
-- **테스트**: 비즈니스 로직 검증을 위한 테스트 필수
-
-### Driving Side (외부 요청 처리)
-
-#### api 모듈
-
-- **목적**: REST API 엔드포인트 제공
-- **포함 요소**:
-    - Controller 클래스들
-    - DTO 클래스들 (Request/Response 객체)
-- **테스트**: Controller 수준의 request/response 검증 테스트
-
-### Driven Side (외부 시스템 연동)
-
-#### infrastructure 모듈
-
-- **목적**: 외부 시스템과의 인터페이스 정의 (포트)
-- **포함 요소**:
-    - Repository 인터페이스들
-- **원칙**: 구현체 포함하지 않음 (테스트 용이성을 위해)
-
-#### repository-jdbc 모듈
-
-- **목적**: JDBC를 통한 데이터 영속성 구현
-- **포함 요소**:
-    - JdbcRepository 구현체들
-    - Entity 클래스들
-    - AutoConfiguration 클래스들
-- **테스트**: Integration Test를 통한 데이터베이스 동작 검증
-
-### Bootstrap (애플리케이션 구성)
-
-#### application-api 모듈
-
-- **목적**: 애플리케이션 실행 및 설정
-- **포함 요소**:
-    - Main Application 클래스
-    - 설정 클래스들 (Documentation, Security 등)
-    - application.yml
-
-#### schema 모듈
-
-- **목적**: 데이터베이스 스키마 관리
-- **포함 요소**:
-    - Liquibase 변경 로그
-    - 초기 스키마 및 데이터 스크립트
-
-## 의존성 규칙
-
-```mermaid
-flowchart TD
-  model["model"]
-  exception["exception"]
-  service["service"]
-  infrastructure["infrastructure"]  
-  repository["repository-jdbc"]
-  api["api"]
-  application["application-api"]
-
-  service --> model
-  service --> infrastructure
-  service --> exception
-  infrastructure --> model
-  repository -.-> infrastructure
-  api --> service
-  api --> exception
-  application --> api
-  application --> repository
-```
-
-### 주요 원칙
-
-1. **의존성 역전**: Service는 Infrastructure 구현체가 아닌 인터페이스에 의존
-2. **단방향 의존**: 상위 레이어는 하위 레이어를 의존하지만 역방향은 불가
-3. **순수 도메인**: Model과 Exception은 외부 의존성 없음
-4. **멀티 쓰레딩 고려**: 멀티 쓰레딩 환경을 고려하여 코드 작성
-
-## 기술 스택
-
-- **언어**: Java 21
-- **프레임워크**: Spring Boot 3.4.0(Spring Security 사용 금지)
-- **빌드 도구**: Gradle 8.x
-- **데이터베이스**: MySQL (운영), H2 (테스트)
-- **테스트**: JUnit 5, TestContainers
-- **문서화**: SpringDoc OpenAPI
-- **컨테이너**: Docker, Docker Compose
-
-## Docker 개발 환경 사용법
-
-### 전체 서비스 실행 (Docker Compose)
-
+### 빌드 및 실행
 ```bash
-# 애플리케이션 빌드
-./gradlew application-api:bootJar
+# 전체 프로젝트 빌드
+./gradlew clean build
 
-# 전체 서비스 (MySQL + 애플리케이션) 시작
+# 애플리케이션 실행 (local 프로필)
+./gradlew application-api:bootRun
+
+# 특정 모듈 빌드
+./gradlew {module-name}:build
+
+# 전체 테스트 실행
+./gradlew test
+
+# 특정 모듈 테스트
+./gradlew {module-name}:test
+```
+
+### Docker 환경
+```bash
+# 개발용: MySQL만 Docker로 실행
+docker-compose -f docker-compose.dev.yml up -d
+
+# 전체 서비스 실행 (권장 방법)
+./gradlew application-api:bootJar
 docker-compose up -d
 
 # 로그 확인
 docker-compose logs -f
 
-# 서비스 중지 및 정리
-docker-compose down
-docker-compose down -v  # 볼륨도 함께 삭제
+# 환경 정리
+docker-compose down -v
 ```
 
-### 개발자 모드 (MySQL만 Docker)
-
+### 빠른 스크립트 실행
 ```bash
-# MySQL만 Docker로 실행
-docker-compose -f docker-compose.dev.yml up -d
-
-# 애플리케이션은 로컬에서 실행 (local 프로필 사용)
-./gradlew application-api:bootRun
+# scripts/build.sh 사용 (MacOS/Linux)
+cd scripts && sh build.sh
 ```
 
-### Docker 환경 설정
+## Hexagonal Architecture 구조
 
-- **docker-compose.yml**: 전체 서비스 (MySQL + 애플리케이션)
-- **docker-compose.dev.yml**: 개발용 (MySQL만)
-- **Dockerfile**: Java 21 기반 애플리케이션 이미지
-- **Spring Profiles**:
-    - `local`: 로컬 MySQL 연결 (localhost:3306)
-    - `docker`: Docker 컨테이너 간 연결 (mysql:3306)
-    - `test`: H2 인메모리 데이터베이스
+### 핵심 아키텍처 원칙
 
-## 컨벤션
+1. **의존성 역전**: Service는 Infrastructure 구현체가 아닌 인터페이스에 의존
+2. **단방향 의존**: 상위 레이어는 하위 레이어를 의존하지만 역방향 불가
+3. **순수 도메인**: Model과 Exception은 외부 의존성 없음
+4. **포트와 어댑터**: Infrastructure 모듈은 포트(인터페이스)만 정의, 구현은 별도 모듈
 
-### 패키지 구조
+### 레이어별 역할
 
+**Domain Layer (핵심 비즈니스)**
+- `model/`: 도메인 엔티티 (Pet, PetIdentity) - 외부 의존성 없음
+- `exception/`: 도메인 예외 (PetNotFoundException) - model 모듈만 의존
+
+**Application Layer (비즈니스 로직)**
+- `service/`: 유스케이스 구현 (PetLookUpService) - Infrastructure 포트를 통해 외부 시스템과 통신
+- `infrastructure/`: 포트 정의 (PetRepository 인터페이스) - 구현체는 포함하지 않음
+
+**Adapter Layer (외부 시스템 연동)**
+- `api/`: HTTP 어댑터 (PetController, PetResponse) - Service에 의존
+- `repository-jdbc/`: JDBC 어댑터 (PetJdbcRepository) - Infrastructure 포트 구현
+
+**Infrastructure Layer**
+- `application-api/`: 스프링 부트 애플리케이션 구성 및 의존성 와이어링
+- `schema/`: Liquibase를 통한 데이터베이스 스키마 관리
+
+### 의존성 흐름
 ```
-{company}.{project}.{domain}.{layer}
+api → service → infrastructure ← repository-jdbc
+              ↘ model ↙
+              ↘ exception
 ```
 
-### 명명 규칙
+## 기술적 특징
 
-- **Service**: `{Domain}LookUpService`
-- **Repository Interface**: `{Domain}Repository`
-- **Repository Implementation**: `{Domain}JdbcRepository`
-- **Entity**: `{Domain}Entity`
-- **Configuration**: `{Domain}AutoConfiguration`
+### 스프링 프로필 관리
+- **local**: 로컬 MySQL (localhost:3306) - 환경변수 지원
+- **docker**: Docker 컨테이너 간 연결 (mysql:3306)
+- **test**: H2 인메모리 데이터베이스
 
-### 클래스 예시
+### 데이터베이스 스키마 관리
+- Liquibase 사용 (`schema/src/main/resources/db/changelog/`)
+- 상대 경로 및 논리적 파일 경로 설정으로 이식성 확보
+- 변경 로그는 XML 형식으로 관리
 
-```java
-// Domain Model
-public class DomainEntity {
-    private final EntityIdentity identity;
-    private final String name;
-    // ...
-}
+### ID 생성 전략
+- PetJdbcRepository에서 KeyHolder 사용하여 자동 생성 ID 처리
+- 삽입 시 생성된 ID로 새로운 Pet 객체 반환
 
-// Service
-public class EntityLookUpService {
-    private final EntityRepository entityRepository;
     
-    public EntityModel findEntity(EntityIdentity identity) {
-        // 비즈니스 로직
-    }
-}
 
-// Repository Interface (Infrastructure)
-public interface EntityRepository {
-    Optional<EntityModel> findByIdentity(EntityIdentity identity);
-}
+### 모듈 간 의존성 규칙
+- Domain 모듈(model, exception)은 외부 의존성 금지
+- Service는 Infrastructure 인터페이스만 의존, 구현체 직접 의존 금지  
+- Repository 구현체는 Infrastructure 인터페이스 구현
+- API 레이어는 Service와 Exception에만 의존
 
-// Repository Implementation
-public class EntityJdbcRepository implements EntityRepository {
-    private final JdbcTemplate jdbcTemplate;
-    
-    @Override
-    public Optional<EntityModel> findByIdentity(EntityIdentity identity) {
-        // JDBC 구현
-    }
-}
-```
+### 코드 작성 원칙
+- DTO는 record 타입 사용
+- Service 메서드에는 @Transactional(readOnly = true) 적용 (조회)
+- 생성자에서 null 및 유효성 검증 수행
+- Builder 패턴 사용 시에도 동일한 검증 로직 적용
 
-### DTO
+### Spring Security 금지
+- 프로젝트 정책에 따라 Spring Security 사용 금지
+- 인증/인가가 필요한 경우 대안 방안 검토 필요
 
-- Request, Response DTO는 record 타입을 활용합니다.
+### 컨벤션
+- 패키지: `com.puppy.talk.{domain}.{layer}`
+- Service: `{Domain}LookUpService`
+- Repository: `{Domain}Repository` (인터페이스), `{Domain}JdbcRepository` (구현체)
+- Identity: `{Domain}Identity`
+
+## 환경 설정
+
+### 환경변수 (local 프로필)
+- `SPRING_DATASOURCE_URL`: MySQL 연결 URL (기본값: jdbc:mysql://localhost:3306/puppy_talk_db?useSSL=false&allowPublicKeyRetrieval=true)
+- `SPRING_DATASOURCE_USERNAME`: DB 사용자명 (기본값: root)  
+- `SPRING_DATASOURCE_PASSWORD`: DB 패스워드 (기본값: 1234)
+
+### API 문서화
+- SpringDoc OpenAPI 사용
+- `/swagger-ui.html`에서 API 문서 확인 가능
+
+### 컨테이너 최적화
+- Amazon Corretto 21 JRE 기반
+- Non-root 사용자로 실행 (보안 강화)
+- G1GC 및 컨테이너 최적화 JVM 옵션 적용

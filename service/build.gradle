@@ -17,7 +17,7 @@ java {
 }
 
 dependencies {
-    implementation project(':model')
+    api project(':model')
     implementation project(':exception')
     implementation project(':infrastructure')
 
@@ -28,5 +28,8 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
 }
