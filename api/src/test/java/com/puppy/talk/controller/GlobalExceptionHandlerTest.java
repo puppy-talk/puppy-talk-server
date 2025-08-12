@@ -23,7 +23,7 @@ class GlobalExceptionHandlerTest {
 
         // Then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(response.getBody().code()).isEqualTo("RESOURCE_NOT_FOUND");
+        assertThat(response.getBody().code()).isEqualTo(ErrorCode.USER_NOT_FOUND);
         assertThat(response.getBody().message()).isEqualTo("Requested resource not found");
     }
 
@@ -37,7 +37,7 @@ class GlobalExceptionHandlerTest {
 
         // Then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(response.getBody().code()).isEqualTo("RESOURCE_NOT_FOUND");
+        assertThat(response.getBody().code()).isEqualTo(ErrorCode.USER_NOT_FOUND);
     }
 
     @Test
@@ -50,7 +50,7 @@ class GlobalExceptionHandlerTest {
 
         // Then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-        assertThat(response.getBody().code()).isEqualTo("RESOURCE_CONFLICT");
+        assertThat(response.getBody().code()).isEqualTo(ErrorCode.DUPLICATE_USERNAME);
         assertThat(response.getBody().message()).isEqualTo("Resource already exists");
     }
 
@@ -64,7 +64,7 @@ class GlobalExceptionHandlerTest {
 
         // Then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody().code()).isEqualTo("INVALID_REQUEST");
+        assertThat(response.getBody().code()).isEqualTo(ErrorCode.VALIDATION_ERROR);
         assertThat(response.getBody().message()).isEqualTo("Invalid request parameters");
     }
 
@@ -78,7 +78,7 @@ class GlobalExceptionHandlerTest {
 
         // Then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        assertThat(response.getBody().code()).isEqualTo("INTERNAL_SERVER_ERROR");
+        assertThat(response.getBody().code()).isEqualTo(ErrorCode.INTERNAL_SERVER_ERROR);
         assertThat(response.getBody().message()).isEqualTo("An unexpected error occurred");
     }
 }
