@@ -191,7 +191,10 @@ class ChatServiceTest {
         
         verify(chatRoomRepository).findByIdentity(chatRoomId);
         verify(messageRepository).save(any(Message.class));
-        verify(chatRoomRepository).save(any(ChatRoom.class));
+        verify(chatRoomRepository).save(argThat(room ->
+            room.lastMessageAt() != null &&
+            !room.lastMessageAt().isBefore(savedMessage.createdAt())
+        ));
     }
     
     @Test

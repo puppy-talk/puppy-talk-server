@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.net.URI;
 import java.util.List;
 
@@ -25,7 +26,8 @@ public class ChatController {
      * 펫과의 대화를 시작합니다.
      */
     @PostMapping("/start/{petId}")
-    public ResponseEntity<ApiResponse<ChatStartResponse>> startChat(@PathVariable Long petId) {
+    public ResponseEntity<ApiResponse<ChatStartResponse>> startChat(
+        @PathVariable @Positive Long petId) {
         PetIdentity petIdentity = PetIdentity.of(petId);
         
         ChatStartResult result = chatService.startChatWithPet(petIdentity);
@@ -43,7 +45,7 @@ public class ChatController {
      */
     @PostMapping("/rooms/{chatRoomId}/messages")
     public ResponseEntity<ApiResponse<MessageSendResponse>> sendMessage(
-        @PathVariable Long chatRoomId,
+        @PathVariable @Positive Long chatRoomId,
         @Valid @RequestBody MessageSendRequest request
     ) {
         ChatRoomIdentity chatRoomIdentity = ChatRoomIdentity.of(chatRoomId);
@@ -62,7 +64,8 @@ public class ChatController {
      * 채팅방의 메시지 히스토리를 조회합니다.
      */
     @GetMapping("/rooms/{chatRoomId}/messages")
-    public ResponseEntity<ApiResponse<List<MessageResponse>>> getChatHistory(@PathVariable Long chatRoomId) {
+    public ResponseEntity<ApiResponse<List<MessageResponse>>> getChatHistory(
+        @PathVariable @Positive Long chatRoomId) {
         ChatRoomIdentity chatRoomIdentity = ChatRoomIdentity.of(chatRoomId);
         
         List<Message> messages = chatService.getChatHistory(chatRoomIdentity);
@@ -78,7 +81,8 @@ public class ChatController {
      * 채팅방의 읽지 않은 메시지를 모두 읽음 처리합니다.
      */
     @PutMapping("/rooms/{chatRoomId}/messages/read")
-    public ResponseEntity<ApiResponse<Void>> markMessagesAsRead(@PathVariable Long chatRoomId) {
+    public ResponseEntity<ApiResponse<Void>> markMessagesAsRead(
+        @PathVariable @Positive Long chatRoomId) {
         ChatRoomIdentity chatRoomIdentity = ChatRoomIdentity.of(chatRoomId);
         
         chatService.markMessagesAsRead(chatRoomIdentity);

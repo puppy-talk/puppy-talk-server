@@ -22,6 +22,8 @@ public record Message(
         if (content == null || content.trim().isEmpty()) {
             throw new IllegalArgumentException("Content cannot be null or empty");
         }
+        // normalize
+        content = content.trim();
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
         }

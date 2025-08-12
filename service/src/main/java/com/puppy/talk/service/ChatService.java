@@ -24,6 +24,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ChatService {
 
+    private static final int DEFAULT_RECENT_MESSAGE_LIMIT = 50;
+    private static final String CHAT_ROOM_NAME_PATTERN = "%s와의 채팅방";
+
     private final PetRepository petRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final MessageRepository messageRepository;
@@ -46,11 +49,11 @@ public class ChatService {
         ChatRoom chatRoom = chatRoomRepository.findByPetId(petId)
             .orElseGet(() -> createNewChatRoom(pet));
 
-        // 최근 메시지들 조회 (최대 50개)
+        // 최근 메시지들 조회 (설정된 제한만큼)
         List<Message> recentMessages = messageRepository
             .findByChatRoomIdOrderByCreatedAtDesc(chatRoom.identity())
             .stream()
-            .limit(50)
+            .limit(DEFAULT_RECENT_MESSAGE_LIMIT)
             .toList();
 
         return new ChatStartResult(chatRoom, pet, recentMessages);
@@ -121,7 +124,7 @@ public class ChatService {
     }
 
     private ChatRoom createNewChatRoom(Pet pet) {
-        String roomName = pet.name() + "와의 채팅방";
+        String roomName = String.format(CHAT_ROOM_NAME_PATTERN, pet.name());
         ChatRoom newChatRoom = new ChatRoom(
             null, // identity는 저장 시 생성됨
             pet.identity(),
