@@ -187,6 +187,6 @@ public class ClaudeProvider implements AiProvider {
             }
         }
 
-        return AiResponse.create(result.trim(), model, PROVIDER_NAME, tokensUsed);
+        return AiResponse.of(result.trim(), model, PROVIDER_NAME, tokensUsed);
     }
 }

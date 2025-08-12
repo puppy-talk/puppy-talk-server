@@ -30,21 +30,21 @@ public record AiRequest(
     /**
      * 기본 파라미터로 요청을 생성합니다.
      */
-    public static AiRequest create(String prompt, String model) {
+    public static AiRequest of(String prompt, String model) {
         return new AiRequest(prompt, model, 150, 0.8, Map.of());
     }
 
     /**
      * 파라미터를 지정하여 요청을 생성합니다.
      */
-    public static AiRequest create(String prompt, String model, Integer maxTokens, Double temperature) {
+    public static AiRequest of(String prompt, String model, Integer maxTokens, Double temperature) {
         return new AiRequest(prompt, model, maxTokens, temperature, Map.of());
     }
 
     /**
      * 추가 파라미터와 함께 요청을 생성합니다.
      */
-    public static AiRequest create(String prompt, String model, Integer maxTokens, Double temperature, Map<String, Object> additionalParameters) {
+    public static AiRequest of(String prompt, String model, Integer maxTokens, Double temperature, Map<String, Object> additionalParameters) {
         return new AiRequest(prompt, model, maxTokens, temperature, additionalParameters != null ? additionalParameters : Map.of());
     }
 }

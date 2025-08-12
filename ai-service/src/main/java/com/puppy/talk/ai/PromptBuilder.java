@@ -65,7 +65,7 @@ public class PromptBuilder {
             
             List<Message> recentMessages = chatHistory.stream()
                 .limit(5)
-                .collect(Collectors.toList());
+                .toList();
             
             for (Message message : recentMessages) {
                 String sender = message.senderType() == SenderType.USER ? "사용자" : pet.name();

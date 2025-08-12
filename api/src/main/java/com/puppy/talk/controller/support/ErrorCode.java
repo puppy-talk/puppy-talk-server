@@ -1,4 +1,4 @@
-package com.puppy.talk.controller;
+package com.puppy.talk.controller.support;
 
 public enum ErrorCode {
     // User related errors

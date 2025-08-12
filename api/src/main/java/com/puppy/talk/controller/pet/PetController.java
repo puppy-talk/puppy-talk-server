@@ -1,5 +1,8 @@
-package com.puppy.talk.controller;
+package com.puppy.talk.controller.pet;
 
+import com.puppy.talk.controller.support.ApiResponse;
+import com.puppy.talk.controller.pet.dto.request.PetCreateRequest;
+import com.puppy.talk.controller.pet.dto.response.PetCreateResponse;
 import com.puppy.talk.model.pet.PersonaIdentity;
 import com.puppy.talk.model.user.UserIdentity;
 import com.puppy.talk.service.PetRegistrationService;

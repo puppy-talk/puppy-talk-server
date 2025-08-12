@@ -20,4 +20,37 @@ public record ChatRoom(
         }
         roomName = roomName.trim();
     }
+    
+    /**
+     * 새로운 채팅방을 생성합니다.
+     */
+    public static ChatRoom of(
+        ChatRoomIdentity identity,
+        PetIdentity petId,
+        String roomName,
+        LocalDateTime lastMessageAt
+    ) {
+        return new ChatRoom(identity, petId, roomName, lastMessageAt);
+    }
+    
+    /**
+     * 마지막 메시지 시간을 지정하여 새로운 채팅방을 생성합니다.
+     */
+    public static ChatRoom of(
+        PetIdentity petId,
+        String roomName,
+        LocalDateTime lastMessageAt
+    ) {
+        return new ChatRoom(null, petId, roomName, lastMessageAt);
+    }
+    
+    /**
+     * 현재 시각을 마지막 메시지 시간으로 하여 새로운 채팅방을 생성합니다.
+     */
+    public static ChatRoom of(
+        PetIdentity petId,
+        String roomName
+    ) {
+        return new ChatRoom(null, petId, roomName, LocalDateTime.now());
+    }
 }

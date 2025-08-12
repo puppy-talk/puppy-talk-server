@@ -35,6 +35,7 @@ public class ChatService {
     private final MessageRepository messageRepository;
     private final AiResponseService aiResponseService;
     private final PersonaLookUpService personaLookUpService;
+    private final ActivityTrackingService activityTrackingService;
 
     /**
      * 펫과의 대화를 시작합니다.
@@ -61,6 +62,9 @@ public class ChatService {
             .limit(DEFAULT_RECENT_MESSAGE_LIMIT)
             .toList();
 
+        // 채팅방 열기 활동 기록
+        activityTrackingService.trackChatOpened(pet.userId(), chatRoom.identity());
+
         return new ChatStartResult(chatRoom, pet, recentMessages);
     }
 
@@ -86,7 +90,7 @@ public class ChatService {
             .orElseThrow(() -> new PetNotFoundException(chatRoom.petId()));
 
         // 사용자 메시지 저장
-        Message userMessage = new Message(
+        Message userMessage = Message.of(
             null, // identity는 저장 시 생성됨
             chatRoomId,
             SenderType.USER,
@@ -96,6 +100,9 @@ public class ChatService {
         );
 
         Message savedUserMessage = messageRepository.save(userMessage);
+
+        // 메시지 전송 활동 기록
+        activityTrackingService.trackMessageSent(pet.userId(), chatRoomId);
 
         // AI 펫 응답 생성 및 저장
         generateAndSavePetResponse(chatRoom, pet, content.trim());
@@ -133,7 +140,18 @@ public class ChatService {
             throw new IllegalArgumentException("ChatRoomId cannot be null");
         }
 
+        // 채팅방 조회
+        ChatRoom chatRoom = chatRoomRepository.findByIdentity(chatRoomId)
+            .orElseThrow(() -> new IllegalArgumentException("ChatRoom not found: " + chatRoomId.id()));
+
+        // 펫 정보 조회
+        Pet pet = petRepository.findByIdentity(chatRoom.petId())
+            .orElseThrow(() -> new PetNotFoundException(chatRoom.petId()));
+
         messageRepository.markAllAsReadByChatRoomId(chatRoomId);
+
+        // 메시지 읽기 활동 기록
+        activityTrackingService.trackMessageRead(pet.userId(), chatRoomId);
     }
 
     /**
@@ -155,7 +173,7 @@ public class ChatService {
             String aiResponse = aiResponseService.generatePetResponse(pet, persona, userMessage, chatHistory);
             
             // 펫 응답 메시지 저장
-            Message petMessage = new Message(
+            Message petMessage = Message.of(
                 null, // identity는 저장 시 생성됨
                 chatRoom.identity(),
                 SenderType.PET,
@@ -175,8 +193,7 @@ public class ChatService {
 
     private ChatRoom createNewChatRoom(Pet pet) {
         String roomName = String.format(CHAT_ROOM_NAME_PATTERN, pet.name());
-        ChatRoom newChatRoom = new ChatRoom(
-            null, // identity는 저장 시 생성됨
+        ChatRoom newChatRoom = ChatRoom.of(
             pet.identity(),
             roomName,
             LocalDateTime.now()

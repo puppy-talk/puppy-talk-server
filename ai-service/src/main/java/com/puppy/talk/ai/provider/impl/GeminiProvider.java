@@ -159,7 +159,7 @@ public class GeminiProvider implements AiProvider {
             }
         }
 
-        return AiResponse.create(result.trim(), model, PROVIDER_NAME, tokensUsed);
+        return AiResponse.of(result.trim(), model, PROVIDER_NAME, tokensUsed);
     }
 
     private String extractTextFromResponse(JsonNode root) throws AiResponseException {

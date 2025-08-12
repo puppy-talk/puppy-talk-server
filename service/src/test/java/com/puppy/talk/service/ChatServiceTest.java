@@ -54,6 +54,9 @@ class ChatServiceTest {
     @Mock
     private PersonaLookUpService personaLookUpService;
     
+    @Mock
+    private ActivityTrackingService activityTrackingService;
+    
     @InjectMocks
     private ChatService chatService;
     
@@ -273,11 +276,18 @@ class ChatServiceTest {
     @Test
     @DisplayName("성공: 메시지 읽음 처리")
     void markMessagesAsRead_Success() {
+        // Given
+        when(chatRoomRepository.findByIdentity(chatRoomId)).thenReturn(Optional.of(mockChatRoom));
+        when(petRepository.findByIdentity(mockChatRoom.petId())).thenReturn(Optional.of(mockPet));
+        
         // When
         chatService.markMessagesAsRead(chatRoomId);
         
         // Then
+        verify(chatRoomRepository).findByIdentity(chatRoomId);
+        verify(petRepository).findByIdentity(mockChatRoom.petId());
         verify(messageRepository).markAllAsReadByChatRoomId(chatRoomId);
+        verify(activityTrackingService).trackMessageRead(mockPet.userId(), chatRoomId);
     }
     
     @Test

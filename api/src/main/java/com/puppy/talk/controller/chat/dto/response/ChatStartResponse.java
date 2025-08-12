@@ -1,5 +1,6 @@
-package com.puppy.talk.controller;
+package com.puppy.talk.controller.chat.dto.response;
 
+import com.puppy.talk.controller.pet.dto.response.PetResponse;
 import com.puppy.talk.service.dto.ChatStartResult;
 
 import java.time.LocalDateTime;

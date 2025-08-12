@@ -13,6 +13,11 @@ management:
     health:
       show-details: always
 
+# Inactivity Notification Scheduler Configuration
+inactivity:
+  scheduler:
+    enabled: ${INACTIVITY_SCHEDULER_ENABLED:true}
+
 # AI Multi-Provider Configuration
 ai:
   default-provider: ${AI_DEFAULT_PROVIDER:gpt-oss}

@@ -38,4 +38,31 @@ public record Message(
     ) {
         this(identity, chatRoomId, senderType, content, isRead, LocalDateTime.now());
     }
+    
+    /**
+     * 새로운 메시지를 생성합니다 (모든 필드 지정).
+     */
+    public static Message of(
+        MessageIdentity identity,
+        ChatRoomIdentity chatRoomId,
+        SenderType senderType,
+        String content,
+        boolean isRead,
+        LocalDateTime createdAt
+    ) {
+        return new Message(identity, chatRoomId, senderType, content, isRead, createdAt);
+    }
+    
+    /**
+     * 새로운 메시지를 생성합니다 (생성 시각 자동 설정).
+     */
+    public static Message of(
+        MessageIdentity identity,
+        ChatRoomIdentity chatRoomId,
+        SenderType senderType,
+        String content,
+        boolean isRead
+    ) {
+        return new Message(identity, chatRoomId, senderType, content, isRead, LocalDateTime.now());
+    }
 }

@@ -1,4 +1,4 @@
-package com.puppy.talk.controller;
+package com.puppy.talk.controller.chat.dto.response;
 
 import com.puppy.talk.model.chat.Message;
 

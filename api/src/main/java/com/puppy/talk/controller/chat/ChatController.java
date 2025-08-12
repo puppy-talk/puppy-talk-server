@@ -1,5 +1,10 @@
-package com.puppy.talk.controller;
+package com.puppy.talk.controller.chat;
 
+import com.puppy.talk.controller.support.ApiResponse;
+import com.puppy.talk.controller.chat.dto.response.ChatStartResponse;
+import com.puppy.talk.controller.chat.dto.response.MessageResponse;
+import com.puppy.talk.controller.chat.dto.request.MessageSendRequest;
+import com.puppy.talk.controller.chat.dto.response.MessageSendResponse;
 import com.puppy.talk.model.chat.ChatRoomIdentity;
 import com.puppy.talk.model.chat.Message;
 import com.puppy.talk.model.pet.PetIdentity;

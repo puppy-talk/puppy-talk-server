@@ -56,8 +56,7 @@ public class PetRegistrationService {
         Pet savedPet = petRepository.save(pet);
 
         String roomTitle = savedPet.name() + "와의 채팅방";
-        ChatRoom newChatRoom = new ChatRoom(
-            null,
+        ChatRoom newChatRoom = ChatRoom.of(
             savedPet.identity(),
             roomTitle,
             null

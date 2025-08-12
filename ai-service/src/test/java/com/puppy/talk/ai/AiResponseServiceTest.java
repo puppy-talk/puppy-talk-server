@@ -196,7 +196,7 @@ class AiResponseServiceTest {
                 throw new AiResponseException("Mock AI provider error");
             }
             
-            return AiResponse.create(mockResponse, request.model(), getProviderName());
+            return AiResponse.of(mockResponse, request.model(), getProviderName());
         }
         
         @Override

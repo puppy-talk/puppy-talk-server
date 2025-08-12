@@ -1,4 +1,4 @@
-package com.puppy.talk.controller;
+package com.puppy.talk.controller.pet.dto.response;
 
 import com.puppy.talk.model.pet.Pet;
 

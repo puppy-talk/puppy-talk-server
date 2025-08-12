@@ -56,7 +56,7 @@ public class AiResponseService {
             log.debug("Using AI provider: {}", provider.getProviderName());
             
             // AI 요청 생성
-            AiRequest request = AiRequest.create(prompt, defaultModel, maxTokens, temperature);
+            AiRequest request = AiRequest.of(prompt, defaultModel, maxTokens, temperature);
             
             // AI 응답 생성
             AiResponse response = provider.generateResponse(request);
