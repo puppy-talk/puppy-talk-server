@@ -12,9 +12,7 @@ public record Message(
 ) {
 
     public Message {
-        if (identity == null) {
-            throw new IllegalArgumentException("Identity cannot be null");
-        }
+        // identity can be null for new messages before saving
         if (chatRoomId == null) {
             throw new IllegalArgumentException("ChatRoomId cannot be null");
         }
