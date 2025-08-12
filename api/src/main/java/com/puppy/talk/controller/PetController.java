@@ -6,7 +6,6 @@ import com.puppy.talk.service.PetRegistrationService;
 import com.puppy.talk.service.dto.PetRegistrationResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,7 +16,8 @@ public class PetController {
     private final PetRegistrationService petRegistrationService;
 
     @PostMapping
-    public ResponseEntity<PetCreateResponse> createPet(@RequestBody PetCreateRequest request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<PetCreateResponse> createPet(@RequestBody PetCreateRequest request) {
         PetRegistrationResult result = petRegistrationService.registerPet(
             UserIdentity.of(request.userId()),
             PersonaIdentity.of(request.personaId()),
@@ -32,6 +32,6 @@ public class PetController {
             result.chatRoom().identity().id()
         );
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ApiResponse.ok(response, "Pet registered successfully");
     }
 }

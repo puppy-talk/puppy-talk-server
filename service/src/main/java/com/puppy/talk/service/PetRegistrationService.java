@@ -35,19 +35,16 @@ public class PetRegistrationService {
         int age,
         String profileImageUrl
     ) {
-        // 사용자 존재 확인
-        if (!userRepository.findByIdentity(userId).isPresent()) {
+        if (userRepository.findByIdentity(userId).isEmpty()) {
             throw new UserNotFoundException(userId);
         }
 
-        // 페르소나 존재 확인
-        if (!personaRepository.findByIdentity(personaId).isPresent()) {
+        if (personaRepository.findByIdentity(personaId).isEmpty()) {
             throw new PersonaNotFoundException(personaId);
         }
 
-        // 펫 생성 (identity는 null로 설정하여 새 ID 생성)
-        Pet newPet = new Pet(
-            null, // PetIdentity는 repository에서 생성
+        Pet pet = new Pet(
+            null,
             userId,
             personaId,
             name,
@@ -56,16 +53,14 @@ public class PetRegistrationService {
             profileImageUrl
         );
 
-        // 펫 저장
-        Pet savedPet = petRepository.save(newPet);
+        Pet savedPet = petRepository.save(pet);
 
-        // 채팅방 생성 (펫 이름을 기반으로 채팅방 이름 생성)
-        String chatRoomName = savedPet.name() + "와의 채팅방";
+        String roomTitle = savedPet.name() + "와의 채팅방";
         ChatRoom newChatRoom = new ChatRoom(
-            null, // ChatRoomIdentity는 repository에서 생성
+            null,
             savedPet.identity(),
-            chatRoomName,
-            null // 초기에는 메시지가 없음
+            roomTitle,
+            null
         );
 
         ChatRoom savedChatRoom = chatRoomRepository.save(newChatRoom);
