@@ -11,9 +11,7 @@ public record ChatRoom(
 ) {
 
     public ChatRoom {
-        if (identity == null) {
-            throw new IllegalArgumentException("Identity cannot be null");
-        }
+        // identity can be null for new chat rooms before saving
         if (petId == null) {
             throw new IllegalArgumentException("PetId cannot be null");
         }

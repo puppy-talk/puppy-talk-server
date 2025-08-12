@@ -13,9 +13,7 @@ public record Pet(
 ) {
 
     public Pet {
-        if (identity == null) {
-            throw new IllegalArgumentException("Identity cannot be null");
-        }
+        // identity can be null for new pets before saving
         if (userId == null) {
             throw new IllegalArgumentException("UserId cannot be null");
         }

@@ -1,24 +1,42 @@
 package com.puppy.talk.controller;
 
-import com.puppy.talk.service.PetLookUpService;
-import java.util.List;
+import com.puppy.talk.model.pet.PersonaIdentity;
+import com.puppy.talk.model.user.UserIdentity;
+import com.puppy.talk.service.PetRegistrationService;
+import com.puppy.talk.service.dto.PetRegistrationResult;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.Valid;
+import java.net.URI;
 
 @RestController
-@RequestMapping("/api/v1/pets")
+@RequestMapping("/api/pets")
 @RequiredArgsConstructor
 public class PetController {
 
-    private final PetLookUpService petLookUpService;
+    private final PetRegistrationService petRegistrationService;
 
-    @GetMapping
-    public List<PetResponse> getPets() {
-        return petLookUpService.findAllPets()
-            .stream()
-            .map(PetResponse::from)
-            .toList();
+    @PostMapping
+    public ResponseEntity<ApiResponse<PetCreateResponse>> createPet(@Valid @RequestBody PetCreateRequest request) {
+        PetRegistrationResult result = petRegistrationService.registerPet(
+            UserIdentity.of(request.userId()),
+            PersonaIdentity.of(request.personaId()),
+            request.name(),
+            request.breed(),
+            request.age(),
+            request.profileImageUrl()
+        );
+
+        PetCreateResponse response = PetCreateResponse.of(
+            result.pet(),
+            result.chatRoom().identity().id()
+        );
+
+        URI location = URI.create(String.format("/api/pets/%d", result.pet().identity().id()));
+        return ResponseEntity
+            .created(location)
+            .body(ApiResponse.ok(response, "Pet registered successfully"));
     }
 }
