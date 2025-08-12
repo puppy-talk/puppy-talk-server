@@ -1,5 +1,6 @@
 package com.puppy.talk.service;
 
+import com.puppy.talk.ai.AiResponseService;
 import com.puppy.talk.exception.pet.PetNotFoundException;
 import com.puppy.talk.infrastructure.chat.ChatRoomRepository;
 import com.puppy.talk.infrastructure.chat.MessageRepository;
@@ -11,6 +12,7 @@ import com.puppy.talk.model.chat.MessageIdentity;
 import com.puppy.talk.model.chat.SenderType;
 import com.puppy.talk.model.pet.Pet;
 import com.puppy.talk.model.pet.PetIdentity;
+import com.puppy.talk.model.pet.Persona;
 import com.puppy.talk.service.dto.ChatStartResult;
 import com.puppy.talk.service.dto.MessageSendResult;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,8 @@ public class ChatService {
     private final PetRepository petRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final MessageRepository messageRepository;
+    private final AiResponseService aiResponseService;
+    private final PersonaLookUpService personaLookUpService;
 
     /**
      * 펫과의 대화를 시작합니다.
@@ -61,6 +65,7 @@ public class ChatService {
 
     /**
      * 사용자가 펫에게 메시지를 보냅니다.
+     * 사용자 메시지 저장 후 AI 펫 응답을 자동으로 생성하여 저장합니다.
      */
     @Transactional
     public MessageSendResult sendMessageToPet(ChatRoomIdentity chatRoomId, String content) {
@@ -75,6 +80,10 @@ public class ChatService {
         ChatRoom chatRoom = chatRoomRepository.findByIdentity(chatRoomId)
             .orElseThrow(() -> new IllegalArgumentException("ChatRoom not found: " + chatRoomId.id()));
 
+        // 펫 정보 조회
+        Pet pet = petRepository.findByIdentity(chatRoom.petId())
+            .orElseThrow(() -> new PetNotFoundException(chatRoom.petId()));
+
         // 사용자 메시지 저장
         Message userMessage = new Message(
             null, // identity는 저장 시 생성됨
@@ -86,6 +95,9 @@ public class ChatService {
         );
 
         Message savedUserMessage = messageRepository.save(userMessage);
+
+        // AI 펫 응답 생성 및 저장
+        generateAndSavePetResponse(chatRoom, pet, content.trim());
 
         // 채팅방 마지막 메시지 시간 업데이트
         ChatRoom updatedChatRoom = new ChatRoom(
@@ -121,6 +133,43 @@ public class ChatService {
         }
 
         messageRepository.markAllAsReadByChatRoomId(chatRoomId);
+    }
+
+    /**
+     * AI를 사용하여 펫의 응답을 생성하고 저장합니다.
+     */
+    private void generateAndSavePetResponse(ChatRoom chatRoom, Pet pet, String userMessage) {
+        try {
+            // 페르소나 조회
+            Persona persona = personaLookUpService.findPersona(pet.personaId());
+            
+            // 채팅 히스토리 조회 (최근 10개)
+            List<Message> chatHistory = messageRepository
+                .findByChatRoomIdOrderByCreatedAtDesc(chatRoom.identity())
+                .stream()
+                .limit(10)
+                .toList();
+            
+            // AI 응답 생성
+            String aiResponse = aiResponseService.generatePetResponse(pet, persona, userMessage, chatHistory);
+            
+            // 펫 응답 메시지 저장
+            Message petMessage = new Message(
+                null, // identity는 저장 시 생성됨
+                chatRoom.identity(),
+                SenderType.PET,
+                aiResponse,
+                false, // 펫 메시지는 처음에 읽지 않음 상태
+                LocalDateTime.now()
+            );
+            
+            messageRepository.save(petMessage);
+            
+        } catch (Exception e) {
+            // AI 응답 생성 실패 시 로그만 남기고 계속 진행
+            // 사용자 메시지는 정상적으로 저장되어야 함
+            System.err.println("Failed to generate pet response: " + e.getMessage());
+        }
     }
 
     private ChatRoom createNewChatRoom(Pet pet) {

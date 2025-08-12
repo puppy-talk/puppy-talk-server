@@ -1,5 +1,6 @@
 package com.puppy.talk.service;
 
+import com.puppy.talk.ai.AiResponseService;
 import com.puppy.talk.exception.pet.PetNotFoundException;
 import com.puppy.talk.infrastructure.chat.ChatRoomRepository;
 import com.puppy.talk.infrastructure.chat.MessageRepository;
@@ -11,6 +12,7 @@ import com.puppy.talk.model.chat.MessageIdentity;
 import com.puppy.talk.model.chat.SenderType;
 import com.puppy.talk.model.pet.Pet;
 import com.puppy.talk.model.pet.PetIdentity;
+import com.puppy.talk.model.pet.Persona;
 import com.puppy.talk.model.pet.PersonaIdentity;
 import com.puppy.talk.model.user.UserIdentity;
 import com.puppy.talk.service.dto.ChatStartResult;
@@ -30,6 +32,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,6 +47,12 @@ class ChatServiceTest {
     
     @Mock
     private MessageRepository messageRepository;
+    
+    @Mock
+    private AiResponseService aiResponseService;
+    
+    @Mock
+    private PersonaLookUpService personaLookUpService;
     
     @InjectMocks
     private ChatService chatService;
@@ -174,7 +183,21 @@ class ChatServiceTest {
             LocalDateTime.now()
         );
         
+        // Persona 생성
+        Persona mockPersona = new Persona(
+            PersonaIdentity.of(1L),
+            "친근한 펫",
+            "활발하고 친근한 성격",
+            "밝고 긍정적",
+            "당신은 친근한 펫입니다.",
+            true
+        );
+        
         when(chatRoomRepository.findByIdentity(chatRoomId)).thenReturn(Optional.of(mockChatRoom));
+        when(petRepository.findByIdentity(mockPet.identity())).thenReturn(Optional.of(mockPet));
+        when(personaLookUpService.findPersona(mockPet.personaId())).thenReturn(mockPersona);
+        when(messageRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId)).thenReturn(List.of());
+        when(aiResponseService.generatePetResponse(eq(mockPet), eq(mockPersona), eq(messageContent), any())).thenReturn("AI 응답");
         when(messageRepository.save(any(Message.class))).thenReturn(savedMessage);
         when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(updatedChatRoom);
         
@@ -190,7 +213,10 @@ class ChatServiceTest {
         assertThat(result.chatRoom().roomName()).isEqualTo(mockChatRoom.roomName());
         
         verify(chatRoomRepository).findByIdentity(chatRoomId);
-        verify(messageRepository).save(any(Message.class));
+        verify(petRepository).findByIdentity(mockPet.identity());
+        verify(personaLookUpService).findPersona(mockPet.personaId());
+        verify(messageRepository, times(2)).save(any(Message.class)); // 사용자 메시지 + AI 응답 메시지
+        verify(aiResponseService).generatePetResponse(eq(mockPet), any(Persona.class), eq(messageContent), any());
         verify(chatRoomRepository).save(argThat(room ->
             room.lastMessageAt() != null &&
             !room.lastMessageAt().isBefore(savedMessage.createdAt())
