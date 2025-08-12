@@ -1,0 +1,165 @@
+### AI 제공업체 상태 및 관리 API
+### 
+### 이 파일은 AI 제공업체들의 상태를 확인하고 관리하는 API를 테스트합니다.
+
+@baseUrl = http://localhost:8080
+
+### 1. 모든 제공업체 상태 확인
+### 현재 활성화된 AI 제공업체들의 상태를 확인합니다.
+GET {{baseUrl}}/api/ai/providers/status
+Accept: application/json
+
+### 2. 특정 제공업체 상태 확인
+### gpt-oss 제공업체 상태
+GET {{baseUrl}}/api/ai/providers/gpt-oss/status
+Accept: application/json
+
+### OpenAI 제공업체 상태
+GET {{baseUrl}}/api/ai/providers/openai/status
+Accept: application/json
+
+### Claude 제공업체 상태
+GET {{baseUrl}}/api/ai/providers/claude/status
+Accept: application/json
+
+### Gemini 제공업체 상태
+GET {{baseUrl}}/api/ai/providers/gemini/status
+Accept: application/json
+
+### 3. 현재 사용 중인 제공업체 확인
+GET {{baseUrl}}/api/ai/providers/current
+Accept: application/json
+
+### 4. 지원되는 모델 목록 확인
+### 모든 제공업체의 지원 모델
+GET {{baseUrl}}/api/ai/models
+Accept: application/json
+
+### 특정 제공업체의 지원 모델
+GET {{baseUrl}}/api/ai/providers/gpt-oss/models
+Accept: application/json
+
+GET {{baseUrl}}/api/ai/providers/openai/models
+Accept: application/json
+
+### 5. AI 제공업체 테스트
+### gpt-oss 테스트
+POST {{baseUrl}}/api/ai/test
+Content-Type: application/json
+Accept: application/json
+
+{
+  "provider": "gpt-oss",
+  "model": "gpt-oss:20b",
+  "prompt": "안녕하세요! 간단한 테스트입니다."
+}
+
+### OpenAI 테스트
+POST {{baseUrl}}/api/ai/test
+Content-Type: application/json
+Accept: application/json
+
+{
+  "provider": "openai",
+  "model": "gpt-3.5-turbo",
+  "prompt": "Hello! This is a simple test."
+}
+
+### Claude 테스트
+POST {{baseUrl}}/api/ai/test
+Content-Type: application/json
+Accept: application/json
+
+{
+  "provider": "claude",
+  "model": "claude-3-haiku-20240307",
+  "prompt": "Hello! This is a simple test."
+}
+
+### Gemini 테스트
+POST {{baseUrl}}/api/ai/test
+Content-Type: application/json
+Accept: application/json
+
+{
+  "provider": "gemini",
+  "model": "gemini-1.5-flash",
+  "prompt": "Hello! This is a simple test."
+}
+
+### 6. 제공업체 전환 테스트
+### 기본 제공업체로 채팅 (자동 선택)
+POST {{baseUrl}}/api/chat/rooms/1/messages
+Content-Type: application/json
+Accept: application/json
+
+{
+  "content": "안녕하세요! 어떤 AI 모델이 응답하고 있나요?"
+}
+
+### 7. 성능 비교 테스트
+### 동일한 프롬프트로 다양한 제공업체 테스트
+POST {{baseUrl}}/api/ai/compare
+Content-Type: application/json
+Accept: application/json
+
+{
+  "providers": ["gpt-oss", "openai", "claude"],
+  "prompt": "강아지에 대한 재미있는 사실을 하나 알려주세요.",
+  "maxTokens": 100
+}
+
+### 8. 오류 상황 테스트
+### 존재하지 않는 제공업체
+POST {{baseUrl}}/api/ai/test
+Content-Type: application/json
+Accept: application/json
+
+{
+  "provider": "non-existent-provider",
+  "model": "fake-model",
+  "prompt": "This should fail."
+}
+
+### 잘못된 모델명
+POST {{baseUrl}}/api/ai/test
+Content-Type: application/json
+Accept: application/json
+
+{
+  "provider": "openai",
+  "model": "invalid-model-name",
+  "prompt": "This should fail too."
+}
+
+### 9. 제공업체 설정 변경 (관리자 전용)
+### 제공업체 활성화/비활성화
+PUT {{baseUrl}}/api/admin/ai/providers/gpt-oss/toggle
+Content-Type: application/json
+Accept: application/json
+
+{
+  "enabled": false
+}
+
+### 기본 제공업체 변경
+PUT {{baseUrl}}/api/admin/ai/default-provider
+Content-Type: application/json
+Accept: application/json
+
+{
+  "provider": "openai"
+}
+
+### 10. 통계 및 모니터링
+### AI 사용 통계
+GET {{baseUrl}}/api/ai/stats
+Accept: application/json
+
+### 제공업체별 응답 시간 통계
+GET {{baseUrl}}/api/ai/stats/response-times
+Accept: application/json
+
+### 제공업체별 오류율 통계
+GET {{baseUrl}}/api/ai/stats/error-rates
+Accept: application/json

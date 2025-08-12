@@ -20,6 +20,7 @@ dependencies {
     api project(':model')
     implementation project(':exception')
     implementation project(':infrastructure')
+    implementation project(':ai-service')
 
     implementation 'org.springframework:spring-context'
     implementation 'org.springframework:spring-tx'
