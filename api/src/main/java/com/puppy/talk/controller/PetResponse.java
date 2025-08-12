@@ -1,6 +1,6 @@
 package com.puppy.talk.controller;
 
-import com.puppy.talk.model.Pet;
+import com.puppy.talk.model.pet.Pet;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -15,10 +15,10 @@ public class PetResponse {
 
     public static PetResponse from(Pet pet) {
         return PetResponse.builder()
-            .id(pet.getIdentity().getId())
-            .name(pet.getName())
-            .breed(pet.getBreed())
-            .age(pet.getAge())
+            .id(pet.identity().id())
+            .name(pet.name())
+            .breed(pet.breed())
+            .age(pet.age())
             .build();
     }
 }
