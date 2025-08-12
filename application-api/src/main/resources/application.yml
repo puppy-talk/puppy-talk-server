@@ -20,28 +20,28 @@ ai:
   max-tokens: ${AI_MAX_TOKENS:150}
   temperature: ${AI_TEMPERATURE:0.8}
   fallback-providers: ${AI_FALLBACK_PROVIDERS:openai,claude}
-  
+
   providers:
     # gpt-oss (Local Model via Ollama)
     gpt-oss:
       enabled: ${AI_GPT_OSS_ENABLED:true}
       server-url: ${AI_GPT_OSS_SERVER_URL:http://localhost:11434}
       timeout: ${AI_GPT_OSS_TIMEOUT:30}
-    
+
     # OpenAI ChatGPT
     openai:
       enabled: ${AI_OPENAI_ENABLED:false}
       api-key: ${AI_OPENAI_API_KEY:}
       base-url: ${AI_OPENAI_BASE_URL:https://api.openai.com}
       timeout: ${AI_OPENAI_TIMEOUT:30}
-    
+
     # Anthropic Claude
     claude:
       enabled: ${AI_CLAUDE_ENABLED:false}
       api-key: ${AI_CLAUDE_API_KEY:}
       base-url: ${AI_CLAUDE_BASE_URL:https://api.anthropic.com}
       timeout: ${AI_CLAUDE_TIMEOUT:30}
-    
+
     # Google Gemini
     gemini:
       enabled: ${AI_GEMINI_ENABLED:false}

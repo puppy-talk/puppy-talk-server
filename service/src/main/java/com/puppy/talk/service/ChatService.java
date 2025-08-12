@@ -27,6 +27,7 @@ import java.util.List;
 public class ChatService {
 
     private static final int DEFAULT_RECENT_MESSAGE_LIMIT = 50;
+    private static final int AI_CONTEXT_MESSAGE_LIMIT = 5;
     private static final String CHAT_ROOM_NAME_PATTERN = "%s와의 채팅방";
 
     private final PetRepository petRepository;
@@ -143,11 +144,11 @@ public class ChatService {
             // 페르소나 조회
             Persona persona = personaLookUpService.findPersona(pet.personaId());
             
-            // 채팅 히스토리 조회 (최근 10개)
+            // 채팅 히스토리 조회 (최근 5개)
             List<Message> chatHistory = messageRepository
                 .findByChatRoomIdOrderByCreatedAtDesc(chatRoom.identity())
                 .stream()
-                .limit(10)
+                .limit(AI_CONTEXT_MESSAGE_LIMIT)
                 .toList();
             
             // AI 응답 생성

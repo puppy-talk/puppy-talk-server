@@ -92,6 +92,12 @@ public class OpenAiProvider implements AiProvider {
                 .header("Authorization", "Bearer " + apiKey)
                 .bodyValue(requestBody)
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError(),
+                    response -> response.bodyToMono(String.class)
+                        .map(body -> new AiResponseException("OpenAI API client error: " + body)))
+                .onStatus(status -> status.is5xxServerError(),
+                    response -> response.bodyToMono(String.class)
+                        .map(body -> new AiResponseException("OpenAI API server error: " + body)))
                 .bodyToMono(String.class)
                 .timeout(Duration.ofSeconds(timeoutSeconds))
                 .block();
@@ -102,6 +108,8 @@ public class OpenAiProvider implements AiProvider {
 
             return parseResponse(responseJson, request.model());
 
+        } catch (AiResponseException e) {
+            throw e;
         } catch (Exception e) {
             log.error("OpenAI API call failed: {}", e.getMessage(), e);
             throw new AiResponseException("Failed to generate AI response from OpenAI", e);

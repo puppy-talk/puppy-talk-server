@@ -14,6 +14,10 @@ import java.util.stream.Collectors;
 @Component
 public class PromptBuilder {
 
+    private static final String DEFAULT_BREED = "귀여운 반려동물";
+    private static final String DEFAULT_PERSONALITY = "친근하고 활발한";
+    private static final String DEFAULT_DESCRIPTION = "사랑스러운 반려동물";
+
     private static final String SYSTEM_PROMPT_TEMPLATE = """
         당신은 반려동물 '%s'입니다. 다음과 같은 특성을 가지고 있습니다:
         
@@ -46,10 +50,10 @@ public class PromptBuilder {
             SYSTEM_PROMPT_TEMPLATE,
             pet.name(),
             pet.name(),
-            pet.breed() != null ? pet.breed() : "귀여운 반려동물",
+            pet.breed() != null ? pet.breed() : DEFAULT_BREED,
             pet.age(),
-            persona.personalityTraits() != null ? persona.personalityTraits() : "친근하고 활발한",
-            persona.description() != null ? persona.description() : "사랑스러운 반려동물",
+            persona.personalityTraits() != null ? persona.personalityTraits() : DEFAULT_PERSONALITY,
+            persona.description() != null ? persona.description() : DEFAULT_DESCRIPTION,
             persona.aiPromptTemplate() != null ? persona.aiPromptTemplate() : ""
         );
         
