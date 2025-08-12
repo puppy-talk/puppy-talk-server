@@ -5,8 +5,11 @@ import com.puppy.talk.model.user.UserIdentity;
 import com.puppy.talk.service.PetRegistrationService;
 import com.puppy.talk.service.dto.PetRegistrationResult;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.Valid;
+import java.net.URI;
 
 @RestController
 @RequestMapping("/api/pets")
@@ -16,8 +19,7 @@ public class PetController {
     private final PetRegistrationService petRegistrationService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<PetCreateResponse> createPet(@RequestBody PetCreateRequest request) {
+    public ResponseEntity<ApiResponse<PetCreateResponse>> createPet(@Valid @RequestBody PetCreateRequest request) {
         PetRegistrationResult result = petRegistrationService.registerPet(
             UserIdentity.of(request.userId()),
             PersonaIdentity.of(request.personaId()),
@@ -32,6 +34,9 @@ public class PetController {
             result.chatRoom().identity().id()
         );
 
-        return ApiResponse.ok(response, "Pet registered successfully");
+        URI location = URI.create(String.format("/api/pets/%d", result.pet().identity().id()));
+        return ResponseEntity
+            .created(location)
+            .body(ApiResponse.ok(response, "Pet registered successfully"));
     }
 }

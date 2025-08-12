@@ -7,7 +7,7 @@ public record ApiResponse<T>(
     boolean success,
     T data,
     String message,
-    String errorCode
+    ErrorCode errorCode
 ) {
 
     // success
@@ -24,11 +24,11 @@ public record ApiResponse<T>(
         return new ApiResponse<>(false, null, message, null);
     }
 
-    public static <T> ApiResponse<T> error(String message, String errorCode) {
+    public static <T> ApiResponse<T> error(String message, ErrorCode errorCode) {
         return new ApiResponse<>(false, null, message, errorCode);
     }
 
-    // 데이터 없는 성공 응답
+    // Success response without data
     public static ApiResponse<Void> ok() {
         return new ApiResponse<>(true, null, null, null);
     }

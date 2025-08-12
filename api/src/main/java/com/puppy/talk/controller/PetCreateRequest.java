@@ -1,10 +1,19 @@
 package com.puppy.talk.controller;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Min;
+
 public record PetCreateRequest(
+    @NotNull @Positive
     Long userId,
+    @NotNull @Positive
     Long personaId,
+    @NotBlank
     String name,
     String breed,
+    @NotNull @Min(0)
     Integer age,
     String profileImageUrl
 ) {

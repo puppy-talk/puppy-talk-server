@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
         log.warn("Resource not found: {}", e.getMessage());
         return ResponseEntity
             .status(HttpStatus.NOT_FOUND)
-            .body(new ErrorResponse("RESOURCE_NOT_FOUND", "Requested resource not found"));
+            .body(new ErrorResponse(ErrorCode.USER_NOT_FOUND, "Requested resource not found"));
     }
 
     @ExceptionHandler({
@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
         log.warn("Resource conflict: {}", e.getMessage());
         return ResponseEntity
             .status(HttpStatus.CONFLICT)
-            .body(new ErrorResponse("RESOURCE_CONFLICT", "Resource already exists"));
+            .body(new ErrorResponse(ErrorCode.DUPLICATE_USERNAME, "Resource already exists"));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
         log.warn("Bad request: {}", e.getMessage());
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
-            .body(new ErrorResponse("INVALID_REQUEST", "Invalid request parameters"));
+            .body(new ErrorResponse(ErrorCode.VALIDATION_ERROR, "Invalid request parameters"));
     }
 
     @ExceptionHandler(RuntimeException.class)
@@ -55,8 +55,8 @@ public class GlobalExceptionHandler {
         log.error("Unexpected error occurred", e);
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(new ErrorResponse("INTERNAL_SERVER_ERROR", "An unexpected error occurred"));
+            .body(new ErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR, "An unexpected error occurred"));
     }
 
-    public record ErrorResponse(String code, String message) {}
+    public record ErrorResponse(ErrorCode code, String message) {}
 }
