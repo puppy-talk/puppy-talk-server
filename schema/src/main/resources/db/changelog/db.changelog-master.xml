@@ -9,5 +9,14 @@
 
   <include file="changes/001-create-dogs-table.xml" relativeToChangelogFile="true"/>
   <include file="changes/002-rename-dogs-to-pets.xml" relativeToChangelogFile="true"/>
+  <include file="changes/003-create-users-table.xml" relativeToChangelogFile="true"/>
+  <include file="changes/004-create-personas-table.xml" relativeToChangelogFile="true"/>
+  <include file="changes/005-update-pets-table.xml" relativeToChangelogFile="true"/>
+  <include file="changes/006-create-chat-rooms-table.xml" relativeToChangelogFile="true"/>
+  <include file="changes/007-create-messages-table.xml" relativeToChangelogFile="true"/>
+  <include file="changes/008-create-user-activities-table.xml" relativeToChangelogFile="true"/>
+  <include file="changes/009-create-inactivity-notifications-table.xml"
+    relativeToChangelogFile="true"/>
+  <include file="changes/010-insert-sample-personas.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
