@@ -143,37 +143,8 @@ public class GeminiProvider implements AiProvider {
     private AiResponse parseResponse(String jsonResponse, String model) throws Exception {
         JsonNode root = objectMapper.readTree(jsonResponse);
         
-        JsonNode candidates = root.get("candidates");
-        if (candidates == null || !candidates.isArray() || candidates.size() == 0) {
-            throw new AiResponseException("No candidates in Gemini response");
-        }
+        String result = extractTextFromResponse(root);
 
-        JsonNode firstCandidate = candidates.get(0);
-        if (firstCandidate == null) {
-            throw new AiResponseException("No first candidate in Gemini response");
-        }
-
-        JsonNode content = firstCandidate.get("content");
-        if (content == null) {
-            throw new AiResponseException("No content in Gemini response");
-        }
-
-        JsonNode parts = content.get("parts");
-        if (parts == null || !parts.isArray() || parts.size() == 0) {
-            throw new AiResponseException("No parts in Gemini response");
-        }
-
-        JsonNode firstPart = parts.get(0);
-        if (firstPart == null) {
-            throw new AiResponseException("No first part in Gemini response");
-        }
-
-        JsonNode text = firstPart.get("text");
-        if (text == null) {
-            throw new AiResponseException("No text in Gemini response");
-        }
-
-        String result = text.asText();
         if (result == null || result.trim().isEmpty()) {
             throw new AiResponseException("Empty text in Gemini response");
         }
@@ -189,5 +160,29 @@ public class GeminiProvider implements AiProvider {
         }
 
         return AiResponse.create(result.trim(), model, PROVIDER_NAME, tokensUsed);
+    }
+
+    private String extractTextFromResponse(JsonNode root) throws AiResponseException {
+        JsonNode candidates = root.get("candidates");
+        if (candidates == null || !candidates.isArray() || candidates.size() == 0) {
+            throw new AiResponseException("No candidates in Gemini response");
+        }
+        
+        JsonNode content = candidates.get(0).get("content");
+        if (content == null) {
+            throw new AiResponseException("No content in Gemini response");
+        }
+        
+        JsonNode parts = content.get("parts");
+        if (parts == null || !parts.isArray() || parts.size() == 0) {
+            throw new AiResponseException("No parts in Gemini response");
+        }
+        
+        JsonNode text = parts.get(0).get("text");
+        if (text == null) {
+            throw new AiResponseException("No text in Gemini response");
+        }
+        
+        return text.asText();
     }
 }

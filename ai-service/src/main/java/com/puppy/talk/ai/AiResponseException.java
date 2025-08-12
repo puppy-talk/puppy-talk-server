@@ -1,7 +1,7 @@
 package com.puppy.talk.ai;
 
 /**
- * AI 응답 생성 중 발생하는 예외를 나타냅니다.
+ * Exception thrown during AI response generation.
  */
 public class AiResponseException extends RuntimeException {
 
