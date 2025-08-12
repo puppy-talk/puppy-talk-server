@@ -78,7 +78,7 @@ public class UserJdbcRepository implements UserRepository {
                 Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, user.username());
             ps.setString(2, user.email());
-            ps.setString(3, user.password());
+            ps.setString(3, user.passwordHash());
             return ps;
         }, keyHolder);
 
@@ -87,13 +87,13 @@ public class UserJdbcRepository implements UserRepository {
             UserIdentity.of(generatedId),
             user.username(),
             user.email(),
-            user.password()
+            user.passwordHash()
         );
     }
 
     private User update(User user) {
         String sql = "UPDATE users SET username = ?, email = ?, password = ? WHERE id = ?";
-        jdbcTemplate.update(sql, user.username(), user.email(), user.password(),
+        jdbcTemplate.update(sql, user.username(), user.email(), user.passwordHash(),
             user.identity().id());
         return user;
     }

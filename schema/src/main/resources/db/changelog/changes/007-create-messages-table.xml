@@ -12,12 +12,14 @@
       referencedColumnNames="id"
       referencedTableName="chat_rooms"/>
 
-    <createIndex indexName="idx_messages_chat_room_id" tableName="messages">
+    <createIndex indexName="idx_messages_room_created_at" tableName="messages">
       <column name="chat_room_id"/>
+      <column name="created_at"/>
     </createIndex>
 
-    <createIndex indexName="idx_messages_created_at" tableName="messages">
-      <column name="created_at"/>
+    <createIndex indexName="idx_messages_room_unread" tableName="messages">
+      <column name="chat_room_id"/>
+      <column name="is_read"/>
     </createIndex>
 
     <createIndex indexName="idx_messages_sender_type" tableName="messages">

@@ -20,5 +20,6 @@ public record ChatRoom(
         if (roomName == null || roomName.trim().isEmpty()) {
             throw new IllegalArgumentException("Room name cannot be null or empty");
         }
+        roomName = roomName.trim();
     }
 }
