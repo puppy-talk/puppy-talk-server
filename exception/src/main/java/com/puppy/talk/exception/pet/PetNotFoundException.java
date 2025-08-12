@@ -1,4 +1,4 @@
-package com.puppy.talk.exception;
+package com.puppy.talk.exception.pet;
 
 import com.puppy.talk.model.pet.PetIdentity;
 

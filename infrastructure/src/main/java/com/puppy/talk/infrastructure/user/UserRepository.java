@@ -1,4 +1,4 @@
-package com.puppy.talk.infrastructure;
+package com.puppy.talk.infrastructure.user;
 
 import com.puppy.talk.model.user.User;
 import com.puppy.talk.model.user.UserIdentity;

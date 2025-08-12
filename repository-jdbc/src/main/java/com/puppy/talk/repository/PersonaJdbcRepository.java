@@ -1,8 +1,8 @@
 package com.puppy.talk.repository;
 
-import com.puppy.talk.infrastructure.PersonaRepository;
-import com.puppy.talk.model.persona.Persona;
-import com.puppy.talk.model.persona.PersonaIdentity;
+import com.puppy.talk.infrastructure.pet.PersonaRepository;
+import com.puppy.talk.model.pet.Persona;
+import com.puppy.talk.model.pet.PersonaIdentity;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;

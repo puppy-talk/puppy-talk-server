@@ -1,4 +1,4 @@
-package com.puppy.talk.exception;
+package com.puppy.talk.exception.user;
 
 import com.puppy.talk.model.user.UserIdentity;
 

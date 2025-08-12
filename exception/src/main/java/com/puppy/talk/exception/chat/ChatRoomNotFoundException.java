@@ -1,4 +1,4 @@
-package com.puppy.talk.exception;
+package com.puppy.talk.exception.chat;
 
 import com.puppy.talk.model.chat.ChatRoomIdentity;
 

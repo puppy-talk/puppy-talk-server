@@ -1,9 +1,9 @@
 package com.puppy.talk.service;
 
-import com.puppy.talk.exception.DuplicateEmailException;
-import com.puppy.talk.exception.DuplicateUsernameException;
-import com.puppy.talk.exception.UserNotFoundException;
-import com.puppy.talk.infrastructure.UserRepository;
+import com.puppy.talk.exception.user.DuplicateEmailException;
+import com.puppy.talk.exception.user.DuplicateUsernameException;
+import com.puppy.talk.exception.user.UserNotFoundException;
+import com.puppy.talk.infrastructure.user.UserRepository;
 import com.puppy.talk.model.user.User;
 import com.puppy.talk.model.user.UserIdentity;
 import java.util.List;

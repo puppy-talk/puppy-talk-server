@@ -1,6 +1,6 @@
 package com.puppy.talk.repository;
 
-import com.puppy.talk.infrastructure.MessageRepository;
+import com.puppy.talk.infrastructure.chat.MessageRepository;
 import com.puppy.talk.model.chat.ChatRoomIdentity;
 import com.puppy.talk.model.chat.Message;
 import com.puppy.talk.model.chat.MessageIdentity;

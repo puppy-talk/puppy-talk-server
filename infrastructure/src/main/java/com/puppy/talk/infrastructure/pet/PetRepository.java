@@ -1,4 +1,4 @@
-package com.puppy.talk.infrastructure;
+package com.puppy.talk.infrastructure.pet;
 
 import com.puppy.talk.model.pet.Pet;
 import com.puppy.talk.model.pet.PetIdentity;

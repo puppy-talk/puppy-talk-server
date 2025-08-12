@@ -1,6 +1,6 @@
 package com.puppy.talk.repository;
 
-import com.puppy.talk.infrastructure.UserRepository;
+import com.puppy.talk.infrastructure.user.UserRepository;
 import com.puppy.talk.model.user.User;
 import com.puppy.talk.model.user.UserIdentity;
 import java.sql.PreparedStatement;

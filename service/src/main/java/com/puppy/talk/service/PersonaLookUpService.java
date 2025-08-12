@@ -1,9 +1,9 @@
 package com.puppy.talk.service;
 
-import com.puppy.talk.exception.PersonaNotFoundException;
-import com.puppy.talk.infrastructure.PersonaRepository;
-import com.puppy.talk.model.persona.Persona;
-import com.puppy.talk.model.persona.PersonaIdentity;
+import com.puppy.talk.exception.pet.PersonaNotFoundException;
+import com.puppy.talk.infrastructure.pet.PersonaRepository;
+import com.puppy.talk.model.pet.Persona;
+import com.puppy.talk.model.pet.PersonaIdentity;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

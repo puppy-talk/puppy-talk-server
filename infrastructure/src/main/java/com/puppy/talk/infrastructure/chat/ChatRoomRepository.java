@@ -1,4 +1,4 @@
-package com.puppy.talk.infrastructure;
+package com.puppy.talk.infrastructure.chat;
 
 import com.puppy.talk.model.chat.ChatRoom;
 import com.puppy.talk.model.chat.ChatRoomIdentity;
