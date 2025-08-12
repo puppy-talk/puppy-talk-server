@@ -1,7 +1,7 @@
 package com.puppy.talk.service;
 
-import com.puppy.talk.exception.PetNotFoundException;
-import com.puppy.talk.infrastructure.PetRepository;
+import com.puppy.talk.exception.pet.PetNotFoundException;
+import com.puppy.talk.infrastructure.pet.PetRepository;
 import com.puppy.talk.model.pet.Pet;
 import com.puppy.talk.model.pet.PetIdentity;
 import com.puppy.talk.model.user.UserIdentity;
