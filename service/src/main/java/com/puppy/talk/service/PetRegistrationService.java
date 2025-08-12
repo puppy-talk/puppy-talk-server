@@ -1,5 +1,6 @@
 package com.puppy.talk.service;
 
+import com.puppy.talk.service.dto.PetRegistrationResult;
 import com.puppy.talk.infrastructure.chat.ChatRoomRepository;
 import com.puppy.talk.infrastructure.pet.PersonaRepository;
 import com.puppy.talk.infrastructure.pet.PetRepository;
@@ -71,6 +72,4 @@ public class PetRegistrationService {
 
         return new PetRegistrationResult(savedPet, savedChatRoom);
     }
-
-    public record PetRegistrationResult(Pet pet, ChatRoom chatRoom) {}
 }

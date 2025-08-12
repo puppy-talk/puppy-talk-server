@@ -3,6 +3,7 @@ package com.puppy.talk.controller;
 import com.puppy.talk.model.pet.PersonaIdentity;
 import com.puppy.talk.model.user.UserIdentity;
 import com.puppy.talk.service.PetRegistrationService;
+import com.puppy.talk.service.dto.PetRegistrationResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,7 @@ public class PetController {
 
     @PostMapping
     public ResponseEntity<PetCreateResponse> createPet(@RequestBody PetCreateRequest request) {
-        PetRegistrationService.PetRegistrationResult result = petRegistrationService.registerPet(
+        PetRegistrationResult result = petRegistrationService.registerPet(
             UserIdentity.of(request.userId()),
             PersonaIdentity.of(request.personaId()),
             request.name(),
