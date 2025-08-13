@@ -1,7 +1,7 @@
 package com.puppy.talk.service.websocket;
 
-import com.puppy.talk.infrastructure.notification.RealtimeNotificationException;
-import com.puppy.talk.infrastructure.notification.RealtimeNotificationPort;
+import com.puppy.talk.service.notification.RealtimeNotificationException;
+import com.puppy.talk.service.notification.RealtimeNotificationPort;
 import com.puppy.talk.model.user.UserIdentity;
 import com.puppy.talk.model.websocket.ChatMessage;
 import lombok.RequiredArgsConstructor;
@@ -79,9 +79,7 @@ public class WebSocketChatService implements RealtimeNotificationPort {
         }
     }
     
-    /**
-     * 특정 사용자에게만 메시지 전송
-     */
+    @Override
     public void sendToUser(UserIdentity userId, ChatMessage message) {
         if (userId == null) {
             log.warn("Cannot send message to null userId");
@@ -131,10 +129,18 @@ public class WebSocketChatService implements RealtimeNotificationPort {
             return;
         }
         
-        broadcastSystemMessage(joinMessage);
+        // NPE 방지를 위해 안전하게 ID 추출 (로깅 전에 미리 처리)
+        String userId = joinMessage.userId() != null ? String.valueOf(joinMessage.userId().id()) : "unknown";
+        String chatRoomId = joinMessage.chatRoomId() != null ? String.valueOf(joinMessage.chatRoomId().id()) : "unknown";
         
-        log.info("User {} joined chat room {}", 
-            joinMessage.userId().id(), joinMessage.chatRoomId().id());
+        try {
+            broadcastSystemMessage(joinMessage);
+            log.info("User {} joined chat room {}", userId, chatRoomId);
+        } catch (Exception e) {
+            log.error("Failed to broadcast user joined message for user={}, chatRoom={}: {}", 
+                userId, chatRoomId, e.getMessage(), e);
+            // 예외가 상위로 전파되지 않도록 처리
+        }
     }
     
     /**
@@ -146,9 +152,17 @@ public class WebSocketChatService implements RealtimeNotificationPort {
             return;
         }
         
-        broadcastSystemMessage(leaveMessage);
+        // NPE 방지를 위해 안전하게 ID 추출 (로깅 전에 미리 처리)
+        String userId = leaveMessage.userId() != null ? String.valueOf(leaveMessage.userId().id()) : "unknown";
+        String chatRoomId = leaveMessage.chatRoomId() != null ? String.valueOf(leaveMessage.chatRoomId().id()) : "unknown";
         
-        log.info("User {} left chat room {}", 
-            leaveMessage.userId().id(), leaveMessage.chatRoomId().id());
+        try {
+            broadcastSystemMessage(leaveMessage);
+            log.info("User {} left chat room {}", userId, chatRoomId);
+        } catch (Exception e) {
+            log.error("Failed to broadcast user left message for user={}, chatRoom={}: {}", 
+                userId, chatRoomId, e.getMessage(), e);
+            // 예외가 상위로 전파되지 않도록 처리
+        }
     }
 }

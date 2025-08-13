@@ -1,6 +1,7 @@
-package com.puppy.talk.infrastructure.notification;
+package com.puppy.talk.service.notification;
 
 import com.puppy.talk.model.websocket.ChatMessage;
+import com.puppy.talk.model.user.UserIdentity;
 
 /**
  * 실시간 알림 전송을 위한 포트 인터페이스
@@ -39,4 +40,13 @@ public interface RealtimeNotificationPort {
      * @throws RealtimeNotificationException 브로드캐스트 실패 시
      */
     void broadcastSystemMessage(ChatMessage systemMessage);
+    
+    /**
+     * 특정 사용자에게 개인 메시지를 실시간 전송합니다.
+     *
+     * @param user 전송할 사용자 식별자
+     * @param message 전송할 채팅 메시지
+     * @throws RealtimeNotificationException 개인 전송 실패 시
+     */
+    void sendToUser(UserIdentity user, ChatMessage message);
 }

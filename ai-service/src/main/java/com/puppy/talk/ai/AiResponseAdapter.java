@@ -112,11 +112,15 @@ public class AiResponseAdapter implements AiResponsePort {
 
     private String createInactivityPrompt(Pet pet, Persona persona, List<Message> recentMessages) {
         // 비활성 상황에 특화된 프롬프트 생성 로직
+        // persona.personalityTraits()가 null일 수 있으므로 null-safe 처리
+        String personalityTraits = persona.personalityTraits() != null ? 
+            persona.personalityTraits() : PromptBuilder.DEFAULT_PERSONALITY;
+            
         String inactivityContext = String.format(
             "사용자가 %s와 오랫동안 대화하지 않았습니다. %s의 성격(%s)에 맞게 먼저 대화를 시작해주세요.",
             pet.name(),
             pet.name(),
-            persona.personalityTraits()
+            personalityTraits
         );
         
         return promptBuilder.buildInactivityPrompt(pet, persona, inactivityContext, recentMessages);

@@ -294,21 +294,21 @@ class RealtimeChatIntegrationScenarioTest {
         
         // When
         // 1. 사용자 타이핑 시작
-        webSocketChatService.broadcastTyping(userTypingMessage);
+        webSocketChatService.broadcastTypingStatus(userTypingMessage);
         
         // 2. 사용자 메시지 전송 (타이핑 중단 + 메시지 발송)
-        webSocketChatService.broadcastTyping(userStopTypingMessage);
+        webSocketChatService.broadcastTypingStatus(userStopTypingMessage);
         MessageSendResult result = chatService.sendMessageToPet(chatRoomId, userMessage);
         
         // 3. AI 타이핑 상태 표시 (응답 준비 중)
-        webSocketChatService.broadcastTyping(aiTypingMessage);
+        webSocketChatService.broadcastTypingStatus(aiTypingMessage);
         
         // 4. AI 응답 완료 후 타이핑 중단
-        webSocketChatService.broadcastTyping(aiStopTypingMessage);
+        webSocketChatService.broadcastTypingStatus(aiStopTypingMessage);
         
         // Then
         // 1. 타이핑 상태 브로드캐스트 검증 (4번)
-        verify(webSocketChatService, times(4)).broadcastTyping(any());
+        verify(webSocketChatService, times(4)).broadcastTypingStatus(any());
         
         // 2. 메시지 브로드캐스트 검증 (AI 응답)
         verify(webSocketChatService).broadcastMessage(any());
@@ -384,7 +384,7 @@ class RealtimeChatIntegrationScenarioTest {
         
         // When
         webSocketChatService.broadcastMessage(normalMessage);           // /topic/chat/{chatRoomId}
-        webSocketChatService.broadcastTyping(typingMessage);            // /topic/chat/{chatRoomId}/typing
+        webSocketChatService.broadcastTypingStatus(typingMessage);            // /topic/chat/{chatRoomId}/typing
         webSocketChatService.broadcastReadReceipt(readMessage);         // /topic/chat/{chatRoomId}/read
         webSocketChatService.broadcastSystemMessage(systemMessage);     // /topic/chat/{chatRoomId}/system
         webSocketChatService.sendToUser(userId, normalMessage);         // /user/{userId}/queue/messages
@@ -392,7 +392,7 @@ class RealtimeChatIntegrationScenarioTest {
         // Then
         // 각 채널별 브로드캐스트 호출 검증
         verify(webSocketChatService).broadcastMessage(eq(normalMessage));
-        verify(webSocketChatService).broadcastTyping(eq(typingMessage));
+        verify(webSocketChatService).broadcastTypingStatus(eq(typingMessage));
         verify(webSocketChatService).broadcastReadReceipt(eq(readMessage));
         verify(webSocketChatService).broadcastSystemMessage(eq(systemMessage));
         verify(webSocketChatService).sendToUser(eq(userId), eq(normalMessage));

@@ -4,7 +4,7 @@ import com.puppy.talk.exception.pet.PetNotFoundException;
 import com.puppy.talk.infrastructure.ai.AiResponsePort;
 import com.puppy.talk.infrastructure.chat.ChatRoomRepository;
 import com.puppy.talk.infrastructure.chat.MessageRepository;
-import com.puppy.talk.infrastructure.notification.RealtimeNotificationPort;
+import com.puppy.talk.service.notification.RealtimeNotificationPort;
 import com.puppy.talk.infrastructure.pet.PetRepository;
 import com.puppy.talk.model.chat.ChatRoom;
 import com.puppy.talk.model.chat.ChatRoomIdentity;

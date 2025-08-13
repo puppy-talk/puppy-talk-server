@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
 @Component
 public class PromptBuilder {
 
-    private static final String DEFAULT_BREED = "귀여운 반려동물";
-    private static final String DEFAULT_PERSONALITY = "친근하고 활발한";
-    private static final String DEFAULT_DESCRIPTION = "사랑스러운 반려동물";
+    public static final String DEFAULT_BREED = "귀여운 반려동물";
+    public static final String DEFAULT_PERSONALITY = "친근하고 활발한";
+    public static final String DEFAULT_DESCRIPTION = "사랑스러운 반려동물";
 
     private static final String SYSTEM_PROMPT_TEMPLATE = """
         당신은 반려동물 '%s'입니다. 다음과 같은 특성을 가지고 있습니다:
@@ -40,13 +40,11 @@ public class PromptBuilder {
         """;
 
     /**
-     * AI 모델에 전달할 프롬프트를 생성합니다.
+     * 펫과 페르소나 정보를 기반으로 시스템 프롬프트를 생성합니다.
+     * null 값에 대해서는 기본값으로 대체합니다.
      */
-    public String buildPrompt(Pet pet, Persona persona, String userMessage, List<Message> chatHistory) {
-        StringBuilder promptBuilder = new StringBuilder();
-        
-        // 시스템 프롬프트 추가
-        String systemPrompt = String.format(
+    private String buildSystemPrompt(Pet pet, Persona persona) {
+        return String.format(
             SYSTEM_PROMPT_TEMPLATE,
             pet.name(),
             pet.name(),
@@ -56,6 +54,16 @@ public class PromptBuilder {
             persona.description() != null ? persona.description() : DEFAULT_DESCRIPTION,
             persona.aiPromptTemplate() != null ? persona.aiPromptTemplate() : ""
         );
+    }
+
+    /**
+     * AI 모델에 전달할 프롬프트를 생성합니다.
+     */
+    public String buildPrompt(Pet pet, Persona persona, String userMessage, List<Message> chatHistory) {
+        StringBuilder promptBuilder = new StringBuilder();
+        
+        // 시스템 프롬프트 추가
+        String systemPrompt = buildSystemPrompt(pet, persona);
         
         promptBuilder.append(systemPrompt).append("\n\n");
         
@@ -63,9 +71,9 @@ public class PromptBuilder {
         if (chatHistory != null && !chatHistory.isEmpty()) {
             promptBuilder.append("최근 대화 기록:\n");
             
-            List<Message> recentMessages = chatHistory.stream()
-                .limit(5)
-                .toList();
+            // 최신 5개 메시지 선택 (chronological order 유지)
+            int start = Math.max(0, chatHistory.size() - 5);
+            List<Message> recentMessages = chatHistory.subList(start, chatHistory.size());
             
             for (Message message : recentMessages) {
                 String sender = message.senderType() == SenderType.USER ? "사용자" : pet.name();
@@ -91,16 +99,7 @@ public class PromptBuilder {
         StringBuilder promptBuilder = new StringBuilder();
         
         // 시스템 프롬프트 추가 (비활성 상황 특화)
-        String inactivitySystemPrompt = String.format(
-            SYSTEM_PROMPT_TEMPLATE,
-            pet.name(),
-            pet.name(),
-            pet.breed() != null ? pet.breed() : DEFAULT_BREED,
-            pet.age(),
-            persona.personalityTraits() != null ? persona.personalityTraits() : DEFAULT_PERSONALITY,
-            persona.description() != null ? persona.description() : DEFAULT_DESCRIPTION,
-            persona.aiPromptTemplate() != null ? persona.aiPromptTemplate() : ""
-        );
+        String inactivitySystemPrompt = buildSystemPrompt(pet, persona);
         
         promptBuilder.append(inactivitySystemPrompt).append("\n\n");
         
@@ -111,9 +110,9 @@ public class PromptBuilder {
         if (recentMessages != null && !recentMessages.isEmpty()) {
             promptBuilder.append("최근 대화 기록 (참고용):\n");
             
-            List<Message> limitedMessages = recentMessages.stream()
-                .limit(3)
-                .toList();
+            // 최신 3개 메시지 선택 (chronological order 유지)
+            int start = Math.max(0, recentMessages.size() - 3);
+            List<Message> limitedMessages = recentMessages.subList(start, recentMessages.size());
             
             for (Message message : limitedMessages) {
                 String sender = message.senderType() == SenderType.USER ? "사용자" : pet.name();

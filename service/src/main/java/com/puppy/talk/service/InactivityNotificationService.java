@@ -4,7 +4,7 @@ import com.puppy.talk.infrastructure.activity.InactivityNotificationRepository;
 import com.puppy.talk.infrastructure.ai.AiResponsePort;
 import com.puppy.talk.infrastructure.chat.ChatRoomRepository;
 import com.puppy.talk.infrastructure.chat.MessageRepository;
-import com.puppy.talk.infrastructure.notification.RealtimeNotificationPort;
+import com.puppy.talk.service.notification.RealtimeNotificationPort;
 import com.puppy.talk.infrastructure.pet.PetRepository;
 import com.puppy.talk.model.activity.InactivityNotification;
 import com.puppy.talk.model.activity.NotificationStatus;
@@ -141,23 +141,11 @@ public class InactivityNotificationService {
             .limit(AI_CONTEXT_MESSAGE_LIMIT)
             .toList();
         
-        // 비활성 상황에 특화된 사용자 메시지 생성
-        String inactivityPrompt = createInactivityPrompt(pet);
-        
         // AI 응답 생성
         return aiResponsePort.generateInactivityMessage(pet, persona, chatHistory);
     }
 
-    /**
-     * 비활성 상황에 특화된 프롬프트를 생성합니다.
-     */
-    private String createInactivityPrompt(Pet pet) {
-        return String.format(
-            "%s이(가) 오랫동안 대화하지 않아서 궁금해하며 먼저 말을 걸어보세요. " +
-            "친근하고 자연스럽게 안부를 묻거나 재미있는 이야기를 시작해보세요.", 
-            pet.name()
-        );
-    }
+
 
     /**
      * AI 실패 시 사용할 기본 비활성 메시지를 생성합니다.

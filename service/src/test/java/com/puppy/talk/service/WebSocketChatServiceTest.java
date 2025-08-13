@@ -64,13 +64,13 @@ class WebSocketChatServiceTest {
     
     @Test
     @DisplayName("타이핑 상태 브로드캐스트 - 성공")
-    void broadcastTyping_Success() {
+    void broadcastTypingStatus_Success() {
         // Given
         ChatMessage typingMessage = ChatMessage.typing(chatRoomId, userId, SenderType.USER);
         String expectedDestination = "/topic/chat/" + chatRoomId.id() + "/typing";
         
         // When
-        webSocketChatService.broadcastTyping(typingMessage);
+        webSocketChatService.broadcastTypingStatus(typingMessage);
         
         // Then
         verify(messagingTemplate).convertAndSend(eq(expectedDestination), eq(typingMessage));

@@ -21,7 +21,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final WebSocketAuthInterceptor webSocketAuthInterceptor;
     private final Environment environment;
     
-    @Value("${puppy-talk.websocket.allowed-origins:http://localhost:3000,http://localhost:8080}")
+    @Value("${puppy-talk.websocket.allowed-origins}")
     private String[] allowedOrigins;
 
     @Override
@@ -55,6 +55,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureClientInboundChannel(ChannelRegistration registration) {
         // 인바운드 메시지에 인터셉터 추가
         registration.interceptors(webSocketAuthInterceptor);
+    }
+    
+    @Override
+    public void configureClientOutboundChannel(ChannelRegistration registration) {
+        // 아웃바운드 메시지 순서 보존을 위해 순차 실행 Executor 설정
+        // Spring Boot 3.x에서는 setPreservePublishOrder 대신 단일 스레드 Executor로 메시지 순서 보장
+        registration.taskExecutor()
+            .corePoolSize(1)        // 핵심 스레드 풀 크기 1 (단일 스레드)
+            .maxPoolSize(1)         // 최대 스레드 풀 크기 1 (단일 스레드)
+            .queueCapacity(1000);   // 대기 큐 용량 (메시지 버퍼링)
     }
     
     private boolean isDevEnvironment() {

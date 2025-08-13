@@ -16,7 +16,7 @@ java {
 
 dependencies {
     implementation project(':infrastructure')
-    api project(':model')
+    implementation project(':model')
 
     implementation 'org.springframework:spring-jdbc'
     implementation 'org.springframework:spring-context'

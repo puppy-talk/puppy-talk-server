@@ -1,0 +1,30 @@
+# Staging Environment Configuration
+spring:
+  profiles:
+    active: staging
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://staging-mysql:3306/puppy_talk_db?useSSL=true&allowPublicKeyRetrieval=false}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+# WebSocket Configuration for Staging
+puppy-talk:
+  websocket:
+    allowed-origins: https://staging.example.com,https://staging-api.example.com
+
+# Staging Security Settings
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# Staging Logging
+logging:
+  level:
+    com.puppy.talk: DEBUG
+    org.springframework.web: INFO

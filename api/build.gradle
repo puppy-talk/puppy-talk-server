@@ -17,7 +17,6 @@ java {
 dependencies {
     implementation project(':service')
     implementation project(':exception')
-    implementation project(':infrastructure')
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'

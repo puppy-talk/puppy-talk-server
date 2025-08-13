@@ -71,7 +71,7 @@ class WebSocketMessageTypeBusinessLogicTest {
         ChatMessage typingMessage = ChatMessage.typing(chatRoomId, userId, SenderType.USER);
         
         // When
-        webSocketChatService.broadcastTyping(typingMessage);
+        webSocketChatService.broadcastTypingStatus(typingMessage);
         
         // Then
         String expectedDestination = "/topic/chat/" + chatRoomId.id() + "/typing";
@@ -90,7 +90,7 @@ class WebSocketMessageTypeBusinessLogicTest {
         ChatMessage stopTypingMessage = ChatMessage.stopTyping(chatRoomId, userId, SenderType.USER);
         
         // When
-        webSocketChatService.broadcastTyping(stopTypingMessage);
+        webSocketChatService.broadcastTypingStatus(stopTypingMessage);
         
         // Then
         String expectedDestination = "/topic/chat/" + chatRoomId.id() + "/typing";
@@ -194,7 +194,7 @@ class WebSocketMessageTypeBusinessLogicTest {
         ChatMessage petTypingMessage = ChatMessage.typing(chatRoomId, userId, SenderType.PET);
         
         // When
-        webSocketChatService.broadcastTyping(petTypingMessage);
+        webSocketChatService.broadcastTypingStatus(petTypingMessage);
         
         // Then
         String expectedDestination = "/topic/chat/" + chatRoomId.id() + "/typing";

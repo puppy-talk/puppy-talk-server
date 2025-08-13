@@ -77,7 +77,7 @@ class WebSocketErrorHandlingBusinessLogicTest {
         
         // When & Then
         assertThatNoException().isThrownBy(() -> {
-            webSocketChatService.broadcastTyping(typingMessage);
+            webSocketChatService.broadcastTypingStatus(typingMessage);
         });
         
         verify(messagingTemplate).convertAndSend(

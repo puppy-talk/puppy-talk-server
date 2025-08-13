@@ -1,4 +1,4 @@
-package com.puppy.talk.infrastructure.notification;
+package com.puppy.talk.service.notification;
 
 /**
  * 실시간 알림 전송 실패 시 발생하는 예외
