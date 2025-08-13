@@ -1,9 +1,10 @@
 package com.puppy.talk.service.chat;
 
-import com.puppy.talk.ai.AiResponseService;
 import com.puppy.talk.exception.pet.PetNotFoundException;
+import com.puppy.talk.infrastructure.ai.AiResponsePort;
 import com.puppy.talk.infrastructure.chat.ChatRoomRepository;
 import com.puppy.talk.infrastructure.chat.MessageRepository;
+import com.puppy.talk.infrastructure.notification.RealtimeNotificationPort;
 import com.puppy.talk.infrastructure.pet.PetRepository;
 import com.puppy.talk.model.chat.ChatRoom;
 import com.puppy.talk.model.chat.ChatRoomIdentity;
@@ -15,7 +16,6 @@ import com.puppy.talk.model.pet.Persona;
 import com.puppy.talk.service.pet.PersonaLookUpService;
 import com.puppy.talk.service.dto.ChatStartResult;
 import com.puppy.talk.service.dto.MessageSendResult;
-import com.puppy.talk.service.websocket.WebSocketChatService;
 import com.puppy.talk.model.websocket.ChatMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,9 +37,9 @@ public class ChatService {
     private final PetRepository petRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final MessageRepository messageRepository;
-    private final AiResponseService aiResponseService; // TODO : mq 활용
+    private final AiResponsePort aiResponsePort;
+    private final RealtimeNotificationPort realtimeNotificationPort;
     private final PersonaLookUpService personaLookUpService; // FIXME :: 동일 layer 참조
-    private final WebSocketChatService webSocketChatService;
     // private final ActivityTrackingService activityTrackingService; // FIXME :: 동일 layer 참조 - TEMPORARILY COMMENTED
 
     /**
@@ -175,7 +175,7 @@ public class ChatService {
                 .toList();
             
             // AI 응답 생성
-            String aiResponse = aiResponseService.generatePetResponse(pet, persona, userMessage, chatHistory);
+            String aiResponse = aiResponsePort.generatePetResponse(pet, persona, userMessage, chatHistory);
             
             // 펫 응답 메시지 저장
             Message petMessage = Message.of(
@@ -198,7 +198,7 @@ public class ChatService {
                 aiResponse,
                 false
             );
-            webSocketChatService.broadcastMessage(webSocketMessage);
+            realtimeNotificationPort.broadcastMessage(webSocketMessage);
             
         } catch (Exception e) {
             // AI 응답 생성 실패 시 로그만 남기고 계속 진행

@@ -1,9 +1,10 @@
 package com.puppy.talk.service;
 
-import com.puppy.talk.ai.AiResponseService;
 import com.puppy.talk.infrastructure.activity.InactivityNotificationRepository;
+import com.puppy.talk.infrastructure.ai.AiResponsePort;
 import com.puppy.talk.infrastructure.chat.ChatRoomRepository;
 import com.puppy.talk.infrastructure.chat.MessageRepository;
+import com.puppy.talk.infrastructure.notification.RealtimeNotificationPort;
 import com.puppy.talk.infrastructure.pet.PetRepository;
 import com.puppy.talk.model.activity.InactivityNotification;
 import com.puppy.talk.model.activity.NotificationStatus;
@@ -16,7 +17,6 @@ import com.puppy.talk.model.push.NotificationType;
 import com.puppy.talk.model.websocket.ChatMessage;
 import com.puppy.talk.service.notification.PushNotificationService;
 import com.puppy.talk.service.pet.PersonaLookUpService;
-import com.puppy.talk.service.websocket.WebSocketChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,9 +39,9 @@ public class InactivityNotificationService {
     private final PetRepository petRepository;
     private final MessageRepository messageRepository;
     private final PersonaLookUpService personaLookUpService;
-    private final AiResponseService aiResponseService;
+    private final AiResponsePort aiResponsePort;
     private final PushNotificationService pushNotificationService;
-    private final WebSocketChatService webSocketChatService;
+    private final RealtimeNotificationPort realtimeNotificationPort;
 
     private static final int AI_CONTEXT_MESSAGE_LIMIT = 5;
 
@@ -145,7 +145,7 @@ public class InactivityNotificationService {
         String inactivityPrompt = createInactivityPrompt(pet);
         
         // AI 응답 생성
-        return aiResponseService.generatePetResponse(pet, persona, inactivityPrompt, chatHistory);
+        return aiResponsePort.generateInactivityMessage(pet, persona, chatHistory);
     }
 
     /**
@@ -221,7 +221,7 @@ public class InactivityNotificationService {
                 false
             );
             
-            webSocketChatService.broadcastMessage(webSocketMessage);
+            realtimeNotificationPort.broadcastMessage(webSocketMessage);
             
             log.debug("Sent WebSocket message for pet={}, chatRoom={}", pet.name(), chatRoom.identity().id());
             

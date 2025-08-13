@@ -1,12 +1,12 @@
 package com.puppy.talk.controller.websocket;
 
+import com.puppy.talk.infrastructure.notification.RealtimeNotificationPort;
 import com.puppy.talk.model.chat.ChatRoomIdentity;
 import com.puppy.talk.model.chat.SenderType;
 import com.puppy.talk.model.user.UserIdentity;
 import com.puppy.talk.model.websocket.ChatMessage;
 import com.puppy.talk.model.websocket.ChatMessageType;
 import com.puppy.talk.service.chat.ChatService;
-import com.puppy.talk.service.websocket.WebSocketChatService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Controller;
 @RequiredArgsConstructor
 public class ChatWebSocketController {
     
-    private final WebSocketChatService webSocketChatService;
+    private final RealtimeNotificationPort realtimeNotificationPort;
     private final ChatService chatService;
     
     /**
@@ -51,7 +51,7 @@ public class ChatWebSocketController {
             var result = chatService.sendMessageToPet(roomId, request.content());
             
             // WebSocket을 통해 실시간으로 브로드캐스트
-            webSocketChatService.broadcastMessage(
+            realtimeNotificationPort.broadcastMessage(
                 ChatMessage.newMessage(
                     result.message().identity(),
                     roomId,
@@ -67,9 +67,8 @@ public class ChatWebSocketController {
             
         } catch (Exception e) {
             log.error("Error sending message to chatRoom={}: {}", chatRoomId, e.getMessage(), e);
-            // 에러 메시지를 해당 사용자에게만 전송
-            webSocketChatService.sendToUser(
-                UserIdentity.of(request.userId()),
+            // 에러 메시지를 해당 사용자에게만 전송 (시스템 메시지로 브로드캐스트)
+            realtimeNotificationPort.broadcastSystemMessage(
                 ChatMessage.of(
                     null,
                     ChatRoomIdentity.of(chatRoomId),
@@ -101,7 +100,7 @@ public class ChatWebSocketController {
                 ? ChatMessage.typing(roomId, userId, SenderType.USER)
                 : ChatMessage.stopTyping(roomId, userId, SenderType.USER);
                 
-            webSocketChatService.broadcastTyping(typingMessage);
+            realtimeNotificationPort.broadcastTypingStatus(typingMessage);
             
         } catch (Exception e) {
             log.error("Error handling typing for chatRoom={}: {}", chatRoomId, e.getMessage(), e);
@@ -126,7 +125,7 @@ public class ChatWebSocketController {
             chatService.markMessagesAsRead(roomId);
             
             // 실시간으로 읽음 상태 브로드캐스트
-            webSocketChatService.broadcastReadReceipt(
+            realtimeNotificationPort.broadcastReadReceipt(
                 ChatMessage.readReceipt(roomId, userId, null)
             );
             

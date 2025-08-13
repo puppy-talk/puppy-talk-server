@@ -83,4 +83,52 @@ public class PromptBuilder {
         
         return finalPrompt;
     }
+
+    /**
+     * 비활성 상황에 특화된 프롬프트를 생성합니다.
+     */
+    public String buildInactivityPrompt(Pet pet, Persona persona, String inactivityContext, List<Message> recentMessages) {
+        StringBuilder promptBuilder = new StringBuilder();
+        
+        // 시스템 프롬프트 추가 (비활성 상황 특화)
+        String inactivitySystemPrompt = String.format(
+            SYSTEM_PROMPT_TEMPLATE,
+            pet.name(),
+            pet.name(),
+            pet.breed() != null ? pet.breed() : DEFAULT_BREED,
+            pet.age(),
+            persona.personalityTraits() != null ? persona.personalityTraits() : DEFAULT_PERSONALITY,
+            persona.description() != null ? persona.description() : DEFAULT_DESCRIPTION,
+            persona.aiPromptTemplate() != null ? persona.aiPromptTemplate() : ""
+        );
+        
+        promptBuilder.append(inactivitySystemPrompt).append("\n\n");
+        
+        // 비활성 상황 컨텍스트 추가
+        promptBuilder.append("상황: ").append(inactivityContext).append("\n\n");
+        
+        // 최근 대화 기록 추가 (참고용)
+        if (recentMessages != null && !recentMessages.isEmpty()) {
+            promptBuilder.append("최근 대화 기록 (참고용):\n");
+            
+            List<Message> limitedMessages = recentMessages.stream()
+                .limit(3)
+                .toList();
+            
+            for (Message message : limitedMessages) {
+                String sender = message.senderType() == SenderType.USER ? "사용자" : pet.name();
+                promptBuilder.append(String.format("%s: %s\n", sender, message.content()));
+            }
+            promptBuilder.append("\n");
+        }
+        
+        // 비활성 메시지 생성 요청
+        promptBuilder.append("위 상황에서 ").append(pet.name()).append("이(가) 먼저 말을 걸어보세요:\n");
+        promptBuilder.append(pet.name()).append(": ");
+        
+        String finalPrompt = promptBuilder.toString();
+        log.debug("Generated inactivity prompt: {}", finalPrompt);
+        
+        return finalPrompt;
+    }
 }

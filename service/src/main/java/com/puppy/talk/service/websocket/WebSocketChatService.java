@@ -1,5 +1,7 @@
 package com.puppy.talk.service.websocket;
 
+import com.puppy.talk.infrastructure.notification.RealtimeNotificationException;
+import com.puppy.talk.infrastructure.notification.RealtimeNotificationPort;
 import com.puppy.talk.model.user.UserIdentity;
 import com.puppy.talk.model.websocket.ChatMessage;
 import lombok.RequiredArgsConstructor;
@@ -9,21 +11,20 @@ import org.springframework.stereotype.Service;
 
 /**
  * WebSocket을 통한 실시간 채팅 서비스
+ * RealtimeNotificationPort의 구현체
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class WebSocketChatService {
+public class WebSocketChatService implements RealtimeNotificationPort {
     
     private final SimpMessagingTemplate messagingTemplate;
     
-    /**
-     * 특정 채팅방의 모든 참여자에게 메시지 브로드캐스트
-     */
+    @Override
     public void broadcastMessage(ChatMessage message) {
         if (message == null) {
             log.warn("Cannot broadcast null message");
-            throw new NullPointerException("ChatMessage cannot be null");
+            throw new RealtimeNotificationException("ChatMessage cannot be null");
         }
         
         try {
@@ -34,13 +35,12 @@ public class WebSocketChatService {
             messagingTemplate.convertAndSend(destination, message);
         } catch (Exception e) {
             log.error("Failed to broadcast message: {}", e.getMessage(), e);
+            throw new RealtimeNotificationException("Failed to broadcast message", e);
         }
     }
     
-    /**
-     * 특정 채팅방의 모든 참여자에게 타이핑 상태 브로드캐스트
-     */
-    public void broadcastTyping(ChatMessage typingMessage) {
+    @Override
+    public void broadcastTypingStatus(ChatMessage typingMessage) {
         if (typingMessage == null) {
             log.warn("Cannot broadcast null typing message");
             return;
@@ -55,27 +55,27 @@ public class WebSocketChatService {
             messagingTemplate.convertAndSend(destination, typingMessage);
         } catch (Exception e) {
             log.error("Failed to broadcast typing status: {}", e.getMessage(), e);
+            throw new RealtimeNotificationException("Failed to broadcast typing status", e);
         }
     }
     
-    /**
-     * 특정 채팅방의 모든 참여자에게 읽음 확인 브로드캐스트
-     */
-    public void broadcastReadReceipt(ChatMessage readMessage) {
-        if (readMessage == null) {
+    @Override
+    public void broadcastReadReceipt(ChatMessage readReceiptMessage) {
+        if (readReceiptMessage == null) {
             log.warn("Cannot broadcast null read receipt message");
-            return;
+            throw new RealtimeNotificationException("Read receipt message cannot be null");
         }
         
         try {
-            String destination = "/topic/chat/" + readMessage.chatRoomId().id() + "/read";
+            String destination = "/topic/chat/" + readReceiptMessage.chatRoomId().id() + "/read";
             
             log.debug("Broadcasting read receipt to {}: user={}", 
-                destination, readMessage.userId().id());
+                destination, readReceiptMessage.userId().id());
             
-            messagingTemplate.convertAndSend(destination, readMessage);
+            messagingTemplate.convertAndSend(destination, readReceiptMessage);
         } catch (Exception e) {
             log.error("Failed to broadcast read receipt: {}", e.getMessage(), e);
+            throw new RealtimeNotificationException("Failed to broadcast read receipt", e);
         }
     }
     
@@ -103,13 +103,11 @@ public class WebSocketChatService {
         }
     }
     
-    /**
-     * 특정 채팅방에 시스템 메시지 브로드캐스트
-     */
+    @Override
     public void broadcastSystemMessage(ChatMessage systemMessage) {
         if (systemMessage == null) {
             log.warn("Cannot broadcast null system message");
-            return;
+            throw new RealtimeNotificationException("System message cannot be null");
         }
         
         try {
@@ -120,6 +118,7 @@ public class WebSocketChatService {
             messagingTemplate.convertAndSend(destination, systemMessage);
         } catch (Exception e) {
             log.error("Failed to broadcast system message: {}", e.getMessage(), e);
+            throw new RealtimeNotificationException("Failed to broadcast system message", e);
         }
     }
     
