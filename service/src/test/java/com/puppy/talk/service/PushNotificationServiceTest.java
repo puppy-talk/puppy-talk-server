@@ -8,7 +8,7 @@ import com.puppy.talk.push.PushNotification;
 import com.puppy.talk.push.PushNotificationIdentity;
 import com.puppy.talk.push.PushNotificationRepository;
 import com.puppy.talk.push.PushNotificationSender;
-import com.puppy.talk.model.push.*;
+import com.puppy.talk.push.*;
 import com.puppy.talk.push.PushNotificationStatus;
 import com.puppy.talk.user.UserIdentity;
 import com.puppy.talk.notification.PushNotificationService;

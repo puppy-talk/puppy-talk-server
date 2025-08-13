@@ -1,19 +1,5 @@
-import org.springframework.boot.gradle.plugin.SpringBootPlugin
-
 plugins {
     id 'java-library'
-    id 'org.springframework.boot' version '3.4.0' apply false
-    id 'io.spring.dependency-management' version '1.1.6'
-}
-
-dependencyManagement {
-    imports {
-        mavenBom SpringBootPlugin.BOM_COORDINATES
-    }
-}
-
-java {
-    sourceCompatibility = '21'
 }
 
 dependencies {
@@ -22,21 +8,13 @@ dependencies {
     implementation project(':infrastructure')
     testImplementation project(':ai-service')
 
+    // Spring Framework
     implementation 'org.springframework:spring-context'
     implementation 'org.springframework:spring-tx'
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
     compileOnly 'org.springframework:spring-messaging'
     testImplementation 'org.springframework:spring-messaging'
     
-    // Logging
-    implementation 'org.slf4j:slf4j-api'
-
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-
+    // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-}
-
-test {
-    useJUnitPlatform()
 }
