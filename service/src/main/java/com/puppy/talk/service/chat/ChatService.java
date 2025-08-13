@@ -1,4 +1,4 @@
-package com.puppy.talk.service;
+package com.puppy.talk.service.chat;
 
 import com.puppy.talk.ai.AiResponseService;
 import com.puppy.talk.exception.pet.PetNotFoundException;
@@ -8,11 +8,11 @@ import com.puppy.talk.infrastructure.pet.PetRepository;
 import com.puppy.talk.model.chat.ChatRoom;
 import com.puppy.talk.model.chat.ChatRoomIdentity;
 import com.puppy.talk.model.chat.Message;
-import com.puppy.talk.model.chat.MessageIdentity;
 import com.puppy.talk.model.chat.SenderType;
 import com.puppy.talk.model.pet.Pet;
 import com.puppy.talk.model.pet.PetIdentity;
 import com.puppy.talk.model.pet.Persona;
+import com.puppy.talk.service.pet.PersonaLookUpService;
 import com.puppy.talk.service.dto.ChatStartResult;
 import com.puppy.talk.service.dto.MessageSendResult;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +33,9 @@ public class ChatService {
     private final PetRepository petRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final MessageRepository messageRepository;
-    private final AiResponseService aiResponseService;
-    private final PersonaLookUpService personaLookUpService;
-    private final ActivityTrackingService activityTrackingService;
+    private final AiResponseService aiResponseService; // TODO : mq 활용
+    private final PersonaLookUpService personaLookUpService; // FIXME :: 동일 layer 참조
+    // private final ActivityTrackingService activityTrackingService; // FIXME :: 동일 layer 참조 - TEMPORARILY COMMENTED
 
     /**
      * 펫과의 대화를 시작합니다.
@@ -63,7 +63,7 @@ public class ChatService {
             .toList();
 
         // 채팅방 열기 활동 기록
-        activityTrackingService.trackChatOpened(pet.userId(), chatRoom.identity());
+        // activityTrackingService.trackChatOpened(pet.userId(), chatRoom.identity()); // TEMPORARILY COMMENTED
 
         return new ChatStartResult(chatRoom, pet, recentMessages);
     }
@@ -102,7 +102,7 @@ public class ChatService {
         Message savedUserMessage = messageRepository.save(userMessage);
 
         // 메시지 전송 활동 기록
-        activityTrackingService.trackMessageSent(pet.userId(), chatRoomId);
+        // activityTrackingService.trackMessageSent(pet.userId(), chatRoomId); // TEMPORARILY COMMENTED
 
         // AI 펫 응답 생성 및 저장
         generateAndSavePetResponse(chatRoom, pet, content.trim());
@@ -151,7 +151,7 @@ public class ChatService {
         messageRepository.markAllAsReadByChatRoomId(chatRoomId);
 
         // 메시지 읽기 활동 기록
-        activityTrackingService.trackMessageRead(pet.userId(), chatRoomId);
+        // activityTrackingService.trackMessageRead(pet.userId(), chatRoomId); // TEMPORARILY COMMENTED
     }
 
     /**

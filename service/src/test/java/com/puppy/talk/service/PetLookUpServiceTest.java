@@ -6,6 +6,7 @@ import com.puppy.talk.model.pet.Pet;
 import com.puppy.talk.model.pet.PetIdentity;
 import com.puppy.talk.model.pet.PersonaIdentity;
 import com.puppy.talk.model.user.UserIdentity;
+import com.puppy.talk.service.pet.PetLookUpServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ class PetLookUpServiceTest {
     private PetRepository petRepository;
     
     @InjectMocks
-    private PetLookUpService petLookUpService;
+    private PetLookUpServiceImpl petLookUpService;
     
     private PetIdentity petId;
     private UserIdentity userId;

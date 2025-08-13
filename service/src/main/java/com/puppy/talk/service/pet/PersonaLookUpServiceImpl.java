@@ -1,4 +1,4 @@
-package com.puppy.talk.service;
+package com.puppy.talk.service.pet;
 
 import com.puppy.talk.exception.pet.PersonaNotFoundException;
 import com.puppy.talk.infrastructure.pet.PersonaRepository;
@@ -11,10 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class PersonaLookUpService {
+public class PersonaLookUpServiceImpl implements PersonaLookUpService {
 
     private final PersonaRepository personaRepository;
 
+    @Override
     @Transactional(readOnly = true)
     public Persona findPersona(PersonaIdentity identity) {
         if (identity == null) {
@@ -24,16 +25,19 @@ public class PersonaLookUpService {
             .orElseThrow(() -> new PersonaNotFoundException(identity));
     }
 
+    @Override
     @Transactional(readOnly = true)
     public List<Persona> findAllPersonas() {
         return personaRepository.findAll();
     }
 
+    @Override
     @Transactional(readOnly = true)
     public List<Persona> findActivePersonas() {
         return personaRepository.findByIsActive(true);
     }
 
+    @Override
     @Transactional
     public Persona createPersona(Persona persona) {
         if (persona == null) {
@@ -42,6 +46,7 @@ public class PersonaLookUpService {
         return personaRepository.save(persona);
     }
 
+    @Override
     @Transactional
     public void deletePersona(PersonaIdentity identity) {
         if (identity == null) {

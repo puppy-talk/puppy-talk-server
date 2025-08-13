@@ -18,6 +18,17 @@ inactivity:
   scheduler:
     enabled: ${INACTIVITY_SCHEDULER_ENABLED:true}
 
+# Firebase Push Notification Configuration
+firebase:
+  service-account-key: ${FIREBASE_SERVICE_ACCOUNT_KEY:firebase-service-account.json}
+  project-id: ${FIREBASE_PROJECT_ID:puppy-talk-dev}
+
+# Push Notification Configuration
+push:
+  notification:
+    enabled: ${PUSH_NOTIFICATION_ENABLED:true}
+    batch-size: ${PUSH_NOTIFICATION_BATCH_SIZE:100}
+
 # AI Multi-Provider Configuration
 ai:
   default-provider: ${AI_DEFAULT_PROVIDER:gpt-oss}

@@ -1,4 +1,4 @@
-package com.puppy.talk.service;
+package com.puppy.talk.service.user;
 
 import com.puppy.talk.exception.user.DuplicateEmailException;
 import com.puppy.talk.exception.user.DuplicateUsernameException;
@@ -13,10 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class UserLookUpService {
+public class UserLookUpServiceImpl implements UserLookUpService {
 
     private final UserRepository userRepository;
 
+    @Override
     @Transactional(readOnly = true)
     public User findUser(UserIdentity identity) {
         if (identity == null) {
@@ -26,6 +27,7 @@ public class UserLookUpService {
             .orElseThrow(() -> new UserNotFoundException(identity));
     }
 
+    @Override
     @Transactional(readOnly = true)
     public User findUserByUsername(String username) {
         if (username == null || username.trim().isEmpty()) {
@@ -36,6 +38,7 @@ public class UserLookUpService {
                 () -> new UserNotFoundException("User not found with username: " + username));
     }
 
+    @Override
     @Transactional(readOnly = true)
     public User findUserByEmail(String email) {
         if (email == null || email.trim().isEmpty()) {
@@ -45,11 +48,13 @@ public class UserLookUpService {
             .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
     }
 
+    @Override
     @Transactional(readOnly = true)
     public List<User> findAllUsers() {
         return userRepository.findAll();
     }
 
+    @Override
     @Transactional
     public User createUser(User user) {
         if (user == null) {
@@ -67,6 +72,7 @@ public class UserLookUpService {
         return userRepository.save(user);
     }
 
+    @Override
     @Transactional
     public void deleteUser(UserIdentity identity) {
         if (identity == null) {

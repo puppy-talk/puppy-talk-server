@@ -18,5 +18,7 @@
   <include file="changes/009-create-inactivity-notifications-table.xml"
     relativeToChangelogFile="true"/>
   <include file="changes/010-insert-sample-personas.xml" relativeToChangelogFile="true"/>
+  <include file="changes/011-create-device-tokens-table.xml" relativeToChangelogFile="true"/>
+  <include file="changes/012-create-push-notifications-table.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

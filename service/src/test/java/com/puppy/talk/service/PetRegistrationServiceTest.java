@@ -15,6 +15,7 @@ import com.puppy.talk.model.pet.PersonaIdentity;
 import com.puppy.talk.model.user.User;
 import com.puppy.talk.model.user.UserIdentity;
 import com.puppy.talk.service.dto.PetRegistrationResult;
+import com.puppy.talk.service.pet.PetRegistrationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

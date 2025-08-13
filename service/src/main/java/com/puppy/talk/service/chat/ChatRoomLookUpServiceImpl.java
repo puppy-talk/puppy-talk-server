@@ -1,4 +1,4 @@
-package com.puppy.talk.service;
+package com.puppy.talk.service.chat;
 
 import com.puppy.talk.exception.chat.ChatRoomNotFoundException;
 import com.puppy.talk.infrastructure.chat.ChatRoomRepository;
@@ -12,10 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class ChatRoomLookUpService {
+public class ChatRoomLookUpServiceImpl implements ChatRoomLookUpService {
 
     private final ChatRoomRepository chatRoomRepository;
 
+    @Override
     @Transactional(readOnly = true)
     public ChatRoom findChatRoom(ChatRoomIdentity identity) {
         if (identity == null) {
@@ -25,6 +26,7 @@ public class ChatRoomLookUpService {
             .orElseThrow(() -> new ChatRoomNotFoundException(identity));
     }
 
+    @Override
     @Transactional(readOnly = true)
     public ChatRoom findChatRoomByPetId(PetIdentity petId) {
         if (petId == null) {
@@ -35,11 +37,13 @@ public class ChatRoomLookUpService {
                 "ChatRoom not found for pet: " + petId.id()));
     }
 
+    @Override
     @Transactional(readOnly = true)
     public List<ChatRoom> findAllChatRooms() {
         return chatRoomRepository.findAll();
     }
 
+    @Override
     @Transactional
     public ChatRoom createChatRoom(ChatRoom chatRoom) {
         if (chatRoom == null) {
@@ -48,6 +52,7 @@ public class ChatRoomLookUpService {
         return chatRoomRepository.save(chatRoom);
     }
 
+    @Override
     @Transactional
     public void deleteChatRoom(ChatRoomIdentity identity) {
         if (identity == null) {

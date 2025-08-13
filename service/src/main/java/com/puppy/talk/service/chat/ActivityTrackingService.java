@@ -1,4 +1,4 @@
-package com.puppy.talk.service;
+package com.puppy.talk.service.chat;
 
 import com.puppy.talk.infrastructure.activity.InactivityNotificationRepository;
 import com.puppy.talk.infrastructure.activity.UserActivityRepository;

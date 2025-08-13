@@ -12,6 +12,9 @@ import com.puppy.talk.model.chat.Message;
 import com.puppy.talk.model.chat.SenderType;
 import com.puppy.talk.model.pet.Pet;
 import com.puppy.talk.model.pet.Persona;
+import com.puppy.talk.model.push.NotificationType;
+import com.puppy.talk.service.notification.PushNotificationService;
+import com.puppy.talk.service.pet.PersonaLookUpService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,6 +38,7 @@ public class InactivityNotificationService {
     private final MessageRepository messageRepository;
     private final PersonaLookUpService personaLookUpService;
     private final AiResponseService aiResponseService;
+    private final PushNotificationService pushNotificationService;
 
     private static final int AI_CONTEXT_MESSAGE_LIMIT = 5;
 
@@ -106,6 +110,9 @@ public class InactivityNotificationService {
         
         messageRepository.save(petMessage);
         
+        // 푸시 알림 전송
+        sendPushNotification(pet, aiMessage);
+        
         // 알림을 SENT 상태로 변경
         InactivityNotification sentNotification = updatedNotification.markAsSent();
         inactivityNotificationRepository.save(sentNotification);
@@ -160,6 +167,60 @@ public class InactivityNotificationService {
         
         int index = (int) (Math.random() * defaultMessages.length);
         return defaultMessages[index];
+    }
+    
+    /**
+     * 비활성 알림에 대한 푸시 알림을 전송합니다.
+     */
+    private void sendPushNotification(Pet pet, String message) {
+        try {
+            String pushTitle = pet.name() + "이(가) 보고 싶어해요! 🐾";
+            String pushMessage = shortenMessageForPush(message);
+            
+            // 푸시 알림 데이터 생성 (JSON 형태)
+            String pushData = String.format(
+                "{\"petId\":%d,\"petName\":\"%s\",\"chatAction\":\"open\"}",
+                pet.identity().id(),
+                pet.name()
+            );
+            
+            // 푸시 알림 전송
+            pushNotificationService.sendNotification(
+                pet.userId(),
+                NotificationType.INACTIVITY_MESSAGE,
+                pushTitle,
+                pushMessage,
+                pushData
+            );
+            
+            log.debug("Sent push notification for pet={}, user={}", pet.name(), pet.userId().id());
+            
+        } catch (Exception e) {
+            log.warn("Failed to send push notification for pet={}: {}", pet.name(), e.getMessage());
+            // 푸시 알림 실패는 전체 프로세스를 중단시키지 않음
+        }
+    }
+    
+    /**
+     * 푸시 알림용으로 메시지를 단축합니다.
+     */
+    private String shortenMessageForPush(String message) {
+        if (message == null) {
+            return "";
+        }
+        
+        // 이모지와 특수 문자 제거 (Java에서 지원하는 패턴 사용)
+        String cleaned = message
+            .replaceAll("[\\p{So}\\p{Sc}]", "")  // 기호 문자들 제거
+            .replaceAll("[🐾💕✨🌟🤔]", "")      // 흔한 이모지들 직접 제거
+            .trim();
+        
+        // 100자 이내로 제한
+        if (cleaned.length() > 100) {
+            return cleaned.substring(0, 97) + "...";
+        }
+        
+        return cleaned;
     }
 
     /**

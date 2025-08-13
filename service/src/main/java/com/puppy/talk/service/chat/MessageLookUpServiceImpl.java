@@ -1,4 +1,4 @@
-package com.puppy.talk.service;
+package com.puppy.talk.service.chat;
 
 import com.puppy.talk.exception.chat.MessageNotFoundException;
 import com.puppy.talk.infrastructure.chat.MessageRepository;
@@ -12,10 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class MessageLookUpService {
+public class MessageLookUpServiceImpl implements MessageLookUpService {
 
     private final MessageRepository messageRepository;
 
+    @Override
     @Transactional(readOnly = true)
     public Message findMessage(MessageIdentity identity) {
         if (identity == null) {
@@ -25,6 +26,7 @@ public class MessageLookUpService {
             .orElseThrow(() -> new MessageNotFoundException(identity));
     }
 
+    @Override
     @Transactional(readOnly = true)
     public List<Message> findMessagesByChatRoomId(ChatRoomIdentity chatRoomId) {
         if (chatRoomId == null) {
@@ -33,6 +35,7 @@ public class MessageLookUpService {
         return messageRepository.findByChatRoomId(chatRoomId);
     }
 
+    @Override
     @Transactional(readOnly = true)
     public List<Message> findMessagesByChatRoomIdOrderByCreatedAtDesc(ChatRoomIdentity chatRoomId) {
         if (chatRoomId == null) {
@@ -41,6 +44,7 @@ public class MessageLookUpService {
         return messageRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId);
     }
 
+    @Override
     @Transactional(readOnly = true)
     public List<Message> findUnreadMessagesByChatRoomId(ChatRoomIdentity chatRoomId) {
         if (chatRoomId == null) {
@@ -49,6 +53,7 @@ public class MessageLookUpService {
         return messageRepository.findUnreadMessagesByChatRoomId(chatRoomId);
     }
 
+    @Override
     @Transactional
     public Message sendMessage(Message message) {
         if (message == null) {
@@ -57,6 +62,7 @@ public class MessageLookUpService {
         return messageRepository.save(message);
     }
 
+    @Override
     @Transactional
     public void markMessageAsRead(MessageIdentity identity) {
         if (identity == null) {
@@ -68,6 +74,7 @@ public class MessageLookUpService {
         messageRepository.markAsRead(identity);
     }
 
+    @Override
     @Transactional
     public void markAllMessagesAsReadByChatRoomId(ChatRoomIdentity chatRoomId) {
         if (chatRoomId == null) {
@@ -76,6 +83,7 @@ public class MessageLookUpService {
         messageRepository.markAllAsReadByChatRoomId(chatRoomId);
     }
 
+    @Override
     @Transactional
     public void deleteMessage(MessageIdentity identity) {
         if (identity == null) {

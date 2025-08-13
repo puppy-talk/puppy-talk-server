@@ -1,4 +1,4 @@
-package com.puppy.talk.service;
+package com.puppy.talk.service.pet;
 
 import com.puppy.talk.service.dto.PetRegistrationResult;
 import com.puppy.talk.infrastructure.chat.ChatRoomRepository;
@@ -8,9 +8,7 @@ import com.puppy.talk.infrastructure.user.UserRepository;
 import com.puppy.talk.exception.pet.PersonaNotFoundException;
 import com.puppy.talk.exception.user.UserNotFoundException;
 import com.puppy.talk.model.chat.ChatRoom;
-import com.puppy.talk.model.chat.ChatRoomIdentity;
 import com.puppy.talk.model.pet.Pet;
-import com.puppy.talk.model.pet.PetIdentity;
 import com.puppy.talk.model.pet.PersonaIdentity;
 import com.puppy.talk.model.user.UserIdentity;
 import lombok.RequiredArgsConstructor;

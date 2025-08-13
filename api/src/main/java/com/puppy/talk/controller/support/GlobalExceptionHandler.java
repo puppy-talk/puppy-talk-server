@@ -9,8 +9,8 @@ import com.puppy.talk.exception.chat.ChatRoomNotFoundException;
 import com.puppy.talk.exception.chat.MessageNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
@@ -24,39 +24,33 @@ public class GlobalExceptionHandler {
         ChatRoomNotFoundException.class,
         MessageNotFoundException.class
     })
-    public ResponseEntity<ErrorResponse> handleNotFound(RuntimeException e) {
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiResponse<Void> handleNotFound(RuntimeException e) {
         log.warn("Resource not found: {}", e.getMessage());
-        return ResponseEntity
-            .status(HttpStatus.NOT_FOUND)
-            .body(new ErrorResponse(ErrorCode.USER_NOT_FOUND, "Requested resource not found"));
+        return ApiResponse.error("Requested resource not found", ErrorCode.USER_NOT_FOUND);
     }
 
     @ExceptionHandler({
         DuplicateEmailException.class,
         DuplicateUsernameException.class
     })
-    public ResponseEntity<ErrorResponse> handleConflict(RuntimeException e) {
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiResponse<Void> handleConflict(RuntimeException e) {
         log.warn("Resource conflict: {}", e.getMessage());
-        return ResponseEntity
-            .status(HttpStatus.CONFLICT)
-            .body(new ErrorResponse(ErrorCode.DUPLICATE_USERNAME, "Resource already exists"));
+        return ApiResponse.error("Resource already exists", ErrorCode.DUPLICATE_USERNAME);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleBadRequest(IllegalArgumentException e) {
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse<Void> handleBadRequest(IllegalArgumentException e) {
         log.warn("Bad request: {}", e.getMessage());
-        return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body(new ErrorResponse(ErrorCode.VALIDATION_ERROR, "Invalid request parameters"));
+        return ApiResponse.error("Invalid request parameters", ErrorCode.VALIDATION_ERROR);
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ErrorResponse> handleInternalServerError(RuntimeException e) {
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ApiResponse<Void> handleInternalServerError(RuntimeException e) {
         log.error("Unexpected error occurred", e);
-        return ResponseEntity
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(new ErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR, "An unexpected error occurred"));
+        return ApiResponse.error("An unexpected error occurred", ErrorCode.INTERNAL_SERVER_ERROR);
     }
-
-    public record ErrorResponse(ErrorCode code, String message) {}
 }

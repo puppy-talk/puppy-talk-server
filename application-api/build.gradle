@@ -20,6 +20,7 @@ bootJar {
 dependencies {
     implementation project(':api')
     implementation project(':ai-service')
+    implementation project(':push-service')
     implementation project(':repository-jdbc')
     implementation project(':schema')
 
