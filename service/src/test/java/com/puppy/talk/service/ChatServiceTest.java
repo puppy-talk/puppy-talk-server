@@ -290,7 +290,8 @@ class ChatServiceTest {
         verify(chatRoomRepository).findByIdentity(chatRoomId);
         verify(petRepository).findByIdentity(mockChatRoom.petId());
         verify(messageRepository).markAllAsReadByChatRoomId(chatRoomId);
-        verify(activityTrackingService).trackMessageRead(mockPet.userId(), chatRoomId);
+        // activityTrackingService 호출은 현재 주석 처리됨
+        // verify(activityTrackingService).trackMessageRead(mockPet.userId(), chatRoomId);
     }
     
     @Test

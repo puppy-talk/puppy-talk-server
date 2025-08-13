@@ -1,9 +1,10 @@
 package com.puppy.talk.service;
 
-import com.puppy.talk.ai.AiResponseService;
 import com.puppy.talk.infrastructure.activity.InactivityNotificationRepository;
+import com.puppy.talk.infrastructure.ai.AiResponsePort;
 import com.puppy.talk.infrastructure.chat.ChatRoomRepository;
 import com.puppy.talk.infrastructure.chat.MessageRepository;
+import com.puppy.talk.service.notification.RealtimeNotificationPort;
 import com.puppy.talk.infrastructure.pet.PetRepository;
 import com.puppy.talk.model.activity.InactivityNotification;
 import com.puppy.talk.model.activity.NotificationStatus;
@@ -13,6 +14,7 @@ import com.puppy.talk.model.chat.SenderType;
 import com.puppy.talk.model.pet.Pet;
 import com.puppy.talk.model.pet.Persona;
 import com.puppy.talk.model.push.NotificationType;
+import com.puppy.talk.model.websocket.ChatMessage;
 import com.puppy.talk.service.notification.PushNotificationService;
 import com.puppy.talk.service.pet.PersonaLookUpService;
 import lombok.RequiredArgsConstructor;
@@ -37,8 +39,9 @@ public class InactivityNotificationService {
     private final PetRepository petRepository;
     private final MessageRepository messageRepository;
     private final PersonaLookUpService personaLookUpService;
-    private final AiResponseService aiResponseService;
+    private final AiResponsePort aiResponsePort;
     private final PushNotificationService pushNotificationService;
+    private final RealtimeNotificationPort realtimeNotificationPort;
 
     private static final int AI_CONTEXT_MESSAGE_LIMIT = 5;
 
@@ -108,7 +111,10 @@ public class InactivityNotificationService {
             LocalDateTime.now()
         );
         
-        messageRepository.save(petMessage);
+        Message savedPetMessage = messageRepository.save(petMessage);
+        
+        // WebSocket을 통해 실시간 브로드캐스트
+        sendWebSocketMessage(chatRoom, pet, savedPetMessage, aiMessage);
         
         // 푸시 알림 전송
         sendPushNotification(pet, aiMessage);
@@ -135,23 +141,11 @@ public class InactivityNotificationService {
             .limit(AI_CONTEXT_MESSAGE_LIMIT)
             .toList();
         
-        // 비활성 상황에 특화된 사용자 메시지 생성
-        String inactivityPrompt = createInactivityPrompt(pet);
-        
         // AI 응답 생성
-        return aiResponseService.generatePetResponse(pet, persona, inactivityPrompt, chatHistory);
+        return aiResponsePort.generateInactivityMessage(pet, persona, chatHistory);
     }
 
-    /**
-     * 비활성 상황에 특화된 프롬프트를 생성합니다.
-     */
-    private String createInactivityPrompt(Pet pet) {
-        return String.format(
-            "%s이(가) 오랫동안 대화하지 않아서 궁금해하며 먼저 말을 걸어보세요. " +
-            "친근하고 자연스럽게 안부를 묻거나 재미있는 이야기를 시작해보세요.", 
-            pet.name()
-        );
-    }
+
 
     /**
      * AI 실패 시 사용할 기본 비활성 메시지를 생성합니다.
@@ -198,6 +192,30 @@ public class InactivityNotificationService {
         } catch (Exception e) {
             log.warn("Failed to send push notification for pet={}: {}", pet.name(), e.getMessage());
             // 푸시 알림 실패는 전체 프로세스를 중단시키지 않음
+        }
+    }
+    
+    /**
+     * WebSocket을 통해 실시간 메시지를 브로드캐스트합니다.
+     */
+    private void sendWebSocketMessage(ChatRoom chatRoom, Pet pet, Message savedMessage, String content) {
+        try {
+            ChatMessage webSocketMessage = ChatMessage.newMessage(
+                savedMessage.identity(),
+                chatRoom.identity(),
+                pet.userId(),
+                SenderType.PET,
+                content,
+                false
+            );
+            
+            realtimeNotificationPort.broadcastMessage(webSocketMessage);
+            
+            log.debug("Sent WebSocket message for pet={}, chatRoom={}", pet.name(), chatRoom.identity().id());
+            
+        } catch (Exception e) {
+            log.warn("Failed to send WebSocket message for pet={}: {}", pet.name(), e.getMessage());
+            // WebSocket 실패는 전체 프로세스를 중단시키지 않음
         }
     }
     

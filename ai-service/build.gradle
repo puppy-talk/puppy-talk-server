@@ -17,6 +17,7 @@ java {
 dependencies {
     api project(':model')
     implementation project(':exception')
+    implementation project(':infrastructure')
 
     implementation 'org.springframework:spring-context'
     implementation 'org.springframework:spring-web'
