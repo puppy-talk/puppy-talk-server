@@ -5,6 +5,8 @@ import com.puppy.talk.chat.ChatRoomIdentity;
 import com.puppy.talk.chat.SenderType;
 import com.puppy.talk.user.UserIdentity;
 import com.puppy.talk.chat.ChatService;
+import com.puppy.talk.websocket.ChatMessage;
+import com.puppy.talk.websocket.ChatMessageType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -65,9 +67,8 @@ public class ChatWebSocketController {
             
         } catch (Exception e) {
             log.error("Error sending message to chatRoom={}: {}", chatRoomId, e.getMessage(), e);
-            // 에러 메시지를 해당 사용자에게만 전송
-            realtimeNotificationPort.sendToUser(
-                UserIdentity.of(request.userId()),
+            // 에러 메시지를 시스템 메시지로 브로드캐스트
+            realtimeNotificationPort.broadcastSystemMessage(
                 ChatMessage.of(
                     null,
                     ChatRoomIdentity.of(chatRoomId),
