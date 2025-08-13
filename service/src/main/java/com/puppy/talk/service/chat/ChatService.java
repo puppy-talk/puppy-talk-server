@@ -18,12 +18,14 @@ import com.puppy.talk.service.dto.MessageSendResult;
 import com.puppy.talk.service.websocket.WebSocketChatService;
 import com.puppy.talk.model.websocket.ChatMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatService {
@@ -201,7 +203,7 @@ public class ChatService {
         } catch (Exception e) {
             // AI 응답 생성 실패 시 로그만 남기고 계속 진행
             // 사용자 메시지는 정상적으로 저장되어야 함
-            System.err.println("Failed to generate pet response: " + e.getMessage());
+            log.error("Failed to generate pet response for chatRoom: {}", chatRoom.identity(), e);
         }
     }
 

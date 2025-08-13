@@ -7,6 +7,10 @@ import com.puppy.talk.model.websocket.ChatMessage;
 import com.puppy.talk.model.websocket.ChatMessageType;
 import com.puppy.talk.service.chat.ChatService;
 import com.puppy.talk.service.websocket.WebSocketChatService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -33,7 +37,7 @@ public class ChatWebSocketController {
     @MessageMapping("/chat/{chatRoomId}/send")
     public void sendMessage(
         @DestinationVariable Long chatRoomId,
-        @Payload ChatMessageRequest request,
+        @Payload @Valid ChatMessageRequest request,
         SimpMessageHeaderAccessor headerAccessor
     ) {
         try {
@@ -86,7 +90,7 @@ public class ChatWebSocketController {
     @MessageMapping("/chat/{chatRoomId}/typing")
     public void handleTyping(
         @DestinationVariable Long chatRoomId,
-        @Payload TypingRequest request,
+        @Payload @Valid TypingRequest request,
         SimpMessageHeaderAccessor headerAccessor
     ) {
         try {
@@ -111,7 +115,7 @@ public class ChatWebSocketController {
     @MessageMapping("/chat/{chatRoomId}/read")
     public void markMessagesAsRead(
         @DestinationVariable Long chatRoomId,
-        @Payload ReadReceiptRequest request,
+        @Payload @Valid ReadReceiptRequest request,
         SimpMessageHeaderAccessor headerAccessor
     ) {
         try {
@@ -135,15 +139,15 @@ public class ChatWebSocketController {
      * 채팅 메시지 요청 DTO
      */
     public record ChatMessageRequest(
-        Long userId,
-        String content
+        @NotNull @Positive Long userId,
+        @NotBlank String content
     ) {}
     
     /**
      * 타이핑 상태 요청 DTO
      */
     public record TypingRequest(
-        Long userId,
+        @NotNull @Positive Long userId,
         boolean isTyping
     ) {}
     
@@ -151,7 +155,7 @@ public class ChatWebSocketController {
      * 읽음 확인 요청 DTO
      */
     public record ReadReceiptRequest(
-        Long userId,
+        @NotNull @Positive Long userId,
         Long lastReadMessageId
     ) {}
 }

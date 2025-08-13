@@ -1,7 +1,9 @@
 package com.puppy.talk.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
@@ -17,6 +19,10 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     
     private final WebSocketAuthInterceptor webSocketAuthInterceptor;
+    private final Environment environment;
+    
+    @Value("${puppy-talk.websocket.allowed-origins:http://localhost:3000,http://localhost:8080}")
+    private String[] allowedOrigins;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -33,14 +39,31 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // WebSocket 연결 엔드포인트
-        registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*") // 개발 환경에서만 사용
-                .withSockJS(); // SockJS fallback 지원
+        var endpoint = registry.addEndpoint("/ws");
+        
+        // 개발 환경에서는 모든 Origin 허용, 프로덕션에서는 설정된 Origin만 허용
+        if (isDevEnvironment()) {
+            endpoint.setAllowedOriginPatterns("*"); // 개발 환경에서만 모든 Origin 허용
+        } else {
+            endpoint.setAllowedOrigins(allowedOrigins); // 설정에서 허용된 Origin만 허용
+        }
+        
+        endpoint.withSockJS(); // SockJS fallback 지원
     }
     
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         // 인바운드 메시지에 인터셉터 추가
         registration.interceptors(webSocketAuthInterceptor);
+    }
+    
+    private boolean isDevEnvironment() {
+        String[] activeProfiles = environment.getActiveProfiles();
+        for (String profile : activeProfiles) {
+            if ("local".equals(profile) || "dev".equals(profile)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

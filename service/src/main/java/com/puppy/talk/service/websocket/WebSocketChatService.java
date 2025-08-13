@@ -41,6 +41,11 @@ public class WebSocketChatService {
      * 특정 채팅방의 모든 참여자에게 타이핑 상태 브로드캐스트
      */
     public void broadcastTyping(ChatMessage typingMessage) {
+        if (typingMessage == null) {
+            log.warn("Cannot broadcast null typing message");
+            return;
+        }
+        
         try {
             String destination = "/topic/chat/" + typingMessage.chatRoomId().id() + "/typing";
             
@@ -57,6 +62,11 @@ public class WebSocketChatService {
      * 특정 채팅방의 모든 참여자에게 읽음 확인 브로드캐스트
      */
     public void broadcastReadReceipt(ChatMessage readMessage) {
+        if (readMessage == null) {
+            log.warn("Cannot broadcast null read receipt message");
+            return;
+        }
+        
         try {
             String destination = "/topic/chat/" + readMessage.chatRoomId().id() + "/read";
             
@@ -73,6 +83,15 @@ public class WebSocketChatService {
      * 특정 사용자에게만 메시지 전송
      */
     public void sendToUser(UserIdentity userId, ChatMessage message) {
+        if (userId == null) {
+            log.warn("Cannot send message to null userId");
+            return;
+        }
+        if (message == null) {
+            log.warn("Cannot send null message to user {}", userId.id());
+            return;
+        }
+        
         try {
             String destination = "/user/" + userId.id() + "/queue/messages";
             
@@ -88,6 +107,11 @@ public class WebSocketChatService {
      * 특정 채팅방에 시스템 메시지 브로드캐스트
      */
     public void broadcastSystemMessage(ChatMessage systemMessage) {
+        if (systemMessage == null) {
+            log.warn("Cannot broadcast null system message");
+            return;
+        }
+        
         try {
             String destination = "/topic/chat/" + systemMessage.chatRoomId().id() + "/system";
             
@@ -103,6 +127,11 @@ public class WebSocketChatService {
      * 사용자 입장 알림
      */
     public void notifyUserJoined(ChatMessage joinMessage) {
+        if (joinMessage == null) {
+            log.warn("Cannot notify user joined with null message");
+            return;
+        }
+        
         broadcastSystemMessage(joinMessage);
         
         log.info("User {} joined chat room {}", 
@@ -113,6 +142,11 @@ public class WebSocketChatService {
      * 사용자 퇴장 알림  
      */
     public void notifyUserLeft(ChatMessage leaveMessage) {
+        if (leaveMessage == null) {
+            log.warn("Cannot notify user left with null message");
+            return;
+        }
+        
         broadcastSystemMessage(leaveMessage);
         
         log.info("User {} left chat room {}", 

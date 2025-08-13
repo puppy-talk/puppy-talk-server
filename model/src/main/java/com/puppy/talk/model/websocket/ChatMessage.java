@@ -50,6 +50,9 @@ public record ChatMessage(
         String content,
         boolean isRead
     ) {
+        if (content == null || content.isBlank()) {
+            throw new IllegalArgumentException("content cannot be null or blank for MESSAGE type");
+        }
         return of(messageId, chatRoomId, userId, senderType, content, isRead, ChatMessageType.MESSAGE);
     }
     
@@ -58,6 +61,9 @@ public record ChatMessage(
         UserIdentity userId,
         SenderType senderType
     ) {
+        if (chatRoomId == null || userId == null || senderType == null) {
+            throw new IllegalArgumentException("chatRoomId/userId/senderType cannot be null");
+        }
         return of(null, chatRoomId, userId, senderType, null, false, ChatMessageType.TYPING);
     }
     
@@ -66,6 +72,9 @@ public record ChatMessage(
         UserIdentity userId,
         SenderType senderType
     ) {
+        if (chatRoomId == null || userId == null || senderType == null) {
+            throw new IllegalArgumentException("chatRoomId/userId/senderType cannot be null");
+        }
         return of(null, chatRoomId, userId, senderType, null, false, ChatMessageType.STOP_TYPING);
     }
     
@@ -74,15 +83,9 @@ public record ChatMessage(
         UserIdentity userId,
         MessageIdentity lastReadMessageId
     ) {
-        return new ChatMessage(
-            lastReadMessageId,
-            chatRoomId,
-            userId,
-            SenderType.USER,
-            null,
-            true,
-            LocalDateTime.now(),
-            ChatMessageType.READ_RECEIPT
-        );
+        if (chatRoomId == null || userId == null || lastReadMessageId == null) {
+            throw new IllegalArgumentException("chatRoomId/userId/lastReadMessageId cannot be null");
+        }
+        return of(lastReadMessageId, chatRoomId, userId, SenderType.USER, null, true, ChatMessageType.READ_RECEIPT);
     }
 }
