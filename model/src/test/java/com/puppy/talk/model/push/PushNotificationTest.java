@@ -1,6 +1,10 @@
 package com.puppy.talk.model.push;
 
-import com.puppy.talk.model.user.UserIdentity;
+import com.puppy.talk.push.NotificationType;
+import com.puppy.talk.push.PushNotification;
+import com.puppy.talk.push.PushNotificationIdentity;
+import com.puppy.talk.push.PushNotificationStatus;
+import com.puppy.talk.user.UserIdentity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

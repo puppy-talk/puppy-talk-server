@@ -1,9 +1,11 @@
 package com.puppy.talk.model.websocket;
 
-import com.puppy.talk.model.chat.ChatRoomIdentity;
-import com.puppy.talk.model.chat.MessageIdentity;
-import com.puppy.talk.model.chat.SenderType;
-import com.puppy.talk.model.user.UserIdentity;
+import com.puppy.talk.chat.ChatRoomIdentity;
+import com.puppy.talk.chat.MessageIdentity;
+import com.puppy.talk.chat.SenderType;
+import com.puppy.talk.user.UserIdentity;
+import com.puppy.talk.websocket.ChatMessage;
+import com.puppy.talk.websocket.ChatMessageType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -1,26 +1,27 @@
 package com.puppy.talk.service;
 
-import com.puppy.talk.ai.AiResponseService;
-import com.puppy.talk.exception.pet.PetNotFoundException;
-import com.puppy.talk.infrastructure.chat.ChatRoomRepository;
-import com.puppy.talk.infrastructure.chat.MessageRepository;
-import com.puppy.talk.infrastructure.pet.PetRepository;
-import com.puppy.talk.model.chat.ChatRoom;
-import com.puppy.talk.model.chat.ChatRoomIdentity;
-import com.puppy.talk.model.chat.Message;
-import com.puppy.talk.model.chat.MessageIdentity;
-import com.puppy.talk.model.chat.SenderType;
-import com.puppy.talk.model.pet.Pet;
-import com.puppy.talk.model.pet.PetIdentity;
-import com.puppy.talk.model.pet.Persona;
-import com.puppy.talk.model.pet.PersonaIdentity;
-import com.puppy.talk.model.user.UserIdentity;
-import com.puppy.talk.model.websocket.ChatMessage;
-import com.puppy.talk.model.websocket.ChatMessageType;
-import com.puppy.talk.service.chat.ChatService;
-import com.puppy.talk.service.dto.MessageSendResult;
-import com.puppy.talk.service.pet.PersonaLookUpService;
-import com.puppy.talk.service.websocket.WebSocketChatService;
+import com.puppy.talk.ai.AiResponsePort;
+import com.puppy.talk.chat.ChatRoomRepository;
+import com.puppy.talk.chat.MessageRepository;
+import com.puppy.talk.pet.PetRepository;
+import com.puppy.talk.chat.ChatRoom;
+import com.puppy.talk.chat.ChatRoomIdentity;
+import com.puppy.talk.chat.Message;
+import com.puppy.talk.chat.MessageIdentity;
+import com.puppy.talk.chat.SenderType;
+import com.puppy.talk.pet.Pet;
+import com.puppy.talk.pet.PetIdentity;
+import com.puppy.talk.pet.Persona;
+import com.puppy.talk.pet.PersonaIdentity;
+import com.puppy.talk.user.UserIdentity;
+import com.puppy.talk.websocket.ChatMessage;
+import com.puppy.talk.websocket.ChatMessageType;
+import com.puppy.talk.chat.ChatService;
+import com.puppy.talk.dto.MessageSendResult;
+import com.puppy.talk.notification.RealtimeNotificationPort;
+import com.puppy.talk.pet.PersonaLookUpService;
+import com.puppy.talk.websocket.WebSocketChatService;
+import com.puppy.talk.pet.PetNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,19 +46,22 @@ import static org.mockito.Mockito.*;
 class ChatServiceWebSocketIntegrationTest {
     
     @Mock
-    private PetRepository petRepository;
-    
-    @Mock
     private ChatRoomRepository chatRoomRepository;
     
     @Mock
     private MessageRepository messageRepository;
     
     @Mock
-    private AiResponseService aiResponseService;
+    private PetRepository petRepository;
     
     @Mock
     private PersonaLookUpService personaLookUpService;
+    
+    @Mock
+    private AiResponsePort aiResponsePort;
+    
+    @Mock
+    private RealtimeNotificationPort realtimeNotificationPort;
     
     @Mock
     private WebSocketChatService webSocketChatService;
@@ -103,7 +107,7 @@ class ChatServiceWebSocketIntegrationTest {
         when(petRepository.findByIdentity(petId)).thenReturn(Optional.of(mockPet));
         when(personaLookUpService.findPersona(mockPet.personaId())).thenReturn(mockPersona);
         when(messageRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId)).thenReturn(List.of());
-        when(aiResponseService.generatePetResponse(eq(mockPet), eq(mockPersona), eq(userMessageContent), any()))
+        when(aiResponsePort.generatePetResponse(eq(mockPet), eq(mockPersona), eq(userMessageContent), any()))
             .thenReturn(aiResponse);
         when(messageRepository.save(any(Message.class)))
             .thenReturn(savedUserMessage)
@@ -132,7 +136,7 @@ class ChatServiceWebSocketIntegrationTest {
         assertThat(broadcastedMessage.messageType()).isEqualTo(ChatMessageType.MESSAGE);
         
         // AI 응답 생성 호출 검증
-        verify(aiResponseService).generatePetResponse(eq(mockPet), eq(mockPersona), eq(userMessageContent), any());
+        verify(aiResponsePort).generatePetResponse(eq(mockPet), eq(mockPersona), eq(userMessageContent), any());
         
         // 메시지 저장 호출 검증 (사용자 메시지 + AI 응답)
         verify(messageRepository, times(2)).save(any(Message.class));
@@ -152,7 +156,7 @@ class ChatServiceWebSocketIntegrationTest {
         when(petRepository.findByIdentity(petId)).thenReturn(Optional.of(mockPet));
         when(personaLookUpService.findPersona(mockPet.personaId())).thenReturn(mockPersona);
         when(messageRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId)).thenReturn(List.of());
-        when(aiResponseService.generatePetResponse(any(), any(), any(), any()))
+        when(aiResponsePort.generatePetResponse(any(), any(), any(), any()))
             .thenThrow(new RuntimeException("AI 서비스 오류"));
         when(messageRepository.save(any(Message.class))).thenReturn(savedUserMessage);
         when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(mockChatRoom);
@@ -191,7 +195,7 @@ class ChatServiceWebSocketIntegrationTest {
         when(petRepository.findByIdentity(petId)).thenReturn(Optional.of(mockPet));
         when(personaLookUpService.findPersona(mockPet.personaId())).thenReturn(mockPersona);
         when(messageRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId)).thenReturn(List.of());
-        when(aiResponseService.generatePetResponse(any(), any(), any(), any())).thenReturn(aiResponse);
+        when(aiResponsePort.generatePetResponse(any(), any(), any(), any())).thenReturn(aiResponse);
         when(messageRepository.save(any(Message.class)))
             .thenReturn(savedUserMessage)
             .thenReturn(savedPetMessage);
@@ -209,7 +213,7 @@ class ChatServiceWebSocketIntegrationTest {
         assertThat(result.message().senderType()).isEqualTo(SenderType.USER);
         
         // AI 응답 생성 및 저장 정상 실행
-        verify(aiResponseService).generatePetResponse(any(), any(), any(), any());
+        verify(aiResponsePort).generatePetResponse(any(), any(), any(), any());
         verify(messageRepository, times(2)).save(any(Message.class));
         
         // WebSocket 브로드캐스트 시도는 했지만 실패
@@ -231,7 +235,7 @@ class ChatServiceWebSocketIntegrationTest {
         
         // WebSocket 관련 메서드 호출되지 않음
         verify(webSocketChatService, never()).broadcastMessage(any());
-        verify(aiResponseService, never()).generatePetResponse(any(), any(), any(), any());
+        verify(aiResponsePort, never()).generatePetResponse(any(), any(), any(), any());
         verify(messageRepository, never()).save(any());
     }
     
@@ -250,7 +254,7 @@ class ChatServiceWebSocketIntegrationTest {
         
         // WebSocket 관련 메서드 호출되지 않음
         verify(webSocketChatService, never()).broadcastMessage(any());
-        verify(aiResponseService, never()).generatePetResponse(any(), any(), any(), any());
+        verify(aiResponsePort, never()).generatePetResponse(any(), any(), any(), any());
         
         // 펫을 찾지 못해 사용자 메시지도 저장되지 않음
         verify(messageRepository, never()).save(any());
@@ -295,7 +299,7 @@ class ChatServiceWebSocketIntegrationTest {
         when(petRepository.findByIdentity(petId)).thenReturn(Optional.of(mockPet));
         when(personaLookUpService.findPersona(mockPet.personaId())).thenReturn(mockPersona);
         when(messageRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId)).thenReturn(List.of());
-        when(aiResponseService.generatePetResponse(any(), any(), any(), any())).thenReturn(longAiResponse);
+        when(aiResponsePort.generatePetResponse(any(), any(), any(), any())).thenReturn(longAiResponse);
         when(messageRepository.save(any(Message.class)))
             .thenReturn(savedUserMessage)
             .thenReturn(savedPetMessage);
@@ -341,7 +345,7 @@ class ChatServiceWebSocketIntegrationTest {
         when(petRepository.findByIdentity(petId)).thenReturn(Optional.of(mockPet));
         when(personaLookUpService.findPersona(mockPet.personaId())).thenReturn(mockPersona);
         when(messageRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId)).thenReturn(chatHistory);
-        when(aiResponseService.generatePetResponse(eq(mockPet), eq(mockPersona), eq(userMessageContent), eq(chatHistory)))
+        when(aiResponsePort.generatePetResponse(eq(mockPet), eq(mockPersona), eq(userMessageContent), eq(chatHistory)))
             .thenReturn(contextualAiResponse);
         when(messageRepository.save(any(Message.class)))
             .thenReturn(savedUserMessage)
@@ -355,7 +359,7 @@ class ChatServiceWebSocketIntegrationTest {
         assertThat(result.message().content()).isEqualTo(userMessageContent);
         
         // AI 서비스에 채팅 히스토리가 컨텍스트로 전달되었는지 확인
-        verify(aiResponseService).generatePetResponse(eq(mockPet), eq(mockPersona), eq(userMessageContent), eq(chatHistory));
+        verify(aiResponsePort).generatePetResponse(eq(mockPet), eq(mockPersona), eq(userMessageContent), eq(chatHistory));
         
         // WebSocket 브로드캐스트에서 컨텍스트 기반 응답 확인
         ArgumentCaptor<ChatMessage> chatMessageCaptor = ArgumentCaptor.forClass(ChatMessage.class);

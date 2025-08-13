@@ -1,6 +1,8 @@
 package com.puppy.talk.model.push;
 
-import com.puppy.talk.model.user.UserIdentity;
+import com.puppy.talk.push.DeviceToken;
+import com.puppy.talk.push.DeviceTokenIdentity;
+import com.puppy.talk.user.UserIdentity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

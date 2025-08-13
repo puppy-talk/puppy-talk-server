@@ -1,23 +1,24 @@
 package com.puppy.talk.service;
 
-import com.puppy.talk.ai.AiResponseService;
-import com.puppy.talk.infrastructure.activity.InactivityNotificationRepository;
-import com.puppy.talk.infrastructure.chat.ChatRoomRepository;
-import com.puppy.talk.infrastructure.chat.MessageRepository;
-import com.puppy.talk.infrastructure.pet.PetRepository;
-import com.puppy.talk.model.activity.InactivityNotification;
-import com.puppy.talk.model.activity.InactivityNotificationIdentity;
-import com.puppy.talk.model.chat.ChatRoom;
-import com.puppy.talk.model.chat.ChatRoomIdentity;
-import com.puppy.talk.model.chat.Message;
-import com.puppy.talk.model.pet.Pet;
-import com.puppy.talk.model.pet.PetIdentity;
-import com.puppy.talk.model.pet.Persona;
-import com.puppy.talk.model.pet.PersonaIdentity;
-import com.puppy.talk.model.push.NotificationType;
-import com.puppy.talk.model.user.UserIdentity;
-import com.puppy.talk.service.notification.PushNotificationService;
-import com.puppy.talk.service.pet.PersonaLookUpService;
+import com.puppy.talk.InactivityNotificationService;
+import com.puppy.talk.ai.AiResponsePort;
+import com.puppy.talk.activity.InactivityNotificationRepository;
+import com.puppy.talk.chat.ChatRoomRepository;
+import com.puppy.talk.chat.MessageRepository;
+import com.puppy.talk.pet.PetRepository;
+import com.puppy.talk.activity.InactivityNotification;
+import com.puppy.talk.activity.InactivityNotificationIdentity;
+import com.puppy.talk.chat.ChatRoom;
+import com.puppy.talk.chat.ChatRoomIdentity;
+import com.puppy.talk.chat.Message;
+import com.puppy.talk.pet.Pet;
+import com.puppy.talk.pet.PetIdentity;
+import com.puppy.talk.pet.Persona;
+import com.puppy.talk.pet.PersonaIdentity;
+import com.puppy.talk.push.NotificationType;
+import com.puppy.talk.user.UserIdentity;
+import com.puppy.talk.notification.PushNotificationService;
+import com.puppy.talk.pet.PersonaLookUpService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,7 +55,7 @@ class InactivityNotificationServicePushTest {
     private PersonaLookUpService personaLookUpService;
     
     @Mock
-    private AiResponseService aiResponseService;
+    private AiResponsePort aiResponsePort;
     
     @Mock
     private PushNotificationService pushNotificationService;
@@ -101,7 +102,7 @@ class InactivityNotificationServicePushTest {
             .thenReturn(mockPersona);
         when(messageRepository.findByChatRoomIdOrderByCreatedAtDesc(mockChatRoom.identity()))
             .thenReturn(List.of());
-        when(aiResponseService.generatePetResponse(eq(mockPet), eq(mockPersona), any(), any()))
+        when(aiResponsePort.generateInactivityMessage(eq(mockPet), eq(mockPersona), any()))
             .thenReturn(aiMessage);
         when(inactivityNotificationRepository.save(any(InactivityNotification.class)))
             .thenReturn(mockNotification.withAiGeneratedMessage(aiMessage).markAsSent());
@@ -125,7 +126,7 @@ class InactivityNotificationServicePushTest {
         verify(chatRoomRepository).findByIdentity(mockNotification.chatRoomId());
         verify(petRepository).findByIdentity(mockChatRoom.petId());
         verify(personaLookUpService).findPersona(mockPet.personaId());
-        verify(aiResponseService).generatePetResponse(eq(mockPet), eq(mockPersona), any(), any());
+        verify(aiResponsePort).generateInactivityMessage(eq(mockPet), eq(mockPersona), any());
         verify(messageRepository).save(any(Message.class));
         verify(inactivityNotificationRepository, times(2)).save(any(InactivityNotification.class));
         
@@ -155,7 +156,7 @@ class InactivityNotificationServicePushTest {
             .thenReturn(mockPersona);
         when(messageRepository.findByChatRoomIdOrderByCreatedAtDesc(mockChatRoom.identity()))
             .thenReturn(List.of());
-        when(aiResponseService.generatePetResponse(any(), any(), any(), any()))
+        when(aiResponsePort.generateInactivityMessage(any(), any(), any()))
             .thenReturn(aiMessage);
         when(inactivityNotificationRepository.save(any(InactivityNotification.class)))
             .thenReturn(mockNotification.withAiGeneratedMessage(aiMessage).markAsSent());
@@ -194,7 +195,7 @@ class InactivityNotificationServicePushTest {
             .thenReturn(mockPersona);
         when(messageRepository.findByChatRoomIdOrderByCreatedAtDesc(mockChatRoom.identity()))
             .thenReturn(List.of());
-        when(aiResponseService.generatePetResponse(any(), any(), any(), any()))
+        when(aiResponsePort.generateInactivityMessage(any(), any(), any()))
             .thenReturn(longAiMessage);
         when(inactivityNotificationRepository.save(any(InactivityNotification.class)))
             .thenReturn(mockNotification.withAiGeneratedMessage(longAiMessage).markAsSent());
@@ -232,7 +233,7 @@ class InactivityNotificationServicePushTest {
             .thenReturn(mockPersona);
         when(messageRepository.findByChatRoomIdOrderByCreatedAtDesc(mockChatRoom.identity()))
             .thenReturn(List.of());
-        when(aiResponseService.generatePetResponse(any(), any(), any(), any()))
+        when(aiResponsePort.generateInactivityMessage(any(), any(), any()))
             .thenReturn(aiMessage);
         when(inactivityNotificationRepository.save(any(InactivityNotification.class)))
             .thenReturn(mockNotification.withAiGeneratedMessage(aiMessage).markAsSent());

@@ -1,11 +1,11 @@
 package com.puppy.talk.service;
 
-import com.puppy.talk.exception.push.DeviceTokenNotFoundException;
-import com.puppy.talk.infrastructure.push.DeviceTokenRepository;
-import com.puppy.talk.model.push.DeviceToken;
-import com.puppy.talk.model.push.DeviceTokenIdentity;
-import com.puppy.talk.model.user.UserIdentity;
-import com.puppy.talk.service.chat.DeviceTokenService;
+import com.puppy.talk.push.DeviceTokenNotFoundException;
+import com.puppy.talk.push.DeviceTokenRepository;
+import com.puppy.talk.push.DeviceToken;
+import com.puppy.talk.push.DeviceTokenIdentity;
+import com.puppy.talk.user.UserIdentity;
+import com.puppy.talk.chat.DeviceTokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

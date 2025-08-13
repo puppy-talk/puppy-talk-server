@@ -1,11 +1,17 @@
 package com.puppy.talk.service;
 
-import com.puppy.talk.infrastructure.push.DeviceTokenRepository;
-import com.puppy.talk.infrastructure.push.PushNotificationRepository;
-import com.puppy.talk.infrastructure.push.PushNotificationSender;
+import com.puppy.talk.push.DeviceToken;
+import com.puppy.talk.push.DeviceTokenIdentity;
+import com.puppy.talk.push.DeviceTokenRepository;
+import com.puppy.talk.push.NotificationType;
+import com.puppy.talk.push.PushNotification;
+import com.puppy.talk.push.PushNotificationIdentity;
+import com.puppy.talk.push.PushNotificationRepository;
+import com.puppy.talk.push.PushNotificationSender;
 import com.puppy.talk.model.push.*;
-import com.puppy.talk.model.user.UserIdentity;
-import com.puppy.talk.service.notification.PushNotificationService;
+import com.puppy.talk.push.PushNotificationStatus;
+import com.puppy.talk.user.UserIdentity;
+import com.puppy.talk.notification.PushNotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,14 +1,13 @@
 package com.puppy.talk.ai;
 
-import com.puppy.talk.model.chat.Message;
-import com.puppy.talk.model.chat.SenderType;
-import com.puppy.talk.model.pet.Pet;
-import com.puppy.talk.model.pet.Persona;
+import com.puppy.talk.chat.Message;
+import com.puppy.talk.chat.SenderType;
+import com.puppy.talk.pet.Pet;
+import com.puppy.talk.pet.Persona;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component

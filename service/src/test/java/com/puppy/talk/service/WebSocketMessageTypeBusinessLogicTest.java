@@ -1,17 +1,16 @@
 package com.puppy.talk.service;
 
-import com.puppy.talk.model.chat.ChatRoomIdentity;
-import com.puppy.talk.model.chat.MessageIdentity;
-import com.puppy.talk.model.chat.SenderType;
-import com.puppy.talk.model.user.UserIdentity;
-import com.puppy.talk.model.websocket.ChatMessage;
-import com.puppy.talk.model.websocket.ChatMessageType;
-import com.puppy.talk.service.websocket.WebSocketChatService;
+import com.puppy.talk.chat.ChatRoomIdentity;
+import com.puppy.talk.chat.MessageIdentity;
+import com.puppy.talk.chat.SenderType;
+import com.puppy.talk.user.UserIdentity;
+import com.puppy.talk.websocket.ChatMessage;
+import com.puppy.talk.websocket.ChatMessageType;
+import com.puppy.talk.websocket.WebSocketChatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;

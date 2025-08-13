@@ -1,12 +1,12 @@
 package com.puppy.talk.service;
 
-import com.puppy.talk.exception.pet.PetNotFoundException;
-import com.puppy.talk.infrastructure.pet.PetRepository;
-import com.puppy.talk.model.pet.Pet;
-import com.puppy.talk.model.pet.PetIdentity;
-import com.puppy.talk.model.pet.PersonaIdentity;
-import com.puppy.talk.model.user.UserIdentity;
-import com.puppy.talk.service.pet.PetLookUpServiceImpl;
+import com.puppy.talk.pet.PetNotFoundException;
+import com.puppy.talk.pet.PetRepository;
+import com.puppy.talk.pet.Pet;
+import com.puppy.talk.pet.PetIdentity;
+import com.puppy.talk.pet.PersonaIdentity;
+import com.puppy.talk.user.UserIdentity;
+import com.puppy.talk.pet.PetLookUpServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

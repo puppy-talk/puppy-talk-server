@@ -1,28 +1,29 @@
 package com.puppy.talk.service;
 
-import com.puppy.talk.ai.AiResponseService;
-import com.puppy.talk.infrastructure.activity.InactivityNotificationRepository;
-import com.puppy.talk.infrastructure.chat.ChatRoomRepository;
-import com.puppy.talk.infrastructure.chat.MessageRepository;
-import com.puppy.talk.infrastructure.pet.PetRepository;
-import com.puppy.talk.model.activity.InactivityNotification;
-import com.puppy.talk.model.activity.InactivityNotificationIdentity;
-import com.puppy.talk.model.chat.ChatRoom;
-import com.puppy.talk.model.chat.ChatRoomIdentity;
-import com.puppy.talk.model.chat.Message;
-import com.puppy.talk.model.chat.MessageIdentity;
-import com.puppy.talk.model.chat.SenderType;
-import com.puppy.talk.model.pet.Pet;
-import com.puppy.talk.model.pet.PetIdentity;
-import com.puppy.talk.model.pet.Persona;
-import com.puppy.talk.model.pet.PersonaIdentity;
-import com.puppy.talk.model.push.NotificationType;
-import com.puppy.talk.model.user.UserIdentity;
-import com.puppy.talk.model.websocket.ChatMessage;
-import com.puppy.talk.model.websocket.ChatMessageType;
-import com.puppy.talk.service.notification.PushNotificationService;
-import com.puppy.talk.service.pet.PersonaLookUpService;
-import com.puppy.talk.service.websocket.WebSocketChatService;
+import com.puppy.talk.InactivityNotificationService;
+import com.puppy.talk.ai.AiResponsePort;
+import com.puppy.talk.activity.InactivityNotificationRepository;
+import com.puppy.talk.chat.ChatRoomRepository;
+import com.puppy.talk.chat.MessageRepository;
+import com.puppy.talk.pet.PetRepository;
+import com.puppy.talk.activity.InactivityNotification;
+import com.puppy.talk.activity.InactivityNotificationIdentity;
+import com.puppy.talk.chat.ChatRoom;
+import com.puppy.talk.chat.ChatRoomIdentity;
+import com.puppy.talk.chat.Message;
+import com.puppy.talk.chat.MessageIdentity;
+import com.puppy.talk.chat.SenderType;
+import com.puppy.talk.pet.Pet;
+import com.puppy.talk.pet.PetIdentity;
+import com.puppy.talk.pet.Persona;
+import com.puppy.talk.pet.PersonaIdentity;
+import com.puppy.talk.push.NotificationType;
+import com.puppy.talk.user.UserIdentity;
+import com.puppy.talk.websocket.ChatMessage;
+import com.puppy.talk.websocket.ChatMessageType;
+import com.puppy.talk.notification.PushNotificationService;
+import com.puppy.talk.notification.RealtimeNotificationPort;
+import com.puppy.talk.pet.PersonaLookUpService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -61,13 +62,13 @@ class InactivityNotificationWebSocketIntegrationTest {
     private PersonaLookUpService personaLookUpService;
     
     @Mock
-    private AiResponseService aiResponseService;
+    private AiResponsePort aiResponsePort;
     
     @Mock
     private PushNotificationService pushNotificationService;
     
     @Mock
-    private WebSocketChatService webSocketChatService;
+    private RealtimeNotificationPort realtimeNotificationPort;
     
     @InjectMocks
     private InactivityNotificationService inactivityNotificationService;
@@ -117,7 +118,7 @@ class InactivityNotificationWebSocketIntegrationTest {
             .thenReturn(mockPersona);
         when(messageRepository.findByChatRoomIdOrderByCreatedAtDesc(mockChatRoom.identity()))
             .thenReturn(List.of());
-        when(aiResponseService.generatePetResponse(eq(mockPet), eq(mockPersona), any(), any()))
+        when(aiResponsePort.generateInactivityMessage(eq(mockPet), eq(mockPersona), any()))
             .thenReturn(aiMessage);
         when(messageRepository.save(any(Message.class)))
             .thenReturn(savedPetMessage);
@@ -125,7 +126,7 @@ class InactivityNotificationWebSocketIntegrationTest {
             .thenReturn(mockNotification.withAiGeneratedMessage(aiMessage).markAsSent());
         
         doNothing().when(pushNotificationService).sendNotification(any(), any(), any(), any(), any());
-        doNothing().when(webSocketChatService).broadcastMessage(any());
+        doNothing().when(realtimeNotificationPort).broadcastMessage(any());
         
         // When
         inactivityNotificationService.processEligibleNotifications();
@@ -133,7 +134,7 @@ class InactivityNotificationWebSocketIntegrationTest {
         // Then
         // WebSocket 브로드캐스트 호출 검증
         ArgumentCaptor<ChatMessage> webSocketMessageCaptor = ArgumentCaptor.forClass(ChatMessage.class);
-        verify(webSocketChatService).broadcastMessage(webSocketMessageCaptor.capture());
+        verify(realtimeNotificationPort).broadcastMessage(webSocketMessageCaptor.capture());
         
         ChatMessage webSocketMessage = webSocketMessageCaptor.getValue();
         assertThat(webSocketMessage.messageId()).isEqualTo(MessageIdentity.of(100L));
@@ -178,7 +179,7 @@ class InactivityNotificationWebSocketIntegrationTest {
             .thenReturn(mockPersona);
         when(messageRepository.findByChatRoomIdOrderByCreatedAtDesc(mockChatRoom.identity()))
             .thenReturn(List.of());
-        when(aiResponseService.generatePetResponse(any(), any(), any(), any()))
+        when(aiResponsePort.generateInactivityMessage(any(), any(), any()))
             .thenReturn(aiMessage);
         when(messageRepository.save(any(Message.class)))
             .thenReturn(savedPetMessage);
@@ -187,7 +188,7 @@ class InactivityNotificationWebSocketIntegrationTest {
         
         // WebSocket 브로드캐스트 실패 시뮬레이션
         doThrow(new RuntimeException("WebSocket 연결 오류"))
-            .when(webSocketChatService).broadcastMessage(any());
+            .when(realtimeNotificationPort).broadcastMessage(any());
         
         doNothing().when(pushNotificationService).sendNotification(any(), any(), any(), any(), any());
         
@@ -196,7 +197,7 @@ class InactivityNotificationWebSocketIntegrationTest {
         
         // Then
         // WebSocket 브로드캐스트 시도는 했지만 실패
-        verify(webSocketChatService).broadcastMessage(any());
+        verify(realtimeNotificationPort).broadcastMessage(any());
         
         // 푸시 알림은 정상 전송
         verify(pushNotificationService).sendNotification(
@@ -232,7 +233,7 @@ class InactivityNotificationWebSocketIntegrationTest {
             .thenReturn(mockPersona);
         when(messageRepository.findByChatRoomIdOrderByCreatedAtDesc(mockChatRoom.identity()))
             .thenReturn(List.of());
-        when(aiResponseService.generatePetResponse(any(), any(), any(), any()))
+        when(aiResponsePort.generateInactivityMessage(any(), any(), any()))
             .thenReturn(aiMessage);
         when(messageRepository.save(any(Message.class)))
             .thenReturn(savedPetMessage);
@@ -243,7 +244,7 @@ class InactivityNotificationWebSocketIntegrationTest {
         doThrow(new RuntimeException("푸시 알림 서비스 오류"))
             .when(pushNotificationService).sendNotification(any(), any(), any(), any(), any());
         
-        doNothing().when(webSocketChatService).broadcastMessage(any());
+        doNothing().when(realtimeNotificationPort).broadcastMessage(any());
         
         // When
         inactivityNotificationService.processEligibleNotifications();
@@ -251,7 +252,7 @@ class InactivityNotificationWebSocketIntegrationTest {
         // Then
         // WebSocket 브로드캐스트 정상 실행
         ArgumentCaptor<ChatMessage> webSocketMessageCaptor = ArgumentCaptor.forClass(ChatMessage.class);
-        verify(webSocketChatService).broadcastMessage(webSocketMessageCaptor.capture());
+        verify(realtimeNotificationPort).broadcastMessage(webSocketMessageCaptor.capture());
         
         ChatMessage webSocketMessage = webSocketMessageCaptor.getValue();
         assertThat(webSocketMessage.content()).isEqualTo(aiMessage);
@@ -285,7 +286,7 @@ class InactivityNotificationWebSocketIntegrationTest {
             .thenReturn(mockPersona);
         when(messageRepository.findByChatRoomIdOrderByCreatedAtDesc(mockChatRoom.identity()))
             .thenReturn(List.of());
-        when(aiResponseService.generatePetResponse(any(), any(), any(), any()))
+        when(aiResponsePort.generateInactivityMessage(any(), any(), any()))
             .thenReturn(aiMessage);
         when(messageRepository.save(any(Message.class)))
             .thenReturn(savedPetMessage);
@@ -294,7 +295,7 @@ class InactivityNotificationWebSocketIntegrationTest {
         
         // WebSocket과 푸시 알림 모두 실패 시뮬레이션
         doThrow(new RuntimeException("WebSocket 오류"))
-            .when(webSocketChatService).broadcastMessage(any());
+            .when(realtimeNotificationPort).broadcastMessage(any());
         doThrow(new RuntimeException("푸시 알림 오류"))
             .when(pushNotificationService).sendNotification(any(), any(), any(), any(), any());
         
@@ -303,11 +304,11 @@ class InactivityNotificationWebSocketIntegrationTest {
         
         // Then
         // 양쪽 모두 시도는 했음
-        verify(webSocketChatService).broadcastMessage(any());
+        verify(realtimeNotificationPort).broadcastMessage(any());
         verify(pushNotificationService).sendNotification(any(), any(), any(), any(), any());
         
         // 핵심 비즈니스 로직은 정상 처리
-        verify(aiResponseService).generatePetResponse(any(), any(), any(), any());
+        verify(aiResponsePort).generateInactivityMessage(any(), any(), any());
         verify(messageRepository).save(any(Message.class));
         verify(inactivityNotificationRepository, times(2)).save(any(InactivityNotification.class));
     }
@@ -334,7 +335,7 @@ class InactivityNotificationWebSocketIntegrationTest {
             .thenReturn(mockPersona);
         when(messageRepository.findByChatRoomIdOrderByCreatedAtDesc(mockChatRoom.identity()))
             .thenReturn(List.of());
-        when(aiResponseService.generatePetResponse(any(), any(), any(), any()))
+        when(aiResponsePort.generateInactivityMessage(any(), any(), any()))
             .thenReturn(longAiMessage);
         when(messageRepository.save(any(Message.class)))
             .thenReturn(savedPetMessage);
@@ -342,7 +343,7 @@ class InactivityNotificationWebSocketIntegrationTest {
             .thenReturn(mockNotification.withAiGeneratedMessage(longAiMessage).markAsSent());
         
         doNothing().when(pushNotificationService).sendNotification(any(), any(), any(), any(), any());
-        doNothing().when(webSocketChatService).broadcastMessage(any());
+        doNothing().when(realtimeNotificationPort).broadcastMessage(any());
         
         // When
         inactivityNotificationService.processEligibleNotifications();
@@ -350,7 +351,7 @@ class InactivityNotificationWebSocketIntegrationTest {
         // Then
         // WebSocket 브로드캐스트는 전체 메시지 전송
         ArgumentCaptor<ChatMessage> webSocketMessageCaptor = ArgumentCaptor.forClass(ChatMessage.class);
-        verify(webSocketChatService).broadcastMessage(webSocketMessageCaptor.capture());
+        verify(realtimeNotificationPort).broadcastMessage(webSocketMessageCaptor.capture());
         
         ChatMessage webSocketMessage = webSocketMessageCaptor.getValue();
         assertThat(webSocketMessage.content()).isEqualTo(longAiMessage);
@@ -402,9 +403,9 @@ class InactivityNotificationWebSocketIntegrationTest {
             .thenReturn(mockPersona);
         when(messageRepository.findByChatRoomIdOrderByCreatedAtDesc(any()))
             .thenReturn(List.of());
-        when(aiResponseService.generatePetResponse(eq(mockPet), any(), any(), any()))
+        when(aiResponsePort.generateInactivityMessage(eq(mockPet), any(), any()))
             .thenReturn(aiMessage1);
-        when(aiResponseService.generatePetResponse(eq(mockPet2), any(), any(), any()))
+        when(aiResponsePort.generateInactivityMessage(eq(mockPet2), any(), any()))
             .thenReturn(aiMessage2);
         when(messageRepository.save(any(Message.class)))
             .thenReturn(new Message(MessageIdentity.of(200L), chatRoomId, SenderType.PET, aiMessage1, false, LocalDateTime.now()))
@@ -414,14 +415,14 @@ class InactivityNotificationWebSocketIntegrationTest {
             .thenReturn(mockNotification2.markAsSent());
         
         doNothing().when(pushNotificationService).sendNotification(any(), any(), any(), any(), any());
-        doNothing().when(webSocketChatService).broadcastMessage(any());
+        doNothing().when(realtimeNotificationPort).broadcastMessage(any());
         
         // When
         inactivityNotificationService.processEligibleNotifications();
         
         // Then
         // WebSocket 브로드캐스트가 2번 호출됨 (각 알림마다)
-        verify(webSocketChatService, times(2)).broadcastMessage(any());
+        verify(realtimeNotificationPort, times(2)).broadcastMessage(any());
         
         // 푸시 알림도 2번 호출됨
         verify(pushNotificationService, times(2)).sendNotification(any(), any(), any(), any(), any());
@@ -441,9 +442,9 @@ class InactivityNotificationWebSocketIntegrationTest {
         inactivityNotificationService.processEligibleNotifications();
         
         // Then
-        verify(webSocketChatService, never()).broadcastMessage(any());
+        verify(realtimeNotificationPort, never()).broadcastMessage(any());
         verify(pushNotificationService, never()).sendNotification(any(), any(), any(), any(), any());
         verify(messageRepository, never()).save(any());
-        verify(aiResponseService, never()).generatePetResponse(any(), any(), any(), any());
+        verify(aiResponsePort, never()).generateInactivityMessage(any(), any(), any());
     }
 }

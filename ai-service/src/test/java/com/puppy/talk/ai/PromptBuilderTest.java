@@ -1,14 +1,14 @@
 package com.puppy.talk.ai;
 
-import com.puppy.talk.model.chat.Message;
-import com.puppy.talk.model.chat.MessageIdentity;
-import com.puppy.talk.model.chat.ChatRoomIdentity;
-import com.puppy.talk.model.chat.SenderType;
-import com.puppy.talk.model.pet.Pet;
-import com.puppy.talk.model.pet.PetIdentity;
-import com.puppy.talk.model.pet.Persona;
-import com.puppy.talk.model.pet.PersonaIdentity;
-import com.puppy.talk.model.user.UserIdentity;
+import com.puppy.talk.chat.Message;
+import com.puppy.talk.chat.MessageIdentity;
+import com.puppy.talk.chat.ChatRoomIdentity;
+import com.puppy.talk.chat.SenderType;
+import com.puppy.talk.pet.Pet;
+import com.puppy.talk.pet.PetIdentity;
+import com.puppy.talk.pet.Persona;
+import com.puppy.talk.pet.PersonaIdentity;
+import com.puppy.talk.user.UserIdentity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -112,14 +112,16 @@ class PromptBuilderTest {
         String prompt = promptBuilder.buildPrompt(testPet, testPersona, userMessage, chatHistory);
         
         // Then
-        // 최근 5개만 포함되어야 함 (메시지1, 응답1, 메시지2, 응답2, 메시지3 포함되고 응답3, 메시지4는 제외)
-        assertThat(prompt).contains("메시지1");
-        assertThat(prompt).contains("응답1");
+        // 7개 메시지에서 최근 5개 선택: start = 2, end = 7
+        // 포함되어야 함: 메시지2, 응답2, 메시지3, 응답3, 메시지4 (인덱스 2,3,4,5,6)
+        // 제외되어야 함: 메시지1, 응답1 (인덱스 0,1)
         assertThat(prompt).contains("메시지2");
         assertThat(prompt).contains("응답2");
         assertThat(prompt).contains("메시지3");
-        assertThat(prompt).doesNotContain("응답3");
-        assertThat(prompt).doesNotContain("메시지4");
+        assertThat(prompt).contains("응답3");
+        assertThat(prompt).contains("메시지4");
+        assertThat(prompt).doesNotContain("메시지1");
+        assertThat(prompt).doesNotContain("응답1");
     }
     
     @Test

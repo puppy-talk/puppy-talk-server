@@ -1,25 +1,25 @@
 package com.puppy.talk.service;
 
-import com.puppy.talk.ai.AiResponseService;
-import com.puppy.talk.exception.pet.PetNotFoundException;
-import com.puppy.talk.infrastructure.chat.ChatRoomRepository;
-import com.puppy.talk.infrastructure.chat.MessageRepository;
-import com.puppy.talk.infrastructure.pet.PetRepository;
-import com.puppy.talk.model.chat.ChatRoom;
-import com.puppy.talk.model.chat.ChatRoomIdentity;
-import com.puppy.talk.model.chat.Message;
-import com.puppy.talk.model.chat.MessageIdentity;
-import com.puppy.talk.model.chat.SenderType;
-import com.puppy.talk.model.pet.Pet;
-import com.puppy.talk.model.pet.PetIdentity;
-import com.puppy.talk.model.pet.Persona;
-import com.puppy.talk.model.pet.PersonaIdentity;
-import com.puppy.talk.model.user.UserIdentity;
-import com.puppy.talk.service.chat.ActivityTrackingService;
-import com.puppy.talk.service.chat.ChatService;
-import com.puppy.talk.service.dto.ChatStartResult;
-import com.puppy.talk.service.dto.MessageSendResult;
-import com.puppy.talk.service.pet.PersonaLookUpService;
+import com.puppy.talk.ai.AiResponsePort;
+import com.puppy.talk.chat.ChatRoomRepository;
+import com.puppy.talk.chat.MessageRepository;
+import com.puppy.talk.pet.PetRepository;
+import com.puppy.talk.chat.ChatRoom;
+import com.puppy.talk.chat.ChatRoomIdentity;
+import com.puppy.talk.chat.Message;
+import com.puppy.talk.chat.MessageIdentity;
+import com.puppy.talk.chat.SenderType;
+import com.puppy.talk.pet.Pet;
+import com.puppy.talk.pet.PetIdentity;
+import com.puppy.talk.pet.Persona;
+import com.puppy.talk.pet.PersonaIdentity;
+import com.puppy.talk.user.UserIdentity;
+import com.puppy.talk.chat.ChatService;
+import com.puppy.talk.dto.ChatStartResult;
+import com.puppy.talk.dto.MessageSendResult;
+import com.puppy.talk.notification.RealtimeNotificationPort;
+import com.puppy.talk.pet.PersonaLookUpService;
+import com.puppy.talk.pet.PetNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,9 +41,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ChatService 단위 테스트")
 class ChatServiceTest {
-
-    @Mock
-    private PetRepository petRepository;
     
     @Mock
     private ChatRoomRepository chatRoomRepository;
@@ -52,13 +49,16 @@ class ChatServiceTest {
     private MessageRepository messageRepository;
     
     @Mock
-    private AiResponseService aiResponseService;
+    private PetRepository petRepository;
     
     @Mock
     private PersonaLookUpService personaLookUpService;
     
     @Mock
-    private ActivityTrackingService activityTrackingService;
+    private AiResponsePort aiResponsePort;
+    
+    @Mock
+    private RealtimeNotificationPort realtimeNotificationPort;
     
     @InjectMocks
     private ChatService chatService;
@@ -203,7 +203,7 @@ class ChatServiceTest {
         when(petRepository.findByIdentity(mockPet.identity())).thenReturn(Optional.of(mockPet));
         when(personaLookUpService.findPersona(mockPet.personaId())).thenReturn(mockPersona);
         when(messageRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId)).thenReturn(List.of());
-        when(aiResponseService.generatePetResponse(eq(mockPet), eq(mockPersona), eq(messageContent), any())).thenReturn("AI 응답");
+        when(aiResponsePort.generatePetResponse(eq(mockPet), eq(mockPersona), eq(messageContent), any())).thenReturn("AI 응답");
         when(messageRepository.save(any(Message.class))).thenReturn(savedMessage);
         when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(updatedChatRoom);
         
@@ -222,7 +222,7 @@ class ChatServiceTest {
         verify(petRepository).findByIdentity(mockPet.identity());
         verify(personaLookUpService).findPersona(mockPet.personaId());
         verify(messageRepository, times(2)).save(any(Message.class)); // 사용자 메시지 + AI 응답 메시지
-        verify(aiResponseService).generatePetResponse(eq(mockPet), any(Persona.class), eq(messageContent), any());
+        verify(aiResponsePort).generatePetResponse(eq(mockPet), any(Persona.class), eq(messageContent), any());
         verify(chatRoomRepository).save(argThat(room ->
             room.lastMessageAt() != null &&
             !room.lastMessageAt().isBefore(savedMessage.createdAt())
