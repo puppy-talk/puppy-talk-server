@@ -15,6 +15,8 @@ import com.puppy.talk.model.pet.Persona;
 import com.puppy.talk.service.pet.PersonaLookUpService;
 import com.puppy.talk.service.dto.ChatStartResult;
 import com.puppy.talk.service.dto.MessageSendResult;
+import com.puppy.talk.service.websocket.WebSocketChatService;
+import com.puppy.talk.model.websocket.ChatMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +37,7 @@ public class ChatService {
     private final MessageRepository messageRepository;
     private final AiResponseService aiResponseService; // TODO : mq 활용
     private final PersonaLookUpService personaLookUpService; // FIXME :: 동일 layer 참조
+    private final WebSocketChatService webSocketChatService;
     // private final ActivityTrackingService activityTrackingService; // FIXME :: 동일 layer 참조 - TEMPORARILY COMMENTED
 
     /**
@@ -182,7 +185,18 @@ public class ChatService {
                 LocalDateTime.now()
             );
             
-            messageRepository.save(petMessage);
+            Message savedPetMessage = messageRepository.save(petMessage);
+            
+            // WebSocket을 통해 AI 응답 실시간 브로드캐스트
+            ChatMessage webSocketMessage = ChatMessage.newMessage(
+                savedPetMessage.identity(),
+                chatRoom.identity(),
+                pet.userId(),
+                SenderType.PET,
+                aiResponse,
+                false
+            );
+            webSocketChatService.broadcastMessage(webSocketMessage);
             
         } catch (Exception e) {
             // AI 응답 생성 실패 시 로그만 남기고 계속 진행

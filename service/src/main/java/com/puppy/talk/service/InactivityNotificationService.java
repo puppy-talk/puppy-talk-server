@@ -13,8 +13,10 @@ import com.puppy.talk.model.chat.SenderType;
 import com.puppy.talk.model.pet.Pet;
 import com.puppy.talk.model.pet.Persona;
 import com.puppy.talk.model.push.NotificationType;
+import com.puppy.talk.model.websocket.ChatMessage;
 import com.puppy.talk.service.notification.PushNotificationService;
 import com.puppy.talk.service.pet.PersonaLookUpService;
+import com.puppy.talk.service.websocket.WebSocketChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,7 @@ public class InactivityNotificationService {
     private final PersonaLookUpService personaLookUpService;
     private final AiResponseService aiResponseService;
     private final PushNotificationService pushNotificationService;
+    private final WebSocketChatService webSocketChatService;
 
     private static final int AI_CONTEXT_MESSAGE_LIMIT = 5;
 
@@ -108,7 +111,10 @@ public class InactivityNotificationService {
             LocalDateTime.now()
         );
         
-        messageRepository.save(petMessage);
+        Message savedPetMessage = messageRepository.save(petMessage);
+        
+        // WebSocket을 통해 실시간 브로드캐스트
+        sendWebSocketMessage(chatRoom, pet, savedPetMessage, aiMessage);
         
         // 푸시 알림 전송
         sendPushNotification(pet, aiMessage);
@@ -198,6 +204,30 @@ public class InactivityNotificationService {
         } catch (Exception e) {
             log.warn("Failed to send push notification for pet={}: {}", pet.name(), e.getMessage());
             // 푸시 알림 실패는 전체 프로세스를 중단시키지 않음
+        }
+    }
+    
+    /**
+     * WebSocket을 통해 실시간 메시지를 브로드캐스트합니다.
+     */
+    private void sendWebSocketMessage(ChatRoom chatRoom, Pet pet, Message savedMessage, String content) {
+        try {
+            ChatMessage webSocketMessage = ChatMessage.newMessage(
+                savedMessage.identity(),
+                chatRoom.identity(),
+                pet.userId(),
+                SenderType.PET,
+                content,
+                false
+            );
+            
+            webSocketChatService.broadcastMessage(webSocketMessage);
+            
+            log.debug("Sent WebSocket message for pet={}, chatRoom={}", pet.name(), chatRoom.identity().id());
+            
+        } catch (Exception e) {
+            log.warn("Failed to send WebSocket message for pet={}: {}", pet.name(), e.getMessage());
+            // WebSocket 실패는 전체 프로세스를 중단시키지 않음
         }
     }
     
