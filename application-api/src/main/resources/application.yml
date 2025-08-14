@@ -3,6 +3,8 @@ spring:
     active: local
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
+    parameters:
+      liquibase.duplicateFileMode: WARN
 
 # WebSocket Configuration for Local Development
 puppy-talk:
@@ -76,10 +78,10 @@ spring:
     activate:
       on-profile: local
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/puppy_talk_db?useSSL=false&allowPublicKeyRetrieval=true}
-    username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:1234}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mariadb://localhost:3306/puppy_talk_db
+    username: root
+    password: d4594283!
+    driver-class-name: org.mariadb.jdbc.Driver
 
 ---
 spring:
