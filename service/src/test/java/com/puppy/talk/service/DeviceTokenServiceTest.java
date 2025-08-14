@@ -6,6 +6,7 @@ import com.puppy.talk.push.DeviceToken;
 import com.puppy.talk.push.DeviceTokenIdentity;
 import com.puppy.talk.user.UserIdentity;
 import com.puppy.talk.chat.DeviceTokenService;
+import com.puppy.talk.push.command.DeviceTokenRegistrationCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,7 +60,8 @@ class DeviceTokenServiceTest {
         when(deviceTokenRepository.save(any(DeviceToken.class))).thenReturn(mockDeviceToken);
         
         // When
-        DeviceToken result = deviceTokenService.registerOrUpdateToken(userId, deviceToken, deviceId, platform);
+        DeviceTokenRegistrationCommand command = DeviceTokenRegistrationCommand.of(1L, deviceToken, deviceId, platform);
+        DeviceToken result = deviceTokenService.registerOrUpdateToken(command);
         
         // Then
         assertThat(result).isNotNull();
@@ -82,7 +84,8 @@ class DeviceTokenServiceTest {
         when(deviceTokenRepository.save(any(DeviceToken.class))).thenReturn(mockDeviceToken);
         
         // When
-        DeviceToken result = deviceTokenService.registerOrUpdateToken(userId, deviceToken, deviceId, platform);
+        DeviceTokenRegistrationCommand command = DeviceTokenRegistrationCommand.of(1L, deviceToken, deviceId, platform);
+        DeviceToken result = deviceTokenService.registerOrUpdateToken(command);
         
         // Then
         assertThat(result).isNotNull();
@@ -106,7 +109,8 @@ class DeviceTokenServiceTest {
         when(deviceTokenRepository.save(any(DeviceToken.class))).thenReturn(mockDeviceToken);
         
         // When
-        DeviceToken result = deviceTokenService.registerOrUpdateToken(userId, deviceToken, deviceId, platform);
+        DeviceTokenRegistrationCommand command = DeviceTokenRegistrationCommand.of(1L, deviceToken, deviceId, platform);
+        DeviceToken result = deviceTokenService.registerOrUpdateToken(command);
         
         // Then
         assertThat(result).isNotNull();
@@ -120,19 +124,23 @@ class DeviceTokenServiceTest {
     @DisplayName("토큰 등록 시 필수값 검증 - 실패")
     void registerToken_ValidationFailure() {
         // When & Then
-        assertThatThrownBy(() -> deviceTokenService.registerOrUpdateToken(null, deviceToken, deviceId, platform))
+        DeviceTokenRegistrationCommand nullUserIdCommand = DeviceTokenRegistrationCommand.of(null, deviceToken, deviceId, platform);
+        assertThatThrownBy(() -> deviceTokenService.registerOrUpdateToken(nullUserIdCommand))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("UserId cannot be null");
             
-        assertThatThrownBy(() -> deviceTokenService.registerOrUpdateToken(userId, null, deviceId, platform))
+        DeviceTokenRegistrationCommand nullTokenCommand = DeviceTokenRegistrationCommand.of(1L, null, deviceId, platform);
+        assertThatThrownBy(() -> deviceTokenService.registerOrUpdateToken(nullTokenCommand))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Token cannot be null or empty");
             
-        assertThatThrownBy(() -> deviceTokenService.registerOrUpdateToken(userId, "", deviceId, platform))
+        DeviceTokenRegistrationCommand emptyTokenCommand = DeviceTokenRegistrationCommand.of(1L, "", deviceId, platform);
+        assertThatThrownBy(() -> deviceTokenService.registerOrUpdateToken(emptyTokenCommand))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Token cannot be null or empty");
             
-        assertThatThrownBy(() -> deviceTokenService.registerOrUpdateToken(userId, deviceToken, deviceId, null))
+        DeviceTokenRegistrationCommand nullPlatformCommand = DeviceTokenRegistrationCommand.of(1L, deviceToken, deviceId, null);
+        assertThatThrownBy(() -> deviceTokenService.registerOrUpdateToken(nullPlatformCommand))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Platform cannot be null or empty");
     }

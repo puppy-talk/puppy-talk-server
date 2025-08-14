@@ -19,6 +19,7 @@ bootJar {
 
 dependencies {
     implementation project(':api')
+    implementation project(':service')
     implementation project(':ai-service')
     implementation project(':push-service')
     implementation project(':repository-jdbc')
@@ -40,11 +41,8 @@ dependencies {
 
     implementation 'org.mariadb.jdbc:mariadb-java-client'
     
-    // JWT 인증을 위한 의존성 (Spring Security 없이)
-    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
-    implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
-    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
-    implementation 'org.springframework.security:spring-security-crypto:6.2.1' // 패스워드 해싱용
+    // BCrypt 패스워드 해싱용 (Bean 설정을 위해)
+    implementation 'org.springframework.security:spring-security-crypto:6.2.1'
     
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

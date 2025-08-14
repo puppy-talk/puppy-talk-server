@@ -5,6 +5,7 @@ import com.puppy.talk.pet.dto.request.PetCreateRequest;
 import com.puppy.talk.pet.dto.response.PetCreateResponse;
 import com.puppy.talk.user.UserIdentity;
 import com.puppy.talk.dto.PetRegistrationResult;
+import com.puppy.talk.pet.command.PetCreateCommand;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -29,14 +30,16 @@ public class PetController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     public ApiResponse<PetCreateResponse> createPet(@Valid @RequestBody PetCreateRequest request) {
-        PetRegistrationResult result = petRegistrationService.registerPet(
-            UserIdentity.of(request.userId()),
-            PersonaIdentity.of(request.personaId()),
+        PetCreateCommand command = PetCreateCommand.of(
+            request.userId(),
+            request.personaId(),
             request.name(),
             request.breed(),
             request.age(),
             request.profileImageUrl()
         );
+        
+        PetRegistrationResult result = petRegistrationService.createPet(command);
 
         PetCreateResponse response = PetCreateResponse.of(
             result.pet(),

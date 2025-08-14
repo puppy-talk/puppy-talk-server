@@ -7,6 +7,7 @@ import com.puppy.talk.user.UserIdentity;
 import com.puppy.talk.chat.ChatService;
 import com.puppy.talk.websocket.ChatMessage;
 import com.puppy.talk.websocket.ChatMessageType;
+import com.puppy.talk.chat.command.MessageSendCommand;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -48,7 +49,8 @@ public class ChatWebSocketController {
                 chatRoomId, request.userId(), request.content());
             
             // 메시지를 데이터베이스에 저장하고 AI 응답 생성
-            var result = chatService.sendMessageToPet(roomId, request.content());
+            MessageSendCommand command = MessageSendCommand.of(request.content());
+            var result = chatService.sendMessageToPet(roomId, command);
             
             // WebSocket을 통해 실시간으로 브로드캐스트
             realtimeNotificationPort.broadcastMessage(

@@ -36,11 +36,11 @@ public class JwtTokenProvider {
         Date validity = new Date(now.getTime() + tokenValidityInMilliseconds);
 
         return Jwts.builder()
-            .setSubject(String.valueOf(userId))
+            .subject(String.valueOf(userId))
             .claim("username", username)
-            .setIssuedAt(now)
-            .setExpiration(validity)
-            .signWith(secretKey, SignatureAlgorithm.HS256)
+            .issuedAt(now)
+            .expiration(validity)
+            .signWith(secretKey)
             .compact();
     }
 
@@ -48,30 +48,47 @@ public class JwtTokenProvider {
      * JWT 토큰에서 사용자 ID를 추출합니다.
      */
     public Long getUserIdFromToken(String token) {
-        Claims claims = getClaimsFromToken(token);
-        return Long.valueOf(claims.getSubject());
+        try {
+            Claims claims = getClaimsFromToken(token);
+            return Long.valueOf(claims.getSubject());
+        } catch (Exception e) {
+            log.error("Failed to extract user ID from token", e);
+            throw e;
+        }
     }
 
     /**
      * JWT 토큰에서 사용자명을 추출합니다.
      */
     public String getUsernameFromToken(String token) {
-        Claims claims = getClaimsFromToken(token);
-        return claims.get("username", String.class);
+        try {
+            Claims claims = getClaimsFromToken(token);
+            return claims.get("username", String.class);
+        } catch (Exception e) {
+            log.error("Failed to extract username from token", e);
+            throw e;
+        }
     }
 
     /**
-     * JWT 토큰의 유효성을 검증합니다.
+     * JWT 토큰이 유효한지 검증합니다.
      */
     public boolean validateToken(String token) {
+        if (token == null || token.trim().isEmpty()) {
+            return false;
+        }
+        
         try {
-            Jwts.parserBuilder()
-                .setSigningKey(secretKey)
+            Jwts.parser()
+                .verifyWith(secretKey)
                 .build()
-                .parseClaimsJws(token);
+                .parseSignedClaims(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            log.warn("JWT token has expired: {}", e.getMessage());
+            return false;
         } catch (JwtException | IllegalArgumentException e) {
-            log.debug("Invalid JWT token: {}", e.getMessage());
+            log.warn("Invalid JWT token: {}", e.getMessage());
             return false;
         }
     }
@@ -83,8 +100,10 @@ public class JwtTokenProvider {
         try {
             Claims claims = getClaimsFromToken(token);
             return claims.getExpiration().before(new Date());
-        } catch (JwtException | IllegalArgumentException e) {
-            log.debug("Error checking token expiration: {}", e.getMessage());
+        } catch (ExpiredJwtException e) {
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to check token expiration", e);
             return true;
         }
     }
@@ -103,10 +122,10 @@ public class JwtTokenProvider {
      * JWT 토큰에서 Claims를 추출합니다.
      */
     private Claims getClaimsFromToken(String token) {
-        return Jwts.parserBuilder()
-            .setSigningKey(secretKey)
+        return Jwts.parser()
+            .verifyWith(secretKey)
             .build()
-            .parseClaimsJws(token)
-            .getBody();
+            .parseSignedClaims(token)
+            .getPayload();
     }
 }

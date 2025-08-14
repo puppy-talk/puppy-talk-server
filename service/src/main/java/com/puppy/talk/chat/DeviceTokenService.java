@@ -4,6 +4,7 @@ import com.puppy.talk.push.DeviceTokenNotFoundException;
 import com.puppy.talk.push.DeviceTokenRepository;
 import com.puppy.talk.push.DeviceToken;
 import com.puppy.talk.user.UserIdentity;
+import com.puppy.talk.push.command.DeviceTokenRegistrationCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,26 +27,21 @@ public class DeviceTokenService {
      * 디바이스 토큰을 등록하거나 업데이트합니다.
      */
     @Transactional
-    public DeviceToken registerOrUpdateToken(
-        UserIdentity userId,
-        String token,
-        String deviceId,
-        String platform
-    ) {
-        if (userId == null) {
+    public DeviceToken registerOrUpdateToken(DeviceTokenRegistrationCommand command) {
+        if (command.userId() == null) {
             throw new IllegalArgumentException("UserId cannot be null");
         }
-        if (token == null || token.trim().isEmpty()) {
+        if (command.token() == null || command.token().trim().isEmpty()) {
             throw new IllegalArgumentException("Token cannot be null or empty");
         }
-        if (platform == null || platform.trim().isEmpty()) {
+        if (command.platform() == null || command.platform().trim().isEmpty()) {
             throw new IllegalArgumentException("Platform cannot be null or empty");
         }
         
-        log.debug("Registering device token for user={}, platform={}", userId.id(), platform);
+        log.debug("Registering device token for user={}, platform={}", command.userId().id(), command.platform());
         
         // 기존 토큰 확인
-        Optional<DeviceToken> existingToken = deviceTokenRepository.findByToken(token);
+        Optional<DeviceToken> existingToken = deviceTokenRepository.findByToken(command.token());
         
         if (existingToken.isPresent()) {
             // 기존 토큰이 있으면 활성화하고 마지막 사용 시간 업데이트
@@ -55,29 +51,29 @@ public class DeviceTokenService {
             
             deviceTokenRepository.save(updatedToken);
             
-            log.debug("Updated existing device token: {}", token);
+            log.debug("Updated existing device token: {}", command.token());
             return updatedToken;
         }
         
         // 동일한 사용자와 디바이스 ID로 등록된 토큰이 있는지 확인
-        if (deviceId != null) {
+        if (command.deviceId() != null) {
             Optional<DeviceToken> existingDeviceToken = 
-                deviceTokenRepository.findByUserIdAndDeviceId(userId, deviceId);
+                deviceTokenRepository.findByUserIdAndDeviceId(command.userId(), command.deviceId());
                 
             if (existingDeviceToken.isPresent()) {
                 // 기존 디바이스의 토큰을 비활성화
                 DeviceToken deactivatedToken = existingDeviceToken.get().deactivate();
                 deviceTokenRepository.save(deactivatedToken);
                 
-                log.debug("Deactivated old token for same device: {}", deviceId);
+                log.debug("Deactivated old token for same device: {}", command.deviceId());
             }
         }
         
         // 새 토큰 생성
-        DeviceToken newToken = DeviceToken.of(userId, token, deviceId, platform);
+        DeviceToken newToken = DeviceToken.of(command.userId(), command.token(), command.deviceId(), command.platform());
         DeviceToken savedToken = deviceTokenRepository.save(newToken);
         
-        log.info("Registered new device token for user={}, platform={}", userId.id(), platform);
+        log.info("Registered new device token for user={}, platform={}", command.userId().id(), command.platform());
         return savedToken;
     }
     

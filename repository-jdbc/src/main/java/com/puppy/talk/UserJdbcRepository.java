@@ -56,7 +56,7 @@ public class UserJdbcRepository implements UserRepository {
 
     @Override
     public User save(User user) {
-        if (user.identity().id() == null) {
+        if (user.identity().id() == null || user.identity().id() == 0L) {
             return insert(user);
         } else {
             return update(user);

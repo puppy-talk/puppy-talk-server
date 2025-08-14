@@ -8,6 +8,7 @@ import com.puppy.talk.chat.dto.response.MessageSendResponse;
 import com.puppy.talk.pet.PetIdentity;
 import com.puppy.talk.dto.ChatStartResult;
 import com.puppy.talk.dto.MessageSendResult;
+import com.puppy.talk.chat.command.MessageSendCommand;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -58,7 +59,8 @@ public class ChatController {
     ) {
         ChatRoomIdentity chatRoomIdentity = ChatRoomIdentity.of(chatRoomId);
         
-        MessageSendResult result = chatService.sendMessageToPet(chatRoomIdentity, request.content());
+        MessageSendCommand command = MessageSendCommand.of(request.content());
+        MessageSendResult result = chatService.sendMessageToPet(chatRoomIdentity, command);
         
         MessageSendResponse response = MessageSendResponse.from(result);
         

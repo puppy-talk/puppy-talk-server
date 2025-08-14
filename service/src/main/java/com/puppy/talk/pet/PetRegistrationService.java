@@ -6,6 +6,7 @@ import com.puppy.talk.user.UserRepository;
 import com.puppy.talk.user.UserNotFoundException;
 import com.puppy.talk.chat.ChatRoom;
 import com.puppy.talk.user.UserIdentity;
+import com.puppy.talk.pet.command.PetCreateCommand;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,30 +21,23 @@ public class PetRegistrationService {
     private final PersonaRepository personaRepository;
 
     @Transactional
-    public PetRegistrationResult registerPet(
-        UserIdentity userId,
-        PersonaIdentity personaId,
-        String name,
-        String breed,
-        int age,
-        String profileImageUrl
-    ) {
-        if (userRepository.findByIdentity(userId).isEmpty()) {
-            throw new UserNotFoundException(userId);
+    public PetRegistrationResult createPet(PetCreateCommand command) {
+        if (userRepository.findByIdentity(command.userId()).isEmpty()) {
+            throw new UserNotFoundException(command.userId());
         }
 
-        if (personaRepository.findByIdentity(personaId).isEmpty()) {
-            throw new PersonaNotFoundException(personaId);
+        if (personaRepository.findByIdentity(command.personaId()).isEmpty()) {
+            throw new PersonaNotFoundException(command.personaId());
         }
 
         Pet pet = new Pet(
             null,
-            userId,
-            personaId,
-            name,
-            breed,
-            age,
-            profileImageUrl
+            command.userId(),
+            command.personaId(),
+            command.name(),
+            command.breed(),
+            command.age(),
+            command.profileImageUrl()
         );
 
         Pet savedPet = petRepository.save(pet);

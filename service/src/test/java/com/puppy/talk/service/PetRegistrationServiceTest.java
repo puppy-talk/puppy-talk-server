@@ -16,6 +16,7 @@ import com.puppy.talk.user.User;
 import com.puppy.talk.user.UserIdentity;
 import com.puppy.talk.dto.PetRegistrationResult;
 import com.puppy.talk.pet.PetRegistrationService;
+import com.puppy.talk.pet.command.PetCreateCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -85,7 +86,7 @@ class PetRegistrationServiceTest {
     
     @Test
     @DisplayName("성공: 유효한 사용자와 페르소나로 펫 등록")
-    void registerPet_Success() {
+    void createPet_Success() {
         // Given
         when(userRepository.findByIdentity(userId)).thenReturn(Optional.of(mockUser));
         when(personaRepository.findByIdentity(personaId)).thenReturn(Optional.of(mockPersona));
@@ -93,9 +94,8 @@ class PetRegistrationServiceTest {
         when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(mockChatRoom);
         
         // When
-        PetRegistrationResult result = petRegistrationService.registerPet(
-            userId, personaId, "멍멍이", "골든리트리버", 3, "http://example.com/image.jpg"
-        );
+        PetCreateCommand command = PetCreateCommand.of(1L, 1L, "멍멍이", "골든리트리버", 3, "http://example.com/image.jpg");
+        PetRegistrationResult result = petRegistrationService.createPet(command);
         
         // Then
         assertThat(result).isNotNull();
@@ -110,15 +110,14 @@ class PetRegistrationServiceTest {
     
     @Test
     @DisplayName("실패: 존재하지 않는 사용자")
-    void registerPet_UserNotFound() {
+    void createPet_UserNotFound() {
         // Given
         when(userRepository.findByIdentity(userId)).thenReturn(Optional.empty());
         
         // When & Then
+        PetCreateCommand command = PetCreateCommand.of(1L, 1L, "멍멍이", "골든리트리버", 3, "http://example.com/image.jpg");
         assertThatThrownBy(() -> 
-            petRegistrationService.registerPet(
-                userId, personaId, "멍멍이", "골든리트리버", 3, "http://example.com/image.jpg"
-            )
+            petRegistrationService.createPet(command)
         ).isInstanceOf(UserNotFoundException.class);
         
         verify(userRepository).findByIdentity(userId);
@@ -129,16 +128,15 @@ class PetRegistrationServiceTest {
     
     @Test
     @DisplayName("실패: 존재하지 않는 페르소나")
-    void registerPet_PersonaNotFound() {
+    void createPet_PersonaNotFound() {
         // Given
         when(userRepository.findByIdentity(userId)).thenReturn(Optional.of(mockUser));
         when(personaRepository.findByIdentity(personaId)).thenReturn(Optional.empty());
         
         // When & Then
+        PetCreateCommand command = PetCreateCommand.of(1L, 1L, "멍멍이", "골든리트리버", 3, "http://example.com/image.jpg");
         assertThatThrownBy(() -> 
-            petRegistrationService.registerPet(
-                userId, personaId, "멍멍이", "골든리트리버", 3, "http://example.com/image.jpg"
-            )
+            petRegistrationService.createPet(command)
         ).isInstanceOf(PersonaNotFoundException.class);
         
         verify(userRepository).findByIdentity(userId);
@@ -149,7 +147,7 @@ class PetRegistrationServiceTest {
     
     @Test
     @DisplayName("검증: 펫 저장 시 올바른 정보가 전달되는지 확인")
-    void registerPet_PetSaveWithCorrectInfo() {
+    void createPet_PetSaveWithCorrectInfo() {
         // Given
         when(userRepository.findByIdentity(userId)).thenReturn(Optional.of(mockUser));
         when(personaRepository.findByIdentity(personaId)).thenReturn(Optional.of(mockPersona));
@@ -157,9 +155,8 @@ class PetRegistrationServiceTest {
         when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(mockChatRoom);
         
         // When
-        petRegistrationService.registerPet(
-            userId, personaId, "멍멍이", "골든리트리버", 3, "http://example.com/image.jpg"
-        );
+        PetCreateCommand command = PetCreateCommand.of(1L, 1L, "멍멍이", "골든리트리버", 3, "http://example.com/image.jpg");
+        petRegistrationService.createPet(command);
         
         // Then
         verify(petRepository).save(argThat(pet -> 
@@ -174,7 +171,7 @@ class PetRegistrationServiceTest {
     
     @Test
     @DisplayName("검증: 채팅방 생성 시 올바른 제목이 설정되는지 확인")
-    void registerPet_ChatRoomTitleGeneration() {
+    void createPet_ChatRoomTitleGeneration() {
         // Given
         when(userRepository.findByIdentity(userId)).thenReturn(Optional.of(mockUser));
         when(personaRepository.findByIdentity(personaId)).thenReturn(Optional.of(mockPersona));
@@ -182,9 +179,8 @@ class PetRegistrationServiceTest {
         when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(mockChatRoom);
         
         // When
-        petRegistrationService.registerPet(
-            userId, personaId, "멍멍이", "골든리트리버", 3, "http://example.com/image.jpg"
-        );
+        PetCreateCommand command = PetCreateCommand.of(1L, 1L, "멍멍이", "골든리트리버", 3, "http://example.com/image.jpg");
+        petRegistrationService.createPet(command);
         
         // Then
         verify(chatRoomRepository).save(argThat(chatRoom -> 

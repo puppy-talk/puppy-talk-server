@@ -89,12 +89,8 @@ public class AuthService {
         // 패스워드 해싱
         String hashedPassword = passwordEncoder.encode(password);
         
-        // 사용자 생성
-        User newUser = User.builder()
-            .username(username.trim())
-            .email(email.trim())
-            .passwordHash(hashedPassword)
-            .build();
+        // 사용자 생성 (UserIdentity는 save 시 생성됨, 임시로 ID 0 사용)
+        User newUser = new User(UserIdentity.of(0L), username.trim(), email.trim(), hashedPassword);
 
         User savedUser = userRepository.save(newUser);
         String token = jwtTokenProvider.createToken(savedUser.identity().id(), savedUser.username());

@@ -8,6 +8,7 @@ import com.puppy.talk.push.dto.response.PushStatisticsResponse;
 import com.puppy.talk.user.UserIdentity;
 import com.puppy.talk.chat.DeviceTokenService;
 import com.puppy.talk.notification.PushNotificationService;
+import com.puppy.talk.push.command.DeviceTokenRegistrationCommand;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,12 +42,14 @@ public class PushNotificationController {
     ) {
         log.info("Registering device token for user: {}", userId);
         
-        DeviceToken deviceToken = deviceTokenService.registerOrUpdateToken(
-            UserIdentity.of(userId),
+        DeviceTokenRegistrationCommand command = DeviceTokenRegistrationCommand.of(
+            userId,
             request.token(),
             request.deviceId(),
             request.platform()
         );
+        
+        DeviceToken deviceToken = deviceTokenService.registerOrUpdateToken(command);
         
         DeviceTokenResponse response = DeviceTokenResponse.from(deviceToken);
         return ApiResponse.ok(response);

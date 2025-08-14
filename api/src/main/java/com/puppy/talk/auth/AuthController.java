@@ -11,9 +11,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 사용자 인증 관련 API 컨트롤러
@@ -25,11 +27,12 @@ import java.util.Optional;
 @Tag(name = "인증", description = "사용자 로그인/회원가입 API")
 public class AuthController {
 
-    private final AuthService authService;
+    // private final AuthService authService;
 
     /**
      * 사용자 로그인
      */
+    /*
     @PostMapping("/login")
     @Operation(summary = "사용자 로그인", description = "사용자명과 패스워드로 로그인하여 JWT 토큰을 발급받습니다.")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
@@ -50,10 +53,12 @@ public class AuthController {
             "Login successful"
         ));
     }
+    */
 
     /**
      * 사용자 회원가입
      */
+    /*
     @PostMapping("/register")
     @Operation(summary = "사용자 회원가입", description = "새 사용자 계정을 생성하고 JWT 토큰을 발급받습니다.")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
@@ -78,10 +83,12 @@ public class AuthController {
             "Registration successful"
         ));
     }
+    */
 
     /**
      * 토큰 유효성 검증
      */
+    /*
     @PostMapping("/validate")
     @Operation(summary = "토큰 검증", description = "JWT 토큰의 유효성을 검증하고 사용자 정보를 반환합니다.")
     public ResponseEntity<AuthResponse> validateToken(@RequestHeader("Authorization") String authHeader) {
@@ -104,6 +111,7 @@ public class AuthController {
             "Token is valid"
         ));
     }
+    */
 
     /**
      * 로그인 요청 DTO
