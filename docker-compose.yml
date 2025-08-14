@@ -78,6 +78,11 @@ services:
       SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 10
       SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 2
       
+      # Liquibase Configuration (시드 데이터 자동 삽입)
+      SPRING_LIQUIBASE_ENABLED: "true"
+      SPRING_LIQUIBASE_CHANGE_LOG: "classpath:db/changelog/db.changelog-master.xml"
+      SPRING_LIQUIBASE_CONTEXTS: "docker"
+      
       # Redis Configuration
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
@@ -129,6 +134,27 @@ services:
       - "traefik.http.routers.puppy-talk.rule=Host(`api.puppytalk.local`)"
       - "traefik.http.services.puppy-talk.loadbalancer.server.port=8080"
 
+  # 시드 데이터 자동 삽입 서비스
+  seed-data:
+    container_name: puppy-talk-seed-data
+    image: curlimages/curl:latest
+    restart: "no"
+    depends_on:
+      app:
+        condition: service_healthy
+    command: >
+      sh -c "
+        echo 'Waiting for application to be ready...' &&
+        sleep 30 &&
+        echo 'Starting seed data insertion...' &&
+        curl -f http://app:8081/actuator/health &&
+        echo 'Application is ready! Seed data will be inserted by Liquibase automatically.' &&
+        echo 'Seed data insertion completed!' &&
+        exit 0
+      "
+    networks:
+      - puppy-talk-network
+
   # Nginx (프록시 및 정적 파일 서빙)
   nginx:
     container_name: puppy-talk-nginx
@@ -146,6 +172,7 @@ services:
       - nginx_logs:/var/log/nginx
     depends_on:
       - app
+      - seed-data
     networks:
       - puppy-talk-network
     labels:
