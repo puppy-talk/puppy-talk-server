@@ -60,6 +60,12 @@ docker-compose down -v
 ```bash
 # scripts/build.sh 사용 (MacOS/Linux)
 cd scripts && sh build.sh
+
+# 단일 테스트 실행
+./gradlew {module-name}:test --tests {TestClassName}
+
+# 특정 테스트 메서드 실행  
+./gradlew {module-name}:test --tests {TestClassName}.{methodName}
 ```
 
 ## Hexagonal Architecture 구조
@@ -195,10 +201,12 @@ flowchart TD
 - 생성자에서 null 및 유효성 검증 수행
 - Builder 패턴 사용 시에도 동일한 검증 로직 적용
 
-### Spring Security 금지
+### 인증 시스템 구현
 
-- 프로젝트 정책에 따라 Spring Security 사용 금지
-- 인증/인가가 필요한 경우 대안 방안 검토 필요
+- **Spring Security 사용 금지**: 프로젝트 정책에 따라 Spring Security 완전 배제
+- **커스텀 BCrypt 구현**: `at.favre.lib:bcrypt:0.10.2`를 사용한 독립적인 패스워드 해싱
+- **JWT 토큰 기반**: `io.jsonwebtoken:jjwt-*:0.12.3`를 사용한 토큰 인증
+- **WebSocket 인증**: JWT 토큰을 통한 WebSocket 연결 인증 (WebSocketAuthInterceptor)
 
 ### 개발 시 중요 고려사항
 
@@ -300,15 +308,54 @@ curl http://localhost:8080/api/ai/providers/status
 # http-requests/ai-provider-status.http - AI 제공업체 상태 확인
 ```
 
+### 테스트 실행 가이드
+
+```bash
+# 전체 테스트 실행
+./gradlew test
+
+# 특정 모듈 테스트만 실행
+./gradlew service:test
+
+# 단일 테스트 클래스 실행
+./gradlew service:test --tests AuthServiceTest
+
+# 특정 테스트 메서드만 실행
+./gradlew service:test --tests "AuthServiceTest.login_ValidCredentials_Success"
+
+# 테스트 결과 상세 출력
+./gradlew test --info
+```
+
 ### 추가 모듈 정보
 
 **주요 도메인 모듈:**
 - `model/`: 순수 도메인 엔티티 (User, Pet, Persona, ChatRoom, Message, UserActivity, InactivityNotification, DeviceToken, PushNotification)
-- `service/`: 비즈니스 로직 구현 (스케줄러 포함)
+- `service/`: 비즈니스 로직 구현 (인증, 채팅, 스케줄러 포함)
 - `infrastructure/`: 포트 인터페이스 정의
 - `repository-jdbc/`: JDBC 기반 데이터 액세스 구현
 
 **보조 모듈:**
 - `ai-service/`: AI 제공업체 관리 및 응답 생성
-- `push-service/`: FCM 기반 푸시 알림
+- `push-service/`: FCM 기반 푸시 알림  
 - `schema/`: Liquibase 데이터베이스 스키마 관리
+
+## 중요 구현 세부사항
+
+### 인증 서비스 (`service/src/main/java/com/puppy/talk/auth/`)
+
+- **AuthService**: 사용자 로그인/등록 처리 (Spring Security 없이 구현)
+- **PasswordEncoder**: BCrypt 해싱을 위한 커스텀 구현체 
+- **JwtTokenProvider**: JWT 토큰 생성/검증 (JJWT 0.12.3 API 사용)
+
+### 테스트 구조
+
+- **Mock 객체 직접 생성**: Mockito 대신 내부 Mock 클래스 구현
+- **통합 테스트**: WebSocket과 AI 서비스를 포함한 시나리오 테스트
+- **비즈니스 로직 테스트**: 각 서비스의 핵심 기능에 대한 포괄적 테스트
+
+### 모니터링 및 운영
+
+- **Prometheus**: `monitoring/prometheus.yml`에서 메트릭 수집 설정
+- **Nginx**: 리버스 프록시 및 SSL 설정 (`nginx/`)
+- **Docker Compose**: 개발/운영 환경별 설정 파일 제공
