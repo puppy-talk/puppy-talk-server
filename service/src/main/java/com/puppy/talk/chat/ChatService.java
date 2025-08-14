@@ -11,6 +11,7 @@ import com.puppy.talk.pet.PersonaLookUpService;
 import com.puppy.talk.dto.ChatStartResult;
 import com.puppy.talk.dto.MessageSendResult;
 import com.puppy.talk.websocket.ChatMessage;
+import com.puppy.talk.chat.command.MessageSendCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -72,11 +73,11 @@ public class ChatService {
      * 사용자 메시지 저장 후 AI 펫 응답을 자동으로 생성하여 저장합니다.
      */
     @Transactional
-    public MessageSendResult sendMessageToPet(ChatRoomIdentity chatRoomId, String content) {
+    public MessageSendResult sendMessageToPet(ChatRoomIdentity chatRoomId, MessageSendCommand command) {
         if (chatRoomId == null) {
             throw new IllegalArgumentException("ChatRoomId cannot be null");
         }
-        if (content == null || content.trim().isEmpty()) {
+        if (command.content() == null || command.content().trim().isEmpty()) {
             throw new IllegalArgumentException("Message content cannot be null or empty");
         }
 
@@ -93,7 +94,7 @@ public class ChatService {
             null, // identity는 저장 시 생성됨
             chatRoomId,
             SenderType.USER,
-            content.trim(),
+            command.content().trim(),
             true, // 사용자가 보낸 메시지는 항상 읽음 처리
             LocalDateTime.now()
         );
@@ -104,7 +105,7 @@ public class ChatService {
         activityTrackingService.trackMessageSent(pet.userId(), chatRoomId);
 
         // AI 펫 응답 생성 및 저장
-        generateAndSavePetResponse(chatRoom, pet, content.trim());
+        generateAndSavePetResponse(chatRoom, pet, command.content().trim());
 
         // 채팅방 마지막 메시지 시간 업데이트
         ChatRoom updatedChatRoom = new ChatRoom(

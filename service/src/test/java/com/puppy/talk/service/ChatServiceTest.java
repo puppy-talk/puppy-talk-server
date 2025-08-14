@@ -21,6 +21,7 @@ import com.puppy.talk.notification.RealtimeNotificationPort;
 import com.puppy.talk.pet.PersonaLookUpService;
 import com.puppy.talk.pet.PetNotFoundException;
 import com.puppy.talk.chat.ActivityTrackingService;
+import com.puppy.talk.chat.command.MessageSendCommand;
 import com.puppy.talk.websocket.ChatMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -185,7 +186,7 @@ class ChatServiceTest {
         ((MockMessageRepository) messageRepository).setMessages(List.of());
         
         // When
-        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, messageContent);
+        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, MessageSendCommand.of(messageContent));
         
         // Then
         assertThat(result).isNotNull();
@@ -203,7 +204,7 @@ class ChatServiceTest {
         ((MockChatRoomRepository) chatRoomRepository).setChatRoom(null);
         
         // When & Then
-        assertThatThrownBy(() -> chatService.sendMessageToPet(chatRoomId, "메시지"))
+        assertThatThrownBy(() -> chatService.sendMessageToPet(chatRoomId, MessageSendCommand.of("메시지")))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("ChatRoom not found");
     }
@@ -212,7 +213,7 @@ class ChatServiceTest {
     @DisplayName("실패: 빈 메시지 내용으로 보내기")
     void sendMessageToPet_EmptyContent() {
         // When & Then
-        assertThatThrownBy(() -> chatService.sendMessageToPet(chatRoomId, ""))
+        assertThatThrownBy(() -> chatService.sendMessageToPet(chatRoomId, MessageSendCommand.of("")))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Message content cannot be null or empty");
     }
