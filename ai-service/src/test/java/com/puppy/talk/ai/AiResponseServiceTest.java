@@ -2,8 +2,8 @@ package com.puppy.talk.ai;
 
 import com.puppy.talk.ai.provider.AiProvider;
 import com.puppy.talk.ai.provider.AiProviderFactory;
-import com.puppy.talk.ai.provider.AiRequest;
-import com.puppy.talk.ai.provider.AiResponse;
+import com.puppy.talk.ai.provider.dto.AiRequest;
+import com.puppy.talk.ai.provider.dto.AiResponse;
 import com.puppy.talk.chat.Message;
 import com.puppy.talk.chat.MessageIdentity;
 import com.puppy.talk.chat.ChatRoomIdentity;

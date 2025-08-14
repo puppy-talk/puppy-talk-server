@@ -12,16 +12,15 @@ dependencies {
     implementation 'org.springframework:spring-context'
     implementation 'org.springframework:spring-tx'
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
-    compileOnly 'org.springframework:spring-messaging'
-    testImplementation 'org.springframework:spring-messaging'
+    implementation 'org.springframework:spring-messaging'
     
     // JWT (without Spring Security)
     implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
     implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
     
-    // BCrypt implementation without Spring Security
-    implementation 'at.favre.lib:bcrypt:0.10.2'
+    // Guava for password hashing
+    implementation 'com.google.guava:guava'
     
     // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

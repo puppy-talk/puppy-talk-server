@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.puppy.talk.ai.AiResponseException;
 import com.puppy.talk.ai.provider.AiProvider;
-import com.puppy.talk.ai.provider.AiRequest;
-import com.puppy.talk.ai.provider.AiResponse;
+import com.puppy.talk.ai.provider.dto.AiRequest;
+import com.puppy.talk.ai.provider.dto.AiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 

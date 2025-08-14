@@ -22,15 +22,18 @@ class AuthServiceTest {
 
     private User testUser;
     private String rawPassword = "password123";
-    private String hashedPassword = "$2a$10$hashedPassword";
+    private String hashedPassword;  // Guava 기반 해싱으로 동적 생성
     private String testToken = "eyJhbGciOiJIUzI1NiJ9.testToken";
 
     @BeforeEach
     void setUp() {
+        // 실제 PasswordEncoder 사용 (Guava 기반)
+        passwordEncoder = new PasswordEncoder();
+        hashedPassword = passwordEncoder.encode(rawPassword);
+        
         // Mock objects 직접 생성
         userRepository = new MockUserRepository();
-        jwtTokenProvider = new MockJwtTokenProvider("mockSecret", 3600000L);
-        passwordEncoder = new MockPasswordEncoder();
+        jwtTokenProvider = new MockJwtTokenProvider("mockSecretKeyForJwtTesting1234567890", 3600000L);
         
         authService = new AuthService(userRepository, jwtTokenProvider, passwordEncoder);
         
@@ -43,7 +46,7 @@ class AuthServiceTest {
         
         // Mock data 설정
         ((MockUserRepository) userRepository).setUser(testUser);
-        ((MockPasswordEncoder) passwordEncoder).setHashedPassword(hashedPassword);
+        ((MockUserRepository) userRepository).setTestUser(testUser);
         ((MockJwtTokenProvider) jwtTokenProvider).setToken(testToken);
     }
 
@@ -52,7 +55,6 @@ class AuthServiceTest {
     void login_ValidCredentials_Success() {
         // given
         ((MockUserRepository) userRepository).setUser(testUser);
-        ((MockPasswordEncoder) passwordEncoder).setHashedPassword(hashedPassword);
         ((MockJwtTokenProvider) jwtTokenProvider).setToken(testToken);
 
         // when
@@ -80,8 +82,7 @@ class AuthServiceTest {
     @Test
     @DisplayName("잘못된 패스워드로 로그인에 실패한다")
     void login_WrongPassword_Failure() {
-        // given
-        ((MockPasswordEncoder) passwordEncoder).setHashedPassword("wrongHash");
+        // given - 틀린 패스워드로 테스트
 
         // when
         Optional<AuthService.AuthResult> result = authService.login("testuser", "wrongpassword");
@@ -266,6 +267,7 @@ class AuthServiceTest {
         private User user;
         private boolean emailExists = false;
         private User savedUser;
+        private User testUser;
         
         public void setUser(User user) {
             this.user = user;
@@ -279,6 +281,10 @@ class AuthServiceTest {
             this.savedUser = savedUser;
         }
         
+        public void setTestUser(User testUser) {
+            this.testUser = testUser;
+        }
+        
         @Override
         public Optional<User> findByUsername(String username) {
             return Optional.ofNullable(user);
@@ -286,7 +292,10 @@ class AuthServiceTest {
         
         @Override
         public Optional<User> findByEmail(String email) {
-            return emailExists ? Optional.ofNullable(user) : Optional.empty();
+            if (emailExists) {
+                return user != null ? Optional.of(user) : Optional.of(testUser);
+            }
+            return Optional.empty();
         }
         
         @Override
@@ -357,21 +366,4 @@ class AuthServiceTest {
         }
     }
     
-    private static class MockPasswordEncoder extends PasswordEncoder {
-        private String hashedPassword;
-        
-        public void setHashedPassword(String hashedPassword) {
-            this.hashedPassword = hashedPassword;
-        }
-        
-        @Override
-        public String encode(String rawPassword) {
-            return hashedPassword;
-        }
-        
-        @Override
-        public boolean matches(String rawPassword, String encodedPassword) {
-            return hashedPassword.equals(encodedPassword);
-        }
-    }
 }

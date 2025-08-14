@@ -1,6 +1,8 @@
 package com.puppy.talk.ai.provider;
 
 import com.puppy.talk.ai.AiResponseException;
+import com.puppy.talk.ai.provider.dto.AiRequest;
+import com.puppy.talk.ai.provider.dto.AiResponse;
 
 /**
  * AI 모델 제공업체의 공통 인터페이스

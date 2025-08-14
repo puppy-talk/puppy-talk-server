@@ -1,4 +1,4 @@
-package com.puppy.talk.ai.provider;
+package com.puppy.talk.ai.provider.dto;
 
 import java.util.Map;
 

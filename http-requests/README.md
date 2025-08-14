@@ -70,9 +70,6 @@ export AI_GPT_OSS_ENABLED=true
 export AI_OPENAI_ENABLED=true
 export AI_OPENAI_API_KEY="your-api-key"
 ```
-
-자세한 설정 방법은 [AI Multi-Provider 가이드](../docs/AI_MULTI_PROVIDER_GUIDE.md)를 참조하세요.
-
 ### 3. 테스트 순서
 
 #### 3.1 기본 설정
