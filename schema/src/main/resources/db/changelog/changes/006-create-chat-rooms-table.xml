@@ -6,20 +6,6 @@
                             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
   <changeSet author="system" id="006">
-    <addForeignKeyConstraint
-      baseColumnNames="pet_id" baseTableName="chat_rooms"
-      constraintName="fk_chat_rooms_pet_id" onDelete="CASCADE"
-      referencedColumnNames="id"
-      referencedTableName="pets"/>
-
-    <createIndex indexName="idx_chat_rooms_pet_id" tableName="chat_rooms">
-      <column name="pet_id"/>
-    </createIndex>
-
-    <createIndex indexName="idx_chat_rooms_last_message_at" tableName="chat_rooms">
-      <column name="last_message_at"/>
-    </createIndex>
-
     <createTable tableName="chat_rooms">
       <column autoIncrement="true" name="id" type="BIGINT">
         <constraints nullable="false" primaryKey="true"/>
@@ -35,6 +21,20 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
+
+    <addForeignKeyConstraint
+      baseColumnNames="pet_id" baseTableName="chat_rooms"
+      constraintName="fk_chat_rooms_pet_id" onDelete="CASCADE"
+      referencedColumnNames="id"
+      referencedTableName="pets"/>
+
+    <createIndex indexName="idx_chat_rooms_pet_id" tableName="chat_rooms">
+      <column name="pet_id"/>
+    </createIndex>
+
+    <createIndex indexName="idx_chat_rooms_last_message_at" tableName="chat_rooms">
+      <column name="last_message_at"/>
+    </createIndex>
   </changeSet>
 
 </databaseChangeLog>

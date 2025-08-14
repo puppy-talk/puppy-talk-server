@@ -33,6 +33,9 @@ Architecture (Ports and Adapters Architecture)** 패턴을 기반으로 설계�
 
 # 특정 모듈 테스트
 ./gradlew {module-name}:test
+
+# JAR 파일 빌드
+./gradlew application-api:bootJar
 ```
 
 ### Docker 환경
@@ -237,3 +240,75 @@ flowchart TD
 - Amazon Corretto 21 JRE 기반
 - Non-root 사용자로 실행 (보안 강화)
 - G1GC 및 컨테이너 최적화 JVM 옵션 적용
+
+## AI 서비스 아키텍처
+
+### Multi-Provider AI 시스템
+
+이 프로젝트는 다중 AI 제공업체 지원을 통한 유연한 AI 서비스를 제공합니다:
+
+**지원 AI 제공업체:**
+- **gpt-oss**: 로컬 실행 오픈소스 모델 (무료, 빠른 응답)
+- **OpenAI**: ChatGPT 시리즈 (API 키 필요)
+- **Anthropic Claude**: Claude 시리즈 (API 키 필요)
+- **Google Gemini**: Gemini 시리즈 (API 키 필요)
+
+**핵심 기능:**
+- 자동 대체(Fallback) 시스템: 기본 제공업체 실패 시 자동으로 대체 제공업체 사용
+- 동적 제공업체 선택: 각 제공업체의 상태를 실시간 모니터링
+- 비용 최적화: 무료 로컬 모델 우선 사용, 필요시에만 유료 서비스 활용
+
+**AI 서비스 상태 확인:**
+```bash
+# AI 제공업체 상태 확인
+curl http://localhost:8080/api/ai/providers/status
+```
+
+**모듈 구조:**
+- `ai-service/`: AI 제공업체 추상화 및 관리
+- `push-service/`: Firebase FCM 기반 푸시 알림
+
+### WebSocket 실시간 채팅
+
+- Spring WebSocket + STOMP 프로토콜 사용
+- JWT 기반 WebSocket 인증 (WebSocketAuthInterceptor)
+- 실시간 메시지 송수신 및 활동 추적
+- 연결/해제 이벤트 모니터링 (WebSocketEventListener)
+
+**WebSocket 엔드포인트:**
+- `/ws/chat`: WebSocket 연결
+- `/app/chat.sendMessage`: 메시지 송신
+- `/topic/chat/{chatRoomId}`: 채팅방별 구독
+
+### 푸시 알림 시스템
+
+- Firebase Cloud Messaging (FCM) 기반
+- 디바이스 토큰 관리 (DEVICE_TOKENS 테이블)
+- 푸시 알림 이력 관리 (PUSH_NOTIFICATIONS 테이블)
+- 비활성 알림과 연동된 자동 푸시 발송
+
+## 개발 및 테스트 가이드
+
+### HTTP 요청 테스트
+
+프로젝트 루트의 `http-requests/` 디렉토리에 API 테스트 파일들이 있습니다:
+
+```bash
+# IntelliJ HTTP Client를 사용한 API 테스트
+# http-requests/pet-management.http - 펫 관리 API
+# http-requests/ai-chat-api.http - AI 채팅 API
+# http-requests/ai-provider-status.http - AI 제공업체 상태 확인
+```
+
+### 추가 모듈 정보
+
+**주요 도메인 모듈:**
+- `model/`: 순수 도메인 엔티티 (User, Pet, Persona, ChatRoom, Message, UserActivity, InactivityNotification, DeviceToken, PushNotification)
+- `service/`: 비즈니스 로직 구현 (스케줄러 포함)
+- `infrastructure/`: 포트 인터페이스 정의
+- `repository-jdbc/`: JDBC 기반 데이터 액세스 구현
+
+**보조 모듈:**
+- `ai-service/`: AI 제공업체 관리 및 응답 생성
+- `push-service/`: FCM 기반 푸시 알림
+- `schema/`: Liquibase 데이터베이스 스키마 관리

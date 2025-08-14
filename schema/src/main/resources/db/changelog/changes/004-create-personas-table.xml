@@ -6,10 +6,6 @@
                             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
   <changeSet author="system" id="004">
-    <createIndex indexName="idx_personas_active" tableName="personas">
-      <column name="is_active"/>
-    </createIndex>
-
     <createTable tableName="personas">
       <column autoIncrement="true" name="id" type="BIGINT">
         <constraints nullable="false" primaryKey="true"/>
@@ -29,6 +25,10 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
+
+    <createIndex indexName="idx_personas_active" tableName="personas">
+      <column name="is_active"/>
+    </createIndex>
   </changeSet>
 
 </databaseChangeLog>

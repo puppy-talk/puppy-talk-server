@@ -24,12 +24,19 @@ dependencies {
     implementation project(':repository-jdbc')
     implementation project(':schema')
 
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     
-    // SpringDoc OpenAPI 3 (Swagger)
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+    // Force consistent Spring version to resolve WebSocket compatibility issues
+    implementation 'org.springframework:spring-web:6.2.0'
+    implementation 'org.springframework:spring-webmvc:6.2.0'
+    implementation 'org.springframework:spring-websocket:6.2.0'
+    implementation 'org.springframework:spring-messaging:6.2.0'
+    
+    // SpringDoc OpenAPI 3 (Swagger) - Updated for Spring Boot 3.4.0 compatibility
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.0'
 
     runtimeOnly 'mysql:mysql-connector-java:8.0.33'
 

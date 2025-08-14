@@ -6,14 +6,6 @@
                             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
   <changeSet author="system" id="003">
-    <createIndex indexName="idx_users_username" tableName="users">
-      <column name="username"/>
-    </createIndex>
-
-    <createIndex indexName="idx_users_email" tableName="users">
-      <column name="email"/>
-    </createIndex>
-
     <createTable tableName="users">
       <column autoIncrement="true" name="id" type="BIGINT">
         <constraints nullable="false" primaryKey="true"/>
@@ -35,6 +27,14 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
+
+    <createIndex indexName="idx_users_username" tableName="users">
+      <column name="username"/>
+    </createIndex>
+
+    <createIndex indexName="idx_users_email" tableName="users">
+      <column name="email"/>
+    </createIndex>
   </changeSet>
 
 </databaseChangeLog>

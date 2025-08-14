@@ -11,8 +11,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     
     // Spring Framework
-    compileOnly 'org.springframework:spring-messaging'
-    testImplementation 'org.springframework:spring-messaging'
+    implementation 'org.springframework:spring-messaging'
     
     // External Libraries
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui'

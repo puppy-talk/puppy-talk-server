@@ -1,4 +1,4 @@
-FROM amazoncorretto:21-alpine-jre
+FROM amazoncorretto:21-alpine
 
 # Create a non-root user
 RUN addgroup -S spring && adduser -S spring -G spring
@@ -6,7 +6,7 @@ RUN addgroup -S spring && adduser -S spring -G spring
 WORKDIR /application
 
 # Copy the jar file and change ownership
-COPY application-api/build/libs/application-api.jar app.jar
+COPY application-api/build/libs/application-api-1.0-SNAPSHOT.jar app.jar
 RUN chown spring:spring app.jar
 
 # Switch to non-root user

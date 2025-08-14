@@ -6,6 +6,27 @@
                             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
   <changeSet author="system" id="008">
+    <createTable tableName="user_activities">
+      <column autoIncrement="true" name="id" type="BIGINT">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="user_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="chat_room_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="activity_type" type="ENUM('MESSAGE_SENT', 'MESSAGE_READ', 'CHAT_OPENED')">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="activity_at" type="TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
     <addForeignKeyConstraint
       baseColumnNames="user_id" baseTableName="user_activities"
       constraintName="fk_user_activities_user_id" onDelete="CASCADE"
@@ -33,27 +54,6 @@
     <createIndex indexName="idx_user_activities_activity_type" tableName="user_activities">
       <column name="activity_type"/>
     </createIndex>
-
-    <createTable tableName="user_activities">
-      <column autoIncrement="true" name="id" type="BIGINT">
-        <constraints nullable="false" primaryKey="true"/>
-      </column>
-      <column name="user_id" type="BIGINT">
-        <constraints nullable="false"/>
-      </column>
-      <column name="chat_room_id" type="BIGINT">
-        <constraints nullable="false"/>
-      </column>
-      <column name="activity_type" type="ENUM('MESSAGE_SENT', 'MESSAGE_READ', 'CHAT_OPENED')">
-        <constraints nullable="false"/>
-      </column>
-      <column defaultValueComputed="CURRENT_TIMESTAMP" name="activity_at" type="TIMESTAMP">
-        <constraints nullable="false"/>
-      </column>
-      <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP">
-        <constraints nullable="false"/>
-      </column>
-    </createTable>
   </changeSet>
 
 </databaseChangeLog>
