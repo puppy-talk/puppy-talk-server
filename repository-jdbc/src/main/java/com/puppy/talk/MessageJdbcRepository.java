@@ -59,7 +59,7 @@ public class MessageJdbcRepository implements MessageRepository {
 
     @Override
     public Message save(Message message) {
-        if (message.identity().id() == null) {
+        if (message.identity() == null) {
             return insert(message);
         } else {
             return update(message);

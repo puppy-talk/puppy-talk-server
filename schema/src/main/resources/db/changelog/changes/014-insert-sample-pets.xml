@@ -12,11 +12,8 @@
       <column name="name" value="멍멍이"/>
       <column name="breed" value="골든리트리버"/>
       <column name="age" value="3"/>
-      <column name="gender" value="male"/>
-      <column name="weight" value="25.5"/>
       <column name="persona_id" value="1"/>
       <column name="profile_image_url" value="https://example.com/pet1.jpg"/>
-      <column name="is_active" valueBoolean="true"/>
       <column name="created_at" valueDate="2024-01-01"/>
       <column name="updated_at" valueDate="2024-01-01"/>
     </insert>
@@ -27,11 +24,8 @@
       <column name="name" value="댕댕이"/>
       <column name="breed" value="웰시코기"/>
       <column name="age" value="2"/>
-      <column name="gender" value="female"/>
-      <column name="weight" value="12.0"/>
       <column name="persona_id" value="1"/>
       <column name="profile_image_url" value="https://example.com/pet2.jpg"/>
-      <column name="is_active" valueBoolean="true"/>
       <column name="created_at" valueDate="2024-01-01"/>
       <column name="updated_at" valueDate="2024-01-01"/>
     </insert>
@@ -42,11 +36,8 @@
       <column name="name" value="강아지"/>
       <column name="breed" value="푸들"/>
       <column name="age" value="1"/>
-      <column name="gender" value="male"/>
-      <column name="weight" value="8.5"/>
       <column name="persona_id" value="1"/>
       <column name="profile_image_url" value="https://example.com/pet3.jpg"/>
-      <column name="is_active" valueBoolean="true"/>
       <column name="created_at" valueDate="2024-01-01"/>
       <column name="updated_at" valueDate="2024-01-01"/>
     </insert>

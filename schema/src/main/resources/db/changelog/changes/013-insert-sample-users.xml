@@ -8,24 +8,18 @@
   <changeSet author="system" id="013">
     <insert tableName="users">
       <column name="id" value="1"/>
-      <column name="username" value="testuser1"/>
-      <column name="email" value="test1@example.com"/>
-      <column name="password_hash" value="$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa"/>
-      <column name="nickname" value="테스트사용자1"/>
-      <column name="profile_image_url" value="https://example.com/profile1.jpg"/>
-      <column name="is_active" valueBoolean="true"/>
+      <column name="username" value="k.yu"/>
+      <column name="email" value="k.yu@dev.com"/>
+      <column name="password" value="$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa"/>
       <column name="created_at" valueDate="2024-01-01"/>
       <column name="updated_at" valueDate="2024-01-01"/>
     </insert>
     
     <insert tableName="users">
       <column name="id" value="2"/>
-      <column name="username" value="testuser2"/>
-      <column name="email" value="test2@example.com"/>
-      <column name="password_hash" value="$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa"/>
-      <column name="nickname" value="테스트사용자2"/>
-      <column name="profile_image_url" value="https://example.com/profile2.jpg"/>
-      <column name="is_active" valueBoolean="true"/>
+      <column name="username" value="hj.lee"/>
+      <column name="email" value="hj.lee@dev.com"/>
+      <column name="password" value="$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa"/>
       <column name="created_at" valueDate="2024-01-01"/>
       <column name="updated_at" valueDate="2024-01-01"/>
     </insert>
@@ -34,10 +28,7 @@
       <column name="id" value="3"/>
       <column name="username" value="demo_user"/>
       <column name="email" value="demo@example.com"/>
-      <column name="password_hash" value="$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa"/>
-      <column name="nickname" value="데모사용자"/>
-      <column name="profile_image_url" value="https://example.com/demo.jpg"/>
-      <column name="is_active" valueBoolean="true"/>
+      <column name="password" value="$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa"/>
       <column name="created_at" valueDate="2024-01-01"/>
       <column name="updated_at" valueDate="2024-01-01"/>
     </insert>

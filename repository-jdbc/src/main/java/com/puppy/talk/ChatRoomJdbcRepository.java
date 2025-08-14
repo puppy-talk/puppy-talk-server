@@ -54,7 +54,7 @@ public class ChatRoomJdbcRepository implements ChatRoomRepository {
 
     @Override
     public ChatRoom save(ChatRoom chatRoom) {
-        if (chatRoom.identity().id() == null) {
+        if (chatRoom.identity() == null) {
             return insert(chatRoom);
         } else {
             return update(chatRoom);
