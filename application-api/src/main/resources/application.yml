@@ -6,6 +6,14 @@ spring:
     parameters:
       liquibase.duplicateFileMode: WARN
 
+# Logging Configuration for WebSocket debugging
+logging:
+  level:
+    org.springframework.web.socket: DEBUG
+    org.springframework.messaging: DEBUG
+    com.puppy.talk.config: DEBUG
+    com.puppy.talk.websocket: DEBUG
+
 # WebSocket Configuration for Local Development
 puppy-talk:
   websocket:

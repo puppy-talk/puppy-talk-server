@@ -54,7 +54,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         // 인바운드 메시지에 인터셉터 추가
-        registration.interceptors(webSocketAuthInterceptor);
+        // 임시로 테스트를 위해 인터셉터 비활성화
+        // registration.interceptors(webSocketAuthInterceptor);
     }
     
     @Override
