@@ -14,10 +14,15 @@ logging:
     com.puppy.talk.config: DEBUG
     com.puppy.talk.websocket: DEBUG
 
-# WebSocket Configuration for Local Development
+# Application Configuration
 puppy-talk:
+  # WebSocket Configuration for Local Development
   websocket:
     allowed-origins: http://localhost:3000,http://localhost:8080
+  # JWT 인증 설정
+  jwt:
+    secret: ${JWT_SECRET:puppy-talk-super-secret-key-for-development-only-please-change-in-production}
+    expiration: ${JWT_EXPIRATION:86400000} # 24시간 (밀리초)
 
 management:
   endpoints:

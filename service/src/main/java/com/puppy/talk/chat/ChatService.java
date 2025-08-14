@@ -34,7 +34,7 @@ public class ChatService {
     private final AiResponsePort aiResponsePort;
     private final RealtimeNotificationPort realtimeNotificationPort;
     private final PersonaLookUpService personaLookUpService; // FIXME :: 동일 layer 참조
-    // private final ActivityTrackingService activityTrackingService; // FIXME :: 동일 layer 참조 - TEMPORARILY COMMENTED
+    private final ActivityTrackingService activityTrackingService;
 
     /**
      * 펫과의 대화를 시작합니다.
@@ -62,7 +62,7 @@ public class ChatService {
             .toList();
 
         // 채팅방 열기 활동 기록
-        // activityTrackingService.trackChatOpened(pet.userId(), chatRoom.identity()); // TEMPORARILY COMMENTED
+        activityTrackingService.trackChatOpened(pet.userId(), chatRoom.identity());
 
         return new ChatStartResult(chatRoom, pet, recentMessages);
     }
@@ -101,7 +101,7 @@ public class ChatService {
         Message savedUserMessage = messageRepository.save(userMessage);
 
         // 메시지 전송 활동 기록
-        // activityTrackingService.trackMessageSent(pet.userId(), chatRoomId); // TEMPORARILY COMMENTED
+        activityTrackingService.trackMessageSent(pet.userId(), chatRoomId);
 
         // AI 펫 응답 생성 및 저장
         generateAndSavePetResponse(chatRoom, pet, content.trim());
@@ -150,7 +150,7 @@ public class ChatService {
         messageRepository.markAllAsReadByChatRoomId(chatRoomId);
 
         // 메시지 읽기 활동 기록
-        // activityTrackingService.trackMessageRead(pet.userId(), chatRoomId); // TEMPORARILY COMMENTED
+        activityTrackingService.trackMessageRead(pet.userId(), chatRoomId);
     }
 
     /**

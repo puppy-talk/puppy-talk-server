@@ -32,3 +32,4 @@ SELECT
 "
 
 echo "Database initialization completed successfully!"
+

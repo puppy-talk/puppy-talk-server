@@ -15,3 +15,4 @@ FLUSH PRIVILEGES;
 
 -- 초기 설정 완료 로그
 SELECT 'Puppy Talk Database initialized successfully!' as status;
+
