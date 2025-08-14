@@ -1,20 +1,13 @@
 package com.puppy.talk.config;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 /**
  * 인증 관련 설정
+ * Spring Security 없이 직접 구현
  */
 @Configuration
 public class AuthConfig {
-
-    /**
-     * 패스워드 해싱을 위한 BCrypt 인코더
-     */
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    // Spring Security 사용 금지 정책에 따라 Bean 설정 제거
+    // PasswordEncoder는 service 모듈에서 직접 구현
 }

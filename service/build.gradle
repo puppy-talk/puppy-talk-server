@@ -15,11 +15,13 @@ dependencies {
     compileOnly 'org.springframework:spring-messaging'
     testImplementation 'org.springframework:spring-messaging'
     
-    // JWT and Security
+    // JWT (without Spring Security)
     implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
     implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
-    implementation 'org.springframework.security:spring-security-crypto:6.2.1'
+    
+    // BCrypt implementation without Spring Security
+    implementation 'at.favre.lib:bcrypt:0.10.2'
     
     // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

@@ -23,6 +23,7 @@ import com.puppy.talk.websocket.ChatMessage;
 import com.puppy.talk.websocket.ChatMessageType;
 import com.puppy.talk.chat.ChatService;
 import com.puppy.talk.dto.MessageSendResult;
+import com.puppy.talk.chat.command.MessageSendCommand;
 import com.puppy.talk.notification.PushNotificationService;
 import com.puppy.talk.notification.RealtimeNotificationPort;
 import com.puppy.talk.pet.PersonaLookUpService;
@@ -127,7 +128,7 @@ class RealtimeChatIntegrationScenarioTest {
         when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(mockChatRoom);
         
         // When
-        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, userMessage);
+        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, MessageSendCommand.of(userMessage));
         
         // Then
         // 1. 사용자 메시지 처리 검증
@@ -188,7 +189,7 @@ class RealtimeChatIntegrationScenarioTest {
         when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(mockChatRoom);
         
         // When
-        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, secondUserMessage);
+        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, MessageSendCommand.of(secondUserMessage));
         
         // Then
         // 1. 컨텍스트 기반 AI 응답 생성 검증
@@ -303,7 +304,7 @@ class RealtimeChatIntegrationScenarioTest {
         
         // 2. 사용자 메시지 전송 (타이핑 중단 + 메시지 발송)
         webSocketChatService.broadcastTypingStatus(userStopTypingMessage);
-        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, userMessage);
+        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, MessageSendCommand.of(userMessage));
         
         // 3. AI 타이핑 상태 표시 (응답 준비 중)
         webSocketChatService.broadcastTypingStatus(aiTypingMessage);
@@ -353,7 +354,7 @@ class RealtimeChatIntegrationScenarioTest {
         
         // When
         // 1. 메시지 교환
-        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, userMessage);
+        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, MessageSendCommand.of(userMessage));
         
         // 2. 읽음 처리
         webSocketChatService.broadcastReadReceipt(readReceiptMessage);
@@ -439,7 +440,7 @@ class RealtimeChatIntegrationScenarioTest {
         
         // When & Then
         // WebSocket 실패에도 불구하고 정상 처리되어야 함
-        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, userMessage);
+        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, MessageSendCommand.of(userMessage));
         
         // 핵심 비즈니스 로직은 정상 작동
         assertThat(result.message().content()).isEqualTo(userMessage);

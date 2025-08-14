@@ -18,6 +18,7 @@ import com.puppy.talk.websocket.ChatMessage;
 import com.puppy.talk.websocket.ChatMessageType;
 import com.puppy.talk.chat.ChatService;
 import com.puppy.talk.dto.MessageSendResult;
+import com.puppy.talk.chat.command.MessageSendCommand;
 import com.puppy.talk.notification.RealtimeNotificationPort;
 import com.puppy.talk.pet.PersonaLookUpService;
 import com.puppy.talk.websocket.WebSocketChatService;
@@ -115,7 +116,7 @@ class ChatServiceWebSocketIntegrationTest {
         when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(mockChatRoom);
         
         // When
-        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, userMessageContent);
+        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, MessageSendCommand.of(userMessageContent));
         
         // Then
         // 기본적인 메시지 처리 검증
@@ -162,7 +163,7 @@ class ChatServiceWebSocketIntegrationTest {
         when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(mockChatRoom);
         
         // When
-        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, userMessageContent);
+        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, MessageSendCommand.of(userMessageContent));
         
         // Then
         // 사용자 메시지는 정상 처리
@@ -207,7 +208,7 @@ class ChatServiceWebSocketIntegrationTest {
         
         // When & Then
         // WebSocket 실패에도 불구하고 정상 처리되어야 함
-        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, userMessageContent);
+        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, MessageSendCommand.of(userMessageContent));
         
         assertThat(result.message().content()).isEqualTo(userMessageContent);
         assertThat(result.message().senderType()).isEqualTo(SenderType.USER);
@@ -229,7 +230,7 @@ class ChatServiceWebSocketIntegrationTest {
         when(chatRoomRepository.findByIdentity(chatRoomId)).thenReturn(Optional.empty());
         
         // When & Then
-        assertThatThrownBy(() -> chatService.sendMessageToPet(chatRoomId, userMessageContent))
+        assertThatThrownBy(() -> chatService.sendMessageToPet(chatRoomId, MessageSendCommand.of(userMessageContent)))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("ChatRoom not found");
         
@@ -249,7 +250,7 @@ class ChatServiceWebSocketIntegrationTest {
         when(petRepository.findByIdentity(petId)).thenReturn(Optional.empty());
         
         // When & Then
-        assertThatThrownBy(() -> chatService.sendMessageToPet(chatRoomId, userMessageContent))
+        assertThatThrownBy(() -> chatService.sendMessageToPet(chatRoomId, MessageSendCommand.of(userMessageContent)))
             .isInstanceOf(PetNotFoundException.class);
         
         // WebSocket 관련 메서드 호출되지 않음
@@ -267,7 +268,7 @@ class ChatServiceWebSocketIntegrationTest {
         String emptyContent = "   ";
         
         // When & Then
-        assertThatThrownBy(() -> chatService.sendMessageToPet(chatRoomId, emptyContent))
+        assertThatThrownBy(() -> chatService.sendMessageToPet(chatRoomId, MessageSendCommand.of(emptyContent)))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Message content cannot be null or empty");
         
@@ -306,7 +307,7 @@ class ChatServiceWebSocketIntegrationTest {
         when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(mockChatRoom);
         
         // When
-        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, userMessageContent);
+        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, MessageSendCommand.of(userMessageContent));
         
         // Then
         assertThat(result.message().content()).isEqualTo(userMessageContent);
@@ -353,7 +354,7 @@ class ChatServiceWebSocketIntegrationTest {
         when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(mockChatRoom);
         
         // When
-        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, userMessageContent);
+        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, MessageSendCommand.of(userMessageContent));
         
         // Then
         assertThat(result.message().content()).isEqualTo(userMessageContent);

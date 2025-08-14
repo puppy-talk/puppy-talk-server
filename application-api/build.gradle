@@ -41,9 +41,6 @@ dependencies {
 
     implementation 'org.mariadb.jdbc:mariadb-java-client'
     
-    // BCrypt 패스워드 해싱용 (Bean 설정을 위해)
-    implementation 'org.springframework.security:spring-security-crypto:6.2.1'
-    
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 

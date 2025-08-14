@@ -6,7 +6,6 @@ import com.puppy.talk.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +17,7 @@ class AuthServiceTest {
 
     private UserRepository userRepository;
     private JwtTokenProvider jwtTokenProvider;
-    private BCryptPasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
     private AuthService authService;
 
     private User testUser;
@@ -31,7 +30,7 @@ class AuthServiceTest {
         // Mock objects 직접 생성
         userRepository = new MockUserRepository();
         jwtTokenProvider = new MockJwtTokenProvider("mockSecret", 3600000L);
-        passwordEncoder = new MockBCryptPasswordEncoder();
+        passwordEncoder = new MockPasswordEncoder();
         
         authService = new AuthService(userRepository, jwtTokenProvider, passwordEncoder);
         
@@ -44,7 +43,7 @@ class AuthServiceTest {
         
         // Mock data 설정
         ((MockUserRepository) userRepository).setUser(testUser);
-        ((MockBCryptPasswordEncoder) passwordEncoder).setHashedPassword(hashedPassword);
+        ((MockPasswordEncoder) passwordEncoder).setHashedPassword(hashedPassword);
         ((MockJwtTokenProvider) jwtTokenProvider).setToken(testToken);
     }
 
@@ -53,7 +52,7 @@ class AuthServiceTest {
     void login_ValidCredentials_Success() {
         // given
         ((MockUserRepository) userRepository).setUser(testUser);
-        ((MockBCryptPasswordEncoder) passwordEncoder).setHashedPassword(hashedPassword);
+        ((MockPasswordEncoder) passwordEncoder).setHashedPassword(hashedPassword);
         ((MockJwtTokenProvider) jwtTokenProvider).setToken(testToken);
 
         // when
@@ -82,7 +81,7 @@ class AuthServiceTest {
     @DisplayName("잘못된 패스워드로 로그인에 실패한다")
     void login_WrongPassword_Failure() {
         // given
-        ((MockBCryptPasswordEncoder) passwordEncoder).setHashedPassword("wrongHash");
+        ((MockPasswordEncoder) passwordEncoder).setHashedPassword("wrongHash");
 
         // when
         Optional<AuthService.AuthResult> result = authService.login("testuser", "wrongpassword");
@@ -358,7 +357,7 @@ class AuthServiceTest {
         }
     }
     
-    private static class MockBCryptPasswordEncoder extends BCryptPasswordEncoder {
+    private static class MockPasswordEncoder extends PasswordEncoder {
         private String hashedPassword;
         
         public void setHashedPassword(String hashedPassword) {
@@ -366,12 +365,12 @@ class AuthServiceTest {
         }
         
         @Override
-        public String encode(CharSequence rawPassword) {
+        public String encode(String rawPassword) {
             return hashedPassword;
         }
         
         @Override
-        public boolean matches(CharSequence rawPassword, String encodedPassword) {
+        public boolean matches(String rawPassword, String encodedPassword) {
             return hashedPassword.equals(encodedPassword);
         }
     }
