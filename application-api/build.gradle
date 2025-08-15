@@ -50,6 +50,7 @@ dependencies {
 
     // Database Driver - migrated to Version Catalog
     implementation libs.mariadb.client
+    implementation 'mysql:mysql-connector-java:8.0.33'
     
     // Development Tools - inherited from root build.gradle (lombok, slf4j)
     // Centralized dependency management reduces duplication

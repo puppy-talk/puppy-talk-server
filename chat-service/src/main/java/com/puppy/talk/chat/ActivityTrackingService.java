@@ -6,6 +6,8 @@ import com.puppy.talk.activity.ActivityType;
 import com.puppy.talk.activity.InactivityNotification;
 import com.puppy.talk.activity.UserActivity;
 import com.puppy.talk.user.UserIdentity;
+import com.puppy.talk.event.UserActivityEvent;
+import com.puppy.talk.event.DomainEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ public class ActivityTrackingService {
 
     private final UserActivityRepository userActivityRepository;
     private final InactivityNotificationRepository inactivityNotificationRepository;
+    private final DomainEventPublisher domainEventPublisher;
 
     /**
      * 사용자 활동을 기록합니다.
@@ -41,6 +44,10 @@ public class ActivityTrackingService {
         
         // 비활성 알림 설정 업데이트 (비주요 작업으로 예외 대상 제외)
         updateInactivityNotification(chatRoomId, now);
+        
+        // 사용자 활동 이벤트 발행
+        UserActivityEvent event = UserActivityEvent.of(userId, chatRoomId, activityType);
+        domainEventPublisher.publish(event);
         
         log.debug("Activity tracked: userId={}, chatRoomId={}, activityType={}, timestamp={}", 
             userId.id(), chatRoomId.id(), activityType, now);
