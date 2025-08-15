@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import com.puppy.talk.user.UserIdentity;
 
 @Slf4j
 @Service
@@ -34,7 +35,8 @@ public class ChatService {
     private final MessageRepository messageRepository;
     private final AiResponsePort aiResponsePort;
     private final RealtimeNotificationPort realtimeNotificationPort;
-    private final PersonaLookUpService personaLookUpService; // FIXME :: 동일 layer 참조
+    // TODO: Replace with PersonaPort interface to resolve same-layer coupling
+    private final PersonaLookUpService personaLookUpService;
     private final ActivityTrackingService activityTrackingService;
 
     /**
@@ -43,27 +45,14 @@ public class ChatService {
      */
     @Transactional
     public ChatStartResult startChatWithPet(PetIdentity petId) {
-        if (petId == null) {
-            throw new IllegalArgumentException("PetId cannot be null");
-        }
+        validatePetId(petId);
 
-        // 펫 존재 확인
-        Pet pet = petRepository.findByIdentity(petId)
-            .orElseThrow(() -> new PetNotFoundException(petId));
-
-        // 기존 채팅방 찾기
-        ChatRoom chatRoom = chatRoomRepository.findByPetId(petId)
-            .orElseGet(() -> createNewChatRoom(pet));
-
-        // 최근 메시지들 조회 (설정된 제한만큼)
-        List<Message> recentMessages = messageRepository
-            .findByChatRoomIdOrderByCreatedAtDesc(chatRoom.identity())
-            .stream()
-            .limit(DEFAULT_RECENT_MESSAGE_LIMIT)
-            .toList();
+        Pet pet = findPetOrThrow(petId);
+        ChatRoom chatRoom = findOrCreateChatRoom(pet);
+        List<Message> recentMessages = findRecentMessages(chatRoom.identity());
 
         // 채팅방 열기 활동 기록
-        activityTrackingService.trackChatOpened(pet.userId(), chatRoom.identity());
+        trackChatActivity(pet.userId(), chatRoom.identity(), "CHAT_OPENED");
 
         return new ChatStartResult(chatRoom, pet, recentMessages);
     }
@@ -74,48 +63,22 @@ public class ChatService {
      */
     @Transactional
     public MessageSendResult sendMessageToPet(ChatRoomIdentity chatRoomId, MessageSendCommand command) {
-        if (chatRoomId == null) {
-            throw new IllegalArgumentException("ChatRoomId cannot be null");
-        }
-        if (command.content() == null || command.content().trim().isEmpty()) {
-            throw new IllegalArgumentException("Message content cannot be null or empty");
-        }
+        validateChatRoomId(chatRoomId);
+        validateMessageContent(command.content());
 
-        // 채팅방 존재 확인
-        ChatRoom chatRoom = chatRoomRepository.findByIdentity(chatRoomId)
-            .orElseThrow(() -> new IllegalArgumentException("ChatRoom not found: " + chatRoomId.id()));
-
-        // 펫 정보 조회
-        Pet pet = petRepository.findByIdentity(chatRoom.petId())
-            .orElseThrow(() -> new PetNotFoundException(chatRoom.petId()));
-
-        // 사용자 메시지 저장
-        Message userMessage = Message.of(
-            null, // identity는 저장 시 생성됨
-            chatRoomId,
-            SenderType.USER,
-            command.content().trim(),
-            true, // 사용자가 보낸 메시지는 항상 읽음 처리
-            LocalDateTime.now()
-        );
-
-        Message savedUserMessage = messageRepository.save(userMessage);
-
-        // 메시지 전송 활동 기록
-        activityTrackingService.trackMessageSent(pet.userId(), chatRoomId);
-
-        // AI 펫 응답 생성 및 저장
-        generateAndSavePetResponse(chatRoom, pet, command.content().trim());
-
-        // 채팅방 마지막 메시지 시간 업데이트
-        ChatRoom updatedChatRoom = new ChatRoom(
-            chatRoom.identity(),
-            chatRoom.petId(),
-            chatRoom.roomName(),
-            LocalDateTime.now()
-        );
-        chatRoomRepository.save(updatedChatRoom);
-
+        ChatRoom chatRoom = findChatRoomOrThrow(chatRoomId);
+        Pet pet = findPetOrThrow(chatRoom.petId());
+        
+        String trimmedContent = command.content().trim();
+        Message savedUserMessage = saveUserMessage(chatRoomId, trimmedContent);
+        
+        trackChatActivity(pet.userId(), chatRoomId, "MESSAGE_SENT");
+        
+        // AI 펫 응답 생성 (비동기로 처리 가능)
+        generateAndSavePetResponse(chatRoom, pet, trimmedContent);
+        
+        ChatRoom updatedChatRoom = updateChatRoomTimestamp(chatRoom);
+        
         return new MessageSendResult(savedUserMessage, updatedChatRoom);
     }
 
@@ -136,22 +99,13 @@ public class ChatService {
      */
     @Transactional
     public void markMessagesAsRead(ChatRoomIdentity chatRoomId) {
-        if (chatRoomId == null) {
-            throw new IllegalArgumentException("ChatRoomId cannot be null");
-        }
+        validateChatRoomId(chatRoomId);
 
-        // 채팅방 조회
-        ChatRoom chatRoom = chatRoomRepository.findByIdentity(chatRoomId)
-            .orElseThrow(() -> new IllegalArgumentException("ChatRoom not found: " + chatRoomId.id()));
-
-        // 펫 정보 조회
-        Pet pet = petRepository.findByIdentity(chatRoom.petId())
-            .orElseThrow(() -> new PetNotFoundException(chatRoom.petId()));
+        ChatRoom chatRoom = findChatRoomOrThrow(chatRoomId);
+        Pet pet = findPetOrThrow(chatRoom.petId());
 
         messageRepository.markAllAsReadByChatRoomId(chatRoomId);
-
-        // 메시지 읽기 활동 기록
-        activityTrackingService.trackMessageRead(pet.userId(), chatRoomId);
+        trackChatActivity(pet.userId(), chatRoomId, "MESSAGE_READ");
     }
 
     /**
@@ -159,56 +113,137 @@ public class ChatService {
      */
     private void generateAndSavePetResponse(ChatRoom chatRoom, Pet pet, String userMessage) {
         try {
-            // 페르소나 조회
-            Persona persona = personaLookUpService.findPersona(pet.personaId());
-            
-            // 채팅 히스토리 조회 (최근 5개)
-            List<Message> chatHistory = messageRepository
-                .findByChatRoomIdOrderByCreatedAtDesc(chatRoom.identity())
-                .stream()
-                .limit(AI_CONTEXT_MESSAGE_LIMIT)
-                .toList();
-            
-            // AI 응답 생성
-            String aiResponse = aiResponsePort.generatePetResponse(pet, persona, userMessage, chatHistory);
-            
-            // 펫 응답 메시지 저장
-            Message petMessage = Message.of(
-                null, // identity는 저장 시 생성됨
-                chatRoom.identity(),
-                SenderType.PET,
-                aiResponse,
-                false, // 펫 메시지는 처음에 읽지 않음 상태
-                LocalDateTime.now()
-            );
-            
-            Message savedPetMessage = messageRepository.save(petMessage);
-            
-            // WebSocket을 통해 AI 응답 실시간 브로드캐스트
-            ChatMessage webSocketMessage = ChatMessage.newMessage(
-                savedPetMessage.identity(),
-                chatRoom.identity(),
-                pet.userId(),
-                SenderType.PET,
-                aiResponse,
-                false
-            );
-            realtimeNotificationPort.broadcastMessage(webSocketMessage);
+            String aiResponse = generateAiResponse(pet, userMessage, chatRoom.identity());
+            Message savedPetMessage = savePetMessage(chatRoom.identity(), aiResponse);
+            broadcastPetMessage(chatRoom, pet, savedPetMessage, aiResponse);
             
         } catch (Exception e) {
             // AI 응답 생성 실패 시 로그만 남기고 계속 진행
-            // 사용자 메시지는 정상적으로 저장되어야 함
             log.error("Failed to generate pet response for chatRoom: {}", chatRoom.identity(), e);
         }
     }
 
     private ChatRoom createNewChatRoom(Pet pet) {
-        String roomName = String.format(CHAT_ROOM_NAME_PATTERN, pet.name());
+        String roomName = pet.generateChatRoomTitle(); // 도메인 엔티티의 비즈니스 로직 사용
         ChatRoom newChatRoom = ChatRoom.of(
             pet.identity(),
             roomName,
             LocalDateTime.now()
         );
         return chatRoomRepository.save(newChatRoom);
+    }
+
+    // === Helper Methods for Improved Readability ===
+    
+    private void validatePetId(PetIdentity petId) {
+        if (petId == null) {
+            throw new IllegalArgumentException("PetId cannot be null");
+        }
+    }
+    
+    private void validateChatRoomId(ChatRoomIdentity chatRoomId) {
+        if (chatRoomId == null) {
+            throw new IllegalArgumentException("ChatRoomId cannot be null");
+        }
+    }
+    
+    private void validateMessageContent(String content) {
+        if (content == null || content.trim().isEmpty()) {
+            throw new IllegalArgumentException("Message content cannot be null or empty");
+        }
+    }
+    
+    private Pet findPetOrThrow(PetIdentity petId) {
+        return petRepository.findByIdentity(petId)
+            .orElseThrow(() -> new PetNotFoundException(petId));
+    }
+    
+    private ChatRoom findChatRoomOrThrow(ChatRoomIdentity chatRoomId) {
+        return chatRoomRepository.findByIdentity(chatRoomId)
+            .orElseThrow(() -> new IllegalArgumentException("ChatRoom not found: " + chatRoomId.id()));
+    }
+    
+    private ChatRoom findOrCreateChatRoom(Pet pet) {
+        return chatRoomRepository.findByPetId(pet.identity())
+            .orElseGet(() -> createNewChatRoom(pet));
+    }
+    
+    private List<Message> findRecentMessages(ChatRoomIdentity chatRoomId) {
+        return messageRepository
+            .findByChatRoomIdOrderByCreatedAtDesc(chatRoomId)
+            .stream()
+            .limit(DEFAULT_RECENT_MESSAGE_LIMIT)
+            .toList();
+    }
+    
+    private Message saveUserMessage(ChatRoomIdentity chatRoomId, String content) {
+        Message userMessage = Message.of(
+            null, // identity는 저장 시 생성됨
+            chatRoomId,
+            SenderType.USER,
+            content,
+            true, // 사용자 메시지는 항상 읽음 처리
+            LocalDateTime.now()
+        );
+        return messageRepository.save(userMessage);
+    }
+    
+    private Message savePetMessage(ChatRoomIdentity chatRoomId, String content) {
+        Message petMessage = Message.of(
+            null, // identity는 저장 시 생성됨
+            chatRoomId,
+            SenderType.PET,
+            content,
+            false, // 펫 메시지는 처음에 읽지 않음 상태
+            LocalDateTime.now()
+        );
+        return messageRepository.save(petMessage);
+    }
+    
+    private String generateAiResponse(Pet pet, String userMessage, ChatRoomIdentity chatRoomId) {
+        // TODO: Replace with PersonaPort to resolve same-layer coupling
+        Persona persona = personaLookUpService.findPersona(pet.personaId());
+        
+        List<Message> chatHistory = messageRepository
+            .findByChatRoomIdOrderByCreatedAtDesc(chatRoomId)
+            .stream()
+            .limit(AI_CONTEXT_MESSAGE_LIMIT)
+            .toList();
+        
+        return aiResponsePort.generatePetResponse(pet, persona, userMessage, chatHistory);
+    }
+    
+    private void broadcastPetMessage(ChatRoom chatRoom, Pet pet, Message savedPetMessage, String content) {
+        try {
+            ChatMessage webSocketMessage = ChatMessage.newMessage(
+                savedPetMessage.identity(),
+                chatRoom.identity(),
+                pet.userId(),
+                SenderType.PET,
+                content,
+                false
+            );
+            realtimeNotificationPort.broadcastMessage(webSocketMessage);
+        } catch (Exception e) {
+            log.warn("Failed to broadcast pet message for chatRoom: {}", chatRoom.identity(), e);
+        }
+    }
+    
+    private ChatRoom updateChatRoomTimestamp(ChatRoom chatRoom) {
+        ChatRoom updatedChatRoom = chatRoom.updateLastMessageTimeToNow(); // 도메인 엔티티의 비즈니스 로직 사용
+        return chatRoomRepository.save(updatedChatRoom);
+    }
+    
+    private void trackChatActivity(UserIdentity userId, ChatRoomIdentity chatRoomId, String activityType) {
+        try {
+            switch (activityType) {
+                case "CHAT_OPENED" -> activityTrackingService.trackChatOpened(userId, chatRoomId);
+                case "MESSAGE_SENT" -> activityTrackingService.trackMessageSent(userId, chatRoomId);
+                case "MESSAGE_READ" -> activityTrackingService.trackMessageRead(userId, chatRoomId);
+                default -> log.warn("Unknown activity type: {}", activityType);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to track activity: {} for user: {}", activityType, userId, e);
+        }
     }
 }

@@ -31,15 +31,7 @@ public class ActivityTrackingService {
      */
     @Transactional
     public void trackActivity(UserIdentity userId, ChatRoomIdentity chatRoomId, ActivityType activityType) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId cannot be null");
-        }
-        if (chatRoomId == null) {
-            throw new IllegalArgumentException("ChatRoomId cannot be null");
-        }
-        if (activityType == null) {
-            throw new IllegalArgumentException("ActivityType cannot be null");
-        }
+        validateTrackingParameters(userId, chatRoomId, activityType);
 
         LocalDateTime now = LocalDateTime.now();
         
@@ -47,7 +39,7 @@ public class ActivityTrackingService {
         UserActivity activity = UserActivity.of(userId, chatRoomId, activityType, now);
         userActivityRepository.save(activity);
         
-        // 비활성 알림 설정 업데이트
+        // 비활성 알림 설정 업데이트 (비주요 작업으로 예외 대상 제외)
         updateInactivityNotification(chatRoomId, now);
         
         log.debug("Activity tracked: userId={}, chatRoomId={}, activityType={}, timestamp={}", 
@@ -83,10 +75,7 @@ public class ActivityTrackingService {
      */
     @Transactional(readOnly = true)
     public Optional<UserActivity> getLastActivity(ChatRoomIdentity chatRoomId) {
-        if (chatRoomId == null) {
-            throw new IllegalArgumentException("ChatRoomId cannot be null");
-        }
-        
+        validateChatRoomId(chatRoomId);
         return userActivityRepository.findLastActivityByChatRoomId(chatRoomId);
     }
 
@@ -95,11 +84,38 @@ public class ActivityTrackingService {
      */
     @Transactional(readOnly = true)
     public Optional<UserActivity> getLastActivity(UserIdentity userId) {
+        validateUserId(userId);
+        return userActivityRepository.findLastActivityByUserId(userId);
+    }
+    
+    /**
+     * 활동 추적 매개변수를 검증합니다.
+     */
+    private void validateTrackingParameters(UserIdentity userId, ChatRoomIdentity chatRoomId, ActivityType activityType) {
+        validateUserId(userId);
+        validateChatRoomId(chatRoomId);
+        
+        if (activityType == null) {
+            throw new IllegalArgumentException("ActivityType cannot be null");
+        }
+    }
+    
+    /**
+     * 사용자 ID를 검증합니다.
+     */
+    private void validateUserId(UserIdentity userId) {
         if (userId == null) {
             throw new IllegalArgumentException("UserId cannot be null");
         }
-        
-        return userActivityRepository.findLastActivityByUserId(userId);
+    }
+    
+    /**
+     * 채팅방 ID를 검증합니다.
+     */
+    private void validateChatRoomId(ChatRoomIdentity chatRoomId) {
+        if (chatRoomId == null) {
+            throw new IllegalArgumentException("ChatRoomId cannot be null");
+        }
     }
 
     /**

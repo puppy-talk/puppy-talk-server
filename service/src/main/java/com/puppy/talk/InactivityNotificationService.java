@@ -9,9 +9,11 @@ import com.puppy.talk.pet.PetRepository;
 import com.puppy.talk.activity.InactivityNotification;
 import com.puppy.talk.activity.NotificationStatus;
 import com.puppy.talk.chat.ChatRoom;
+import com.puppy.talk.chat.ChatRoomIdentity;
 import com.puppy.talk.chat.Message;
 import com.puppy.talk.chat.SenderType;
 import com.puppy.talk.pet.Pet;
+import com.puppy.talk.pet.PetIdentity;
 import com.puppy.talk.pet.Persona;
 import com.puppy.talk.push.NotificationType;
 import com.puppy.talk.websocket.ChatMessage;
@@ -63,85 +65,85 @@ public class InactivityNotificationService {
         
         log.info("Found {} eligible notifications to process", eligibleNotifications.size());
         
+        int successCount = 0;
         for (InactivityNotification notification : eligibleNotifications) {
-            processSingleNotification(notification);
+            if (processSingleNotificationSafely(notification)) {
+                successCount++;
+            }
         }
         
-        log.info("Processed {} inactivity notifications", eligibleNotifications.size());
+        log.info("Successfully processed {}/{} inactivity notifications", 
+            successCount, eligibleNotifications.size());
     }
 
     /**
+     * 단일 비활성 알림을 안전하게 처리합니다.
+     */
+    private boolean processSingleNotificationSafely(InactivityNotification notification) {
+        try {
+            return processSingleNotification(notification);
+        } catch (Exception e) {
+            log.error("Failed to process inactivity notification for chatRoomId={}: {}", 
+                notification.chatRoomId().id(), e.getMessage(), e);
+            return false;
+        }
+    }
+    
+    /**
      * 단일 비활성 알림을 처리합니다.
      */
-    private void processSingleNotification(InactivityNotification notification) {
+    private boolean processSingleNotification(InactivityNotification notification) {
         log.debug("Processing notification for chatRoomId={}", notification.chatRoomId().id());
         
-        // 채팅방 조회
-        Optional<ChatRoom> chatRoomOpt = chatRoomRepository.findByIdentity(notification.chatRoomId());
-        if (chatRoomOpt.isEmpty()) {
-            log.warn("ChatRoom not found for notification: {}", notification.chatRoomId().id());
-            return;
-        }
+        ChatRoom chatRoom = findChatRoomOrSkip(notification.chatRoomId());
+        if (chatRoom == null) return false;
         
-        ChatRoom chatRoom = chatRoomOpt.get();
+        Pet pet = findPetOrSkip(chatRoom.petId());
+        if (pet == null) return false;
         
-        // 펫 조회
-        Optional<Pet> petOpt = petRepository.findByIdentity(chatRoom.petId());
-        if (petOpt.isEmpty()) {
-            log.warn("Pet not found for chatRoom: {}", chatRoom.petId().id());
-            return;
-        }
+        String aiMessage = generateInactivityMessageWithFallback(pet, chatRoom);
         
-        Pet pet = petOpt.get();
+        // 알림 업데이트 및 메시지 저장
+        updateNotificationWithMessage(notification, aiMessage);
+        Message savedPetMessage = saveInactivityMessage(chatRoom.identity(), aiMessage);
         
-        // AI 메시지 생성
-        String aiMessage = generateInactivityMessage(pet, chatRoom);
+        // 실시간 통신 및 푸시 알림
+        sendRealtimeCommunications(chatRoom, pet, savedPetMessage, aiMessage);
         
-        // AI 메시지를 비활성 알림에 저장
-        InactivityNotification updatedNotification = notification.withAiGeneratedMessage(aiMessage);
-        inactivityNotificationRepository.save(updatedNotification);
-        
-        // 펫 메시지로 저장
-        Message petMessage = Message.of(
-            null, // identity는 저장 시 생성됨
-            chatRoom.identity(),
-            SenderType.PET,
-            aiMessage,
-            false, // 펫 메시지는 처음에 읽지 않음 상태
-            LocalDateTime.now()
-        );
-        
-        Message savedPetMessage = messageRepository.save(petMessage);
-        
-        // WebSocket을 통해 실시간 브로드캐스트
-        sendWebSocketMessage(chatRoom, pet, savedPetMessage, aiMessage);
-        
-        // 푸시 알림 전송
-        sendPushNotification(pet, aiMessage);
-        
-        // 알림을 SENT 상태로 변경
-        InactivityNotification sentNotification = updatedNotification.markAsSent();
-        inactivityNotificationRepository.save(sentNotification);
+        // 알림 상태 완료로 변경
+        markNotificationAsSent(notification, aiMessage);
         
         log.info("Successfully sent inactivity notification for chatRoomId={}, petName={}", 
             chatRoom.identity().id(), pet.name());
+        return true;
     }
 
+    /**
+     * 비활성 상황에 맞는 AI 메시지를 생성합니다 (Fallback 포함).
+     */
+    private String generateInactivityMessageWithFallback(Pet pet, ChatRoom chatRoom) {
+        try {
+            return generateInactivityMessage(pet, chatRoom);
+        } catch (Exception e) {
+            log.warn("AI inactivity message generation failed for pet={}, using fallback: {}", 
+                pet.name(), e.getMessage());
+            return createDefaultInactivityMessage(pet);
+        }
+    }
+    
     /**
      * 비활성 상황에 맞는 AI 메시지를 생성합니다.
      */
     private String generateInactivityMessage(Pet pet, ChatRoom chatRoom) {
-        // 페르소나 조회
+        // TODO: Replace with PersonaPort to resolve same-layer coupling
         Persona persona = personaLookUpService.findPersona(pet.personaId());
         
-        // 채팅 히스토리 조회 (최근 메시지들)
         List<Message> chatHistory = messageRepository
             .findByChatRoomIdOrderByCreatedAtDesc(chatRoom.identity())
             .stream()
             .limit(AI_CONTEXT_MESSAGE_LIMIT)
             .toList();
         
-        // AI 응답 생성
         return aiResponsePort.generateInactivityMessage(pet, persona, chatHistory);
     }
 
@@ -279,4 +281,52 @@ public class InactivityNotificationService {
         long sentCount,
         long disabledCount
     ) {}
+    
+    // === Helper Methods for Improved Readability and Error Handling ===
+    
+    private ChatRoom findChatRoomOrSkip(ChatRoomIdentity chatRoomId) {
+        Optional<ChatRoom> chatRoomOpt = chatRoomRepository.findByIdentity(chatRoomId);
+        if (chatRoomOpt.isEmpty()) {
+            log.warn("ChatRoom not found for notification: {}", chatRoomId.id());
+            return null;
+        }
+        return chatRoomOpt.get();
+    }
+    
+    private Pet findPetOrSkip(PetIdentity petId) {
+        Optional<Pet> petOpt = petRepository.findByIdentity(petId);
+        if (petOpt.isEmpty()) {
+            log.warn("Pet not found for petId: {}", petId.id());
+            return null;
+        }
+        return petOpt.get();
+    }
+    
+    private void updateNotificationWithMessage(InactivityNotification notification, String aiMessage) {
+        InactivityNotification updatedNotification = notification.withAiGeneratedMessage(aiMessage);
+        inactivityNotificationRepository.save(updatedNotification);
+    }
+    
+    private Message saveInactivityMessage(ChatRoomIdentity chatRoomId, String content) {
+        Message petMessage = Message.of(
+            null, // identity는 저장 시 생성됨
+            chatRoomId,
+            SenderType.PET,
+            content,
+            false, // 펫 메시지는 처음에 읽지 않음 상태
+            LocalDateTime.now()
+        );
+        return messageRepository.save(petMessage);
+    }
+    
+    private void sendRealtimeCommunications(ChatRoom chatRoom, Pet pet, Message savedMessage, String content) {
+        sendWebSocketMessage(chatRoom, pet, savedMessage, content);
+        sendPushNotification(pet, content);
+    }
+    
+    private void markNotificationAsSent(InactivityNotification notification, String aiMessage) {
+        InactivityNotification updatedNotification = notification.withAiGeneratedMessage(aiMessage);
+        InactivityNotification sentNotification = updatedNotification.markAsSent();
+        inactivityNotificationRepository.save(sentNotification);
+    }
 }
