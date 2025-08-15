@@ -6,6 +6,7 @@ dependencies {
     api project(':model')
     implementation project(':exception')
     implementation project(':infrastructure')
+    implementation project(':repository-jdbc')  // Layered Architecture: Service depends on Data Access Layer
     testImplementation project(':ai-service')
 
     // Spring Framework

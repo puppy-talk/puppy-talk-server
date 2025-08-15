@@ -4,9 +4,9 @@ plugins {
 
 dependencies {
     api project(':model')
-    api project(':infrastructure')
     implementation project(':exception')
-    
+    implementation project(':infrastructure')
+
     // Firebase Admin SDK
     implementation 'com.google.firebase:firebase-admin'
     
