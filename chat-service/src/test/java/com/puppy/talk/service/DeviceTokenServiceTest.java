@@ -124,10 +124,9 @@ class DeviceTokenServiceTest {
     @DisplayName("토큰 등록 시 필수값 검증 - 실패")
     void registerToken_ValidationFailure() {
         // When & Then
-        DeviceTokenRegistrationCommand nullUserIdCommand = DeviceTokenRegistrationCommand.of(null, deviceToken, deviceId, platform);
-        assertThatThrownBy(() -> deviceTokenService.registerOrUpdateToken(nullUserIdCommand))
+        assertThatThrownBy(() -> DeviceTokenRegistrationCommand.of(null, deviceToken, deviceId, platform))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("UserId cannot be null");
+            .hasMessage("Id cannot be null");
             
         DeviceTokenRegistrationCommand nullTokenCommand = DeviceTokenRegistrationCommand.of(1L, null, deviceId, platform);
         assertThatThrownBy(() -> deviceTokenService.registerOrUpdateToken(nullTokenCommand))

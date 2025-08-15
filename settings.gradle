@@ -38,5 +38,4 @@ include 'websocket-service'
 include 'event-service'
 
 // == Legacy Modules ==
-// Note: 'service' module to be removed after domain service migration
-include 'service'
+// REMOVED: 'service' module - domain service migration completed
