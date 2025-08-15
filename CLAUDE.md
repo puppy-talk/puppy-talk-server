@@ -5,8 +5,8 @@ repository.
 
 ## 개요
 
-**Puppy Talk**은 생성형 AI 기반 반려동물 채팅 서비스의 백엔드 서버입니다. Java Spring Boot 멀티모듈 프로젝트로 **Hexagonal
-Architecture (Ports and Adapters Architecture)** 패턴을 기반으로 설계되었습니다.
+**Puppy Talk**은 생성형 AI 기반 반려동물 채팅 서비스의 백엔드 서버입니다. Java Spring Boot 멀티모듈 프로젝트로 **Layered
+Architecture** 패턴을 기반으로 설계되었습니다.
 
 ### 핵심 비즈니스 기능
 
@@ -68,80 +68,120 @@ cd scripts && sh build.sh
 ./gradlew {module-name}:test --tests {TestClassName}.{methodName}
 ```
 
-## Hexagonal Architecture 구조
+## Layered Architecture 구조
 
 ### 핵심 아키텍처 원칙
 
-1. **의존성 역전**: Service는 Infrastructure 구현체가 아닌 인터페이스에 의존
-2. **단방향 의존**: 상위 레이어는 하위 레이어를 의존하지만 역방향 불가
-3. **순수 도메인**: Model과 Exception은 외부 의존성 없음
-4. **포트와 어댑터**: Infrastructure 모듈은 포트(인터페이스)만 정의, 구현은 별도 모듈
+1. **계층 분리**: 각 계층은 명확한 책임을 가지며 단일 관심사에 집중
+2. **단방향 의존성**: 상위 계층만 하위 계층을 의존 (역방향 의존 금지)
+3. **의존성 역전**: 상위 계층은 하위 계층의 추상화(인터페이스)에 의존
+4. **계층별 응집도**: 같은 계층 내 모듈들은 유사한 책임과 추상화 수준
 
-### 레이어별 역할
+### 계층별 역할 (상위 → 하위)
 
-**Domain Layer (핵심 비즈니스)**
+**Application Layer (애플리케이션 계층)**
 
-- `model/`: 도메인 엔티티 (Pet, PetIdentity, User, Persona, ChatRoom, Message) - 외부 의존성 없음
+- `application-api/`: Spring Boot 애플리케이션 부트스트랩, 전체 시스템 조립
+
+**Presentation Layer (프레젠테이션 계층)**
+
+- `api/`: REST API 컨트롤러, DTO, 외부 요청 처리 및 응답 변환
+
+**Business Logic Layer (비즈니스 로직 계층)**
+
+- `service/`: 핵심 비즈니스 로직, 유스케이스 구현
+- `ai-service/`: AI 제공업체 통합 서비스
+- `push-service/`: 푸시 알림 서비스
+
+**Data Access Layer (데이터 접근 계층)**
+
+- `infrastructure/`: 데이터 접근 인터페이스 정의 (Repository 인터페이스)
+- `repository-jdbc/`: JDBC 기반 데이터 액세스 구현체
+
+**Domain Layer (도메인 계층)**
+
+- `model/`: 순수 도메인 엔티티 (Pet, User, Persona, ChatRoom, Message) - 외부 의존성 없음
 - `exception/`: 도메인 예외 (PetNotFoundException) - model 모듈만 의존
 
-**Application Layer (비즈니스 로직)**
+**Infrastructure Layer (인프라스트럭처 계층)**
 
-- `service/`: 유스케이스 구현 - Infrastructure 포트를 통해 외부 시스템과 통신
-- `infrastructure/`: 포트 정의 (Repository 인터페이스) - 구현체는 포함하지 않음
+- `schema/`: 데이터베이스 스키마 관리 (Liquibase)
 
-**Adapter Layer (외부 시스템 연동)**
-
-- `api/`: HTTP 어댑터 (Controllers, DTOs) - Service에 의존
-- `repository-jdbc/`: JDBC 어댑터 - Infrastructure 포트 구현
-
-**Infrastructure Layer**
-
-- `application-api/`: 스프링 부트 애플리케이션 구성 및 의존성 와이어링
-- `schema/`: Liquibase를 통한 데이터베이스 스키마 관리
-
-### 모듈 간 의존성 관계
+### 모듈 간 의존성 관계 (계층형)
 
 ```mermaid
 flowchart TD
-    model["model<br/>🎯 도메인 모델"]
-    exception["exception<br/>🚨 도메인 예외"]
-    service["service<br/>🔧 비즈니스 로직"]
-    infrastructure["infrastructure<br/>🔌 인터페이스"]
-    repository["repository-jdbc<br/>💾 데이터 접근"]
-    api["api<br/>🌐 REST API"]
-    application["application-api<br/>🚀 부트스트랩"]
-    schema["schema<br/>📊 DB 스키마"]
-%% Domain Layer (순수 비즈니스 로직)
-    exception -->|api| model
-%% Service Layer (비즈니스 로직 구현)
-    service -->|api| model
-    service -->|implementation| infrastructure
-    service -->|implementation| exception
-%% Infrastructure Layer (인터페이스 정의)
-    infrastructure -->|api| model
-%% Repository Layer (데이터 접근 구현체)
-    repository -.->|implements| infrastructure
-%% API Layer (REST 엔드포인트)
-    api -->|implementation| service
-    api -->|implementation| exception
-%% Application Layer (부트스트랩)
-    application -->|implementation| api
-    application -->|implementation| repository
-%% Schema (독립적, 런타임 의존성만)
+    %% Layered Architecture Structure
+    subgraph "🚀 Application Layer"
+        application["application-api<br/>Spring Boot Bootstrap"]
+    end
+    
+    subgraph "🌐 Presentation Layer"
+        api["api<br/>REST Controllers & DTOs"]
+    end
+    
+    subgraph "🔧 Business Logic Layer"
+        service["service<br/>Business Services"]
+        aiService["ai-service<br/>AI Integration"]
+        pushService["push-service<br/>Push Notifications"]
+    end
+    
+    subgraph "💾 Data Access Layer"
+        infrastructure["infrastructure<br/>Repository Interfaces"]
+        repository["repository-jdbc<br/>JDBC Implementation"]
+    end
+    
+    subgraph "🎯 Domain Layer"
+        model["model<br/>Domain Entities"]
+        exception["exception<br/>Domain Exceptions"]
+    end
+    
+    subgraph "📊 Infrastructure Layer"
+        schema["schema<br/>Database Schema"]
+    end
 
-%% 스타일링
-    classDef domainLayer fill: #e1f5fe
-    classDef serviceLayer fill: #f3e5f5
-    classDef drivingLayer fill: #e8f5e8
-    classDef drivenLayer fill: #fff3e0
-    classDef bootstrapLayer fill: #fce4ec
-    classDef schemaLayer fill: #f1f8e9
-    class model, exception domainLayer
-    class service serviceLayer
-    class api drivingLayer
-    class infrastructure, repository drivenLayer
-    class application bootstrapLayer
-    class schema schemaLayer
+    %% Top-down dependencies only
+    application --> api
+    application --> service
+    application --> aiService
+    application --> pushService
+    application --> repository
+    application --> schema
+    
+    api --> service
+    api --> exception
+    
+    service --> repository
+    service --> infrastructure
+    service --> model
+    service --> exception
+    
+    aiService --> model
+    aiService --> exception
+    
+    pushService --> model
+    pushService --> exception
+    
+    repository --> infrastructure
+    repository --> model
+    
+    infrastructure --> model
+    exception --> model
+
+    %% Layer styling
+    classDef applicationLayer fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    classDef presentationLayer fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef businessLayer fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef dataLayer fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef domainLayer fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef infrastructureLayer fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+    
+    class application applicationLayer
+    class api presentationLayer
+    class service,aiService,pushService businessLayer
+    class infrastructure,repository dataLayer
+    class model,exception domainLayer
+    class schema infrastructureLayer
 ```
 
 ## 기술적 특징
