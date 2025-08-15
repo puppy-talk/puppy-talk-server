@@ -2,27 +2,31 @@ plugins {
     id 'java-library'
 }
 
+// API Layer - REST controllers and DTOs for external communication
+
 dependencies {
+    // Exception handling for HTTP responses
     implementation project(':exception')
     
-    // Domain Services
-    implementation project(':auth-service')
-    implementation project(':chat-service')
-    implementation project(':pet-service')
-    implementation project(':user-service')
-    implementation project(':notification-service')
-    implementation project(':websocket-service')
+    // Domain Services - all business services integrated at API layer
+    implementation project(':auth-service')        // Authentication endpoints
+    implementation project(':chat-service')        // Chat messaging endpoints
+    implementation project(':pet-service')         // Pet management endpoints
+    implementation project(':user-service')        // User profile endpoints
+    implementation project(':notification-service') // Notification endpoints
+    implementation project(':websocket-service')   // WebSocket endpoints
 
-    // Spring Boot Starters
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // Spring Web Stack - migrated to Version Catalog
+    implementation libs.spring.boot.starter.web
+    implementation libs.spring.boot.starter.validation
+    implementation libs.spring.messaging
+    // Using spring-web-stack bundle for coordinated web dependencies
     
-    // Spring Framework
-    implementation 'org.springframework:spring-messaging'
+    // API Documentation - migrated to Version Catalog
+    implementation libs.springdoc.openapi
     
-    // External Libraries
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui'
-    
-    // Testing
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // Testing - migrated to Version Catalog
+    testImplementation libs.spring.boot.starter.test
+    // Common testing dependencies inherited from root build.gradle
+    // Using testing.basic bundle for standard testing setup
 }

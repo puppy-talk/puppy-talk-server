@@ -1,5 +1,21 @@
 rootProject.name = 'puppy-talk-server'
 
+// Repository configuration for dependency resolution
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+        maven { 
+            name = "Spring Milestones"
+            url = uri('https://repo.spring.io/milestone') 
+        }
+        maven { 
+            name = "Spring Snapshots"
+            url = uri('https://repo.spring.io/snapshot') 
+        }
+    }
+}
+
+// == Core Domain Modules ==
 include 'model'
 include 'exception'
 include 'infrastructure'
@@ -8,11 +24,11 @@ include 'api'
 include 'application-api'
 include 'schema'
 
-// AI and External Services
+// == External Services ==
 include 'ai-service'
 include 'push-service'
 
-// Domain Services
+// == Domain Services ==
 include 'auth-service'
 include 'chat-service'
 include 'pet-service'
@@ -21,6 +37,6 @@ include 'notification-service'
 include 'websocket-service'
 include 'event-service'
 
-// Legacy service module (to be removed after migration)
+// == Legacy Modules ==
+// Note: 'service' module to be removed after domain service migration
 include 'service'
-

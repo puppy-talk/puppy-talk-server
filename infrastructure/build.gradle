@@ -3,5 +3,9 @@ plugins {
 }
 
 dependencies {
-    api project(':model')
+    // Infrastructure layer - defines repository interfaces
+    api project(':model')  // API exposure: repositories return domain entities
+    
+    // Version Catalog ready: Port/adapter interfaces require no external dependencies
+    // Common development tools inherited from root build.gradle
 }

@@ -1,8 +1,11 @@
 plugins {
     id 'java-library'
-    id 'org.springframework.boot' version '3.4.0'
-    id 'io.spring.dependency-management' version '1.1.6'
+    // Migrated to Version Catalog plugin references
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dependency.management)
 }
+
+// Main Application - Spring Boot executable JAR with all services integrated
 
 java {
     sourceCompatibility = '21'
@@ -18,36 +21,42 @@ bootJar {
 }
 
 dependencies {
-    implementation project(':api')
-    implementation project(':repository-jdbc')
-    api project(':schema')
+    // Application assembly - integrates all layers
+    implementation project(':api')            // REST API layer
+    implementation project(':repository-jdbc') // Data access implementation
+    api project(':schema')                   // Database schema (exposed for migrations)
     
-    // Domain Services
-    implementation project(':auth-service')
-    implementation project(':chat-service')
-    implementation project(':pet-service')
-    implementation project(':user-service')
-    implementation project(':notification-service')
-    implementation project(':websocket-service')
-    implementation project(':event-service')
+    // Domain Services - all business logic modules
+    implementation project(':auth-service')        // Authentication service
+    implementation project(':chat-service')        // Chat messaging service
+    implementation project(':pet-service')         // Pet management service
+    implementation project(':user-service')        // User profile service
+    implementation project(':notification-service') // Notification service
+    implementation project(':websocket-service')   // Real-time messaging service
+    implementation project(':event-service')       // Event publishing service
     
-    // External Services
-    implementation project(':ai-service')
-    implementation project(':push-service')
+    // External Services - third-party integrations
+    implementation project(':ai-service')    // AI provider integration
+    implementation project(':push-service')  // Push notification integration
 
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    // Spring Boot Application Stack - migrated to Version Catalog
+    implementation libs.spring.boot.starter.web
+    implementation libs.spring.boot.starter.jdbc
+    implementation libs.spring.boot.starter.actuator
+    implementation libs.spring.boot.starter.websocket
     
-    // SpringDoc OpenAPI 3 (Swagger)
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui'
+    // API Documentation - migrated to Version Catalog
+    implementation libs.springdoc.openapi
 
-    implementation 'org.mariadb.jdbc:mariadb-java-client'
+    // Database Driver - migrated to Version Catalog
+    implementation libs.mariadb.client
     
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    // Development Tools - inherited from root build.gradle (lombok, slf4j)
+    // Centralized dependency management reduces duplication
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'com.h2database:h2'
+    // Testing - migrated to Version Catalog bundles
+    testImplementation libs.spring.boot.starter.test
+    testImplementation libs.h2  // In-memory test database
+    // Common testing dependencies inherited from root build.gradle
+    // Using testing.database bundle for comprehensive database testing
 }

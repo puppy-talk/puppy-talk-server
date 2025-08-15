@@ -9,20 +9,20 @@ dependencies {
     implementation project(':repository-jdbc')  // Layered Architecture: Service depends on Data Access Layer
     testImplementation project(':ai-service')
 
-    // Spring Framework
-    implementation 'org.springframework:spring-context'
-    implementation 'org.springframework:spring-tx'
-    implementation 'org.springframework.boot:spring-boot-autoconfigure'
-    implementation 'org.springframework:spring-messaging'
+    // Spring Framework - migrated to Version Catalog bundles
+    implementation libs.bundles.spring.core  // spring-context, spring-tx
+    implementation libs.spring.boot.autoconfigure
+    implementation libs.spring.messaging
+    // Consolidated Spring dependencies using bundles
     
-    // JWT (without Spring Security)
-    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
-    implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
-    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+    // JWT (without Spring Security) - migrated to Version Catalog bundles
+    implementation libs.bundles.jwt.auth  // jjwt-api, jjwt-impl, jjwt-jackson
+    // Consolidated JWT dependencies using bundle
     
-    // Guava for password hashing
-    implementation 'com.google.guava:guava'
+    // Guava utilities - migrated to Version Catalog
+    implementation libs.guava
     
-    // Testing
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // Testing - migrated to Version Catalog
+    testImplementation libs.spring.boot.starter.test
+    // Common testing dependencies inherited from root build.gradle
 }

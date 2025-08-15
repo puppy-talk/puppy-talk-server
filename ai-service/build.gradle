@@ -2,19 +2,24 @@ plugins {
     id 'java-library'
 }
 
-dependencies {
-    api project(':model')
-    implementation project(':exception')
-    implementation project(':infrastructure')
+// AI Service - Multi-provider AI integration (OpenAI, Claude, Gemini, local models)
 
-    // Spring Framework
-    implementation 'org.springframework:spring-context'
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation 'org.springframework.boot:spring-boot-autoconfigure'
+dependencies {
+    // Core modules
+    api project(':model')                    // Exposes AI response entities
+    implementation project(':exception')     // Uses AI-specific exceptions
+    implementation project(':infrastructure') // Uses repository interfaces
+
+    // Spring Framework - migrated to Version Catalog
+    implementation libs.spring.context
+    implementation libs.spring.boot.starter.webflux
+    implementation libs.spring.boot.autoconfigure
     
-    // JSON processing
-    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    // JSON Processing - migrated to Version Catalog
+    implementation libs.jackson.databind
+    // AI service uses JSON for API communication with external providers
     
-    // Testing
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // Testing - migrated to Version Catalog
+    testImplementation libs.spring.boot.starter.test
+    // Common testing dependencies inherited from root build.gradle
 }

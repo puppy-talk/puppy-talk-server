@@ -21,6 +21,7 @@
   <include file="changes/011-create-device-tokens-table.xml" relativeToChangelogFile="true"/>
   <include file="changes/012-create-push-notifications-table.xml" relativeToChangelogFile="true"/>
   <include file="changes/013-insert-sample-users.xml" relativeToChangelogFile="true"/>
-  <include file="changes/014-insert-sample-pets.xml" relativeToChangelogFile="true"/>
+  <!-- TODO: Create 014-insert-sample-pets.xml file -->
+  <!-- <include file="changes/014-insert-sample-pets.xml" relativeToChangelogFile="true"/> -->
 
 </databaseChangeLog>
