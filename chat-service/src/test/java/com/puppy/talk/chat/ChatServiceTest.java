@@ -18,7 +18,7 @@ import com.puppy.talk.chat.ChatService;
 import com.puppy.talk.dto.ChatStartResult;
 import com.puppy.talk.dto.MessageSendResult;
 import com.puppy.talk.notification.RealtimeNotificationPort;
-import com.puppy.talk.pet.PersonaLookUpService;
+import com.puppy.talk.pet.PersonaRepository;
 import com.puppy.talk.pet.PetNotFoundException;
 import com.puppy.talk.chat.ActivityTrackingService;
 import com.puppy.talk.chat.command.MessageSendCommand;
@@ -41,7 +41,7 @@ class ChatServiceTest {
     private ChatRoomRepository chatRoomRepository;
     private MessageRepository messageRepository;
     private PetRepository petRepository;
-    private PersonaLookUpService personaLookUpService;
+    private PersonaRepository personaRepository;
     private AiResponsePort aiResponsePort;
     private RealtimeNotificationPort realtimeNotificationPort;
     private ActivityTrackingService activityTrackingService;
@@ -59,7 +59,7 @@ class ChatServiceTest {
         chatRoomRepository = new MockChatRoomRepository();
         messageRepository = new MockMessageRepository();
         petRepository = new MockPetRepository();
-        personaLookUpService = new MockPersonaLookUpService();
+        personaRepository = new MockPersonaRepository();
         aiResponsePort = new MockAiResponsePort();
         realtimeNotificationPort = new MockRealtimeNotificationPort();
         activityTrackingService = new MockActivityTrackingService();
@@ -71,7 +71,7 @@ class ChatServiceTest {
             messageRepository,
             aiResponsePort,
             realtimeNotificationPort,
-            personaLookUpService,
+            personaRepository,
             activityTrackingService
         );
         
@@ -182,7 +182,7 @@ class ChatServiceTest {
             true
         );
         
-        ((MockPersonaLookUpService) personaLookUpService).setPersona(mockPersona);
+        ((MockPersonaRepository) personaRepository).setPersona(mockPersona);
         ((MockMessageRepository) messageRepository).setMessages(List.of());
         
         // When
@@ -394,7 +394,7 @@ class ChatServiceTest {
         }
     }
     
-    private static class MockPersonaLookUpService implements PersonaLookUpService {
+    private static class MockPersonaRepository implements PersonaRepository {
         private Persona persona;
         
         public void setPersona(Persona persona) {
@@ -402,28 +402,28 @@ class ChatServiceTest {
         }
         
         @Override
-        public Persona findPersona(PersonaIdentity personaId) {
-            return persona;
+        public Optional<Persona> findByIdentity(PersonaIdentity identity) {
+            return Optional.ofNullable(persona);
         }
         
         @Override
-        public List<Persona> findActivePersonas() {
+        public List<Persona> findAll() {
             return persona != null ? List.of(persona) : List.of();
         }
         
         @Override
-        public Persona createPersona(Persona persona) {
+        public List<Persona> findByIsActive(boolean isActive) {
+            return persona != null ? List.of(persona) : List.of();
+        }
+        
+        @Override
+        public Persona save(Persona persona) {
             return persona;
         }
         
         @Override
-        public void deletePersona(PersonaIdentity personaId) {
-            // Mock implementation
-        }
-        
-        @Override
-        public List<Persona> findAllPersonas() {
-            return persona != null ? List.of(persona) : List.of();
+        public void deleteByIdentity(PersonaIdentity identity) {
+            // Mock implementation - do nothing
         }
     }
     
