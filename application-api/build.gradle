@@ -19,11 +19,21 @@ bootJar {
 
 dependencies {
     implementation project(':api')
-    implementation project(':service')
-    implementation project(':ai-service')
-    implementation project(':push-service')
     implementation project(':repository-jdbc')
     api project(':schema')
+    
+    // Domain Services
+    implementation project(':auth-service')
+    implementation project(':chat-service')
+    implementation project(':pet-service')
+    implementation project(':user-service')
+    implementation project(':notification-service')
+    implementation project(':websocket-service')
+    implementation project(':event-service')
+    
+    // External Services
+    implementation project(':ai-service')
+    implementation project(':push-service')
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'

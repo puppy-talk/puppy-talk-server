@@ -2,12 +2,25 @@ rootProject.name = 'puppy-talk-server'
 
 include 'model'
 include 'exception'
-include 'service'
-include 'ai-service'
-include 'push-service'
 include 'infrastructure'
 include 'repository-jdbc'
 include 'api'
 include 'application-api'
 include 'schema'
+
+// AI and External Services
+include 'ai-service'
+include 'push-service'
+
+// Domain Services
+include 'auth-service'
+include 'chat-service'
+include 'pet-service'
+include 'user-service'
+include 'notification-service'
+include 'websocket-service'
+include 'event-service'
+
+// Legacy service module (to be removed after migration)
+include 'service'
 

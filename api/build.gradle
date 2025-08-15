@@ -3,8 +3,15 @@ plugins {
 }
 
 dependencies {
-    implementation project(':service')
     implementation project(':exception')
+    
+    // Domain Services
+    implementation project(':auth-service')
+    implementation project(':chat-service')
+    implementation project(':pet-service')
+    implementation project(':user-service')
+    implementation project(':notification-service')
+    implementation project(':websocket-service')
 
     // Spring Boot Starters
     implementation 'org.springframework.boot:spring-boot-starter-web'
