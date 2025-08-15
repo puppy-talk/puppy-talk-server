@@ -9,6 +9,7 @@ import com.puppy.talk.pet.PetIdentity;
 import com.puppy.talk.dto.ChatStartResult;
 import com.puppy.talk.dto.MessageSendResult;
 import com.puppy.talk.chat.command.MessageSendCommand;
+import com.puppy.talk.facade.ChatFacade;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -26,6 +27,7 @@ import java.util.List;
 public class ChatController {
 
     private final ChatService chatService;
+    private final ChatFacade chatFacade; // Facade 패턴 적용
 
     @PostMapping("/start/{petId}")
     @Operation(summary = "채팅 시작", description = "지정된 반려동물과 채팅을 시작합니다.")
