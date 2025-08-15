@@ -55,52 +55,23 @@ public class PushNotificationService {
         String data,
         LocalDateTime scheduledAt
     ) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId cannot be null");
-        }
-        if (notificationType == null) {
-            throw new IllegalArgumentException("NotificationType cannot be null");
-        }
-        if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Title cannot be null or empty");
-        }
-        if (message == null || message.trim().isEmpty()) {
-            throw new IllegalArgumentException("Message cannot be null or empty");
-        }
+        validateNotificationInput(userId, notificationType, title, message);
         
         log.debug("Sending push notification to user={}, type={}", userId.id(), notificationType);
         
-        // 사용자의 활성 디바이스 토큰들 조회
-        List<DeviceToken> activeTokens = deviceTokenRepository.findActiveByUserId(userId);
-        
+        List<DeviceToken> activeTokens = getActiveTokensForUser(userId);
         if (activeTokens.isEmpty()) {
-            log.warn("No active device tokens found for user: {}", userId.id());
             return;
         }
         
-        // 각 디바이스 토큰에 대해 푸시 알림 생성 및 전송
-        for (DeviceToken deviceToken : activeTokens) {
-            PushNotification notification = PushNotification.of(
-                userId,
-                deviceToken.token(),
-                notificationType,
-                title,
-                message,
-                data,
-                scheduledAt
-            );
-            
-            // 푸시 알림 저장
-            PushNotification savedNotification = pushNotificationRepository.save(notification);
-            
-            // 즉시 전송인 경우 바로 전송 처리
-            if (scheduledAt.isBefore(LocalDateTime.now().plusMinutes(1))) {
-                processSingleNotification(savedNotification);
-            }
-        }
+        List<PushNotification> notifications = createNotificationsForTokens(
+            userId, notificationType, title, message, data, scheduledAt, activeTokens
+        );
         
-        log.info("Created push notifications for user={}, devices={}, type={}", 
-            userId.id(), activeTokens.size(), notificationType);
+        processImmediateNotifications(notifications, scheduledAt);
+        
+        log.info("Created {} push notifications for user={}, type={}", 
+            notifications.size(), userId.id(), notificationType);
     }
     
     /**
@@ -121,11 +92,10 @@ public class PushNotificationService {
         
         log.info("Found {} pending push notifications to process", pendingNotifications.size());
         
-        for (PushNotification notification : pendingNotifications) {
-            processSingleNotification(notification);
-        }
+        int successCount = processBatchNotifications(pendingNotifications);
         
-        log.info("Processed {} push notifications", pendingNotifications.size());
+        log.info("Successfully processed {}/{} push notifications", 
+            successCount, pendingNotifications.size());
     }
     
     /**
@@ -197,12 +167,99 @@ public class PushNotificationService {
         
         pushNotificationRepository.findByIdentity(
             PushNotificationIdentity.of(notificationId)
-        ).ifPresent(notification -> {
-            PushNotification receivedNotification = notification.markAsReceived();
-            pushNotificationRepository.save(receivedNotification);
-            
-            log.debug("Marked push notification as received: {}", notificationId);
-        });
+        ).ifPresentOrElse(
+            this::updateNotificationAsReceived,
+            () -> log.warn("Push notification not found for ID: {}", notificationId)
+        );
+    }
+    
+    /**
+     * 입력값을 검증합니다.
+     */
+    private void validateNotificationInput(UserIdentity userId, NotificationType notificationType, 
+                                         String title, String message) {
+        if (userId == null) {
+            throw new IllegalArgumentException("UserId cannot be null");
+        }
+        if (notificationType == null) {
+            throw new IllegalArgumentException("NotificationType cannot be null");
+        }
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("Title cannot be null or empty");
+        }
+        if (message == null || message.trim().isEmpty()) {
+            throw new IllegalArgumentException("Message cannot be null or empty");
+        }
+    }
+    
+    /**
+     * 사용자의 활성 디바이스 토큰을 조회합니다.
+     */
+    private List<DeviceToken> getActiveTokensForUser(UserIdentity userId) {
+        List<DeviceToken> activeTokens = deviceTokenRepository.findActiveByUserId(userId);
+        
+        if (activeTokens.isEmpty()) {
+            log.warn("No active device tokens found for user: {}", userId.id());
+        }
+        
+        return activeTokens;
+    }
+    
+    /**
+     * 디바이스 토큰들에 대한 푸시 알림을 생성합니다.
+     */
+    private List<PushNotification> createNotificationsForTokens(
+            UserIdentity userId, NotificationType notificationType, String title, 
+            String message, String data, LocalDateTime scheduledAt, List<DeviceToken> tokens) {
+        
+        return tokens.stream()
+            .map(token -> {
+                PushNotification notification = PushNotification.of(
+                    userId, token.token(), notificationType, title, message, data, scheduledAt
+                );
+                return pushNotificationRepository.save(notification);
+            })
+            .toList();
+    }
+    
+    /**
+     * 즉시 전송 대상인 알림들을 처리합니다.
+     */
+    private void processImmediateNotifications(List<PushNotification> notifications, LocalDateTime scheduledAt) {
+        LocalDateTime threshold = LocalDateTime.now().plusMinutes(1);
+        
+        if (scheduledAt.isBefore(threshold)) {
+            notifications.forEach(this::processSingleNotification);
+        }
+    }
+    
+    /**
+     * 배치로 알림들을 처리합니다.
+     */
+    private int processBatchNotifications(List<PushNotification> notifications) {
+        int successCount = 0;
+        
+        for (PushNotification notification : notifications) {
+            try {
+                processSingleNotification(notification);
+                successCount++;
+            } catch (Exception e) {
+                log.error("Failed to process notification in batch: {}", 
+                    notification.identity().id(), e);
+            }
+        }
+        
+        return successCount;
+    }
+    
+    /**
+     * 알림을 수신됨으로 업데이트합니다.
+     */
+    private void updateNotificationAsReceived(PushNotification notification) {
+        PushNotification receivedNotification = notification.markAsReceived();
+        pushNotificationRepository.save(receivedNotification);
+        
+        log.debug("Marked push notification as received: {}", notification.identity().id());
     }
     
     /**

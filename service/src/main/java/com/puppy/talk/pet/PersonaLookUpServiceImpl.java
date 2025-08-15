@@ -10,6 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class PersonaLookUpServiceImpl implements PersonaLookUpService {
 
     private final PersonaRepository personaRepository;
+    
+    // TODO: Consider adding caching for frequently accessed personas
+    // @Cacheable("personas") could improve performance for read operations
 
     @Override
     @Transactional(readOnly = true)
@@ -39,6 +42,10 @@ public class PersonaLookUpServiceImpl implements PersonaLookUpService {
         if (persona == null) {
             throw new IllegalArgumentException("Persona cannot be null");
         }
+        
+        // TODO: Add validation for persona business rules
+        // e.g., duplicate name checks, persona template validation
+        
         return personaRepository.save(persona);
     }
 
@@ -48,9 +55,11 @@ public class PersonaLookUpServiceImpl implements PersonaLookUpService {
         if (identity == null) {
             throw new IllegalArgumentException("Identity cannot be null");
         }
-        if (!personaRepository.findByIdentity(identity).isPresent()) {
-            throw new PersonaNotFoundException(identity);
-        }
-        personaRepository.deleteByIdentity(identity);
+        
+        personaRepository.findByIdentity(identity)
+            .ifPresentOrElse(
+                persona -> personaRepository.deleteByIdentity(identity),
+                () -> { throw new PersonaNotFoundException(identity); }
+            );
     }
 }

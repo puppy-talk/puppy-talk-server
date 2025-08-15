@@ -1,5 +1,7 @@
 package com.puppy.talk.ai;
 
+import com.puppy.talk.ai.AiResponseGenerationException;
+import com.puppy.talk.ai.AiResponsePort;
 import com.puppy.talk.ai.provider.AiProvider;
 import com.puppy.talk.ai.provider.AiProviderFactory;
 import com.puppy.talk.ai.provider.dto.AiRequest;

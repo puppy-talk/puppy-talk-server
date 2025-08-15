@@ -24,28 +24,31 @@ public class MessageLookUpServiceImpl implements MessageLookUpService {
     @Override
     @Transactional(readOnly = true)
     public List<Message> findMessagesByChatRoomId(ChatRoomIdentity chatRoomId) {
-        if (chatRoomId == null) {
-            throw new IllegalArgumentException("ChatRoomId cannot be null");
-        }
+        validateChatRoomId(chatRoomId);
         return messageRepository.findByChatRoomId(chatRoomId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Message> findMessagesByChatRoomIdOrderByCreatedAtDesc(ChatRoomIdentity chatRoomId) {
-        if (chatRoomId == null) {
-            throw new IllegalArgumentException("ChatRoomId cannot be null");
-        }
+        validateChatRoomId(chatRoomId);
         return messageRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Message> findUnreadMessagesByChatRoomId(ChatRoomIdentity chatRoomId) {
+        validateChatRoomId(chatRoomId);
+        return messageRepository.findUnreadMessagesByChatRoomId(chatRoomId);
+    }
+    
+    /**
+     * ChatRoomId 유효성을 검증합니다.
+     */
+    private void validateChatRoomId(ChatRoomIdentity chatRoomId) {
         if (chatRoomId == null) {
             throw new IllegalArgumentException("ChatRoomId cannot be null");
         }
-        return messageRepository.findUnreadMessagesByChatRoomId(chatRoomId);
     }
 
     @Override
@@ -63,10 +66,12 @@ public class MessageLookUpServiceImpl implements MessageLookUpService {
         if (identity == null) {
             throw new IllegalArgumentException("Identity cannot be null");
         }
-        if (!messageRepository.findByIdentity(identity).isPresent()) {
-            throw new MessageNotFoundException(identity);
-        }
-        messageRepository.markAsRead(identity);
+        
+        messageRepository.findByIdentity(identity)
+            .ifPresentOrElse(
+                message -> messageRepository.markAsRead(identity),
+                () -> { throw new MessageNotFoundException(identity); }
+            );
     }
 
     @Override
@@ -84,9 +89,11 @@ public class MessageLookUpServiceImpl implements MessageLookUpService {
         if (identity == null) {
             throw new IllegalArgumentException("Identity cannot be null");
         }
-        if (!messageRepository.findByIdentity(identity).isPresent()) {
-            throw new MessageNotFoundException(identity);
-        }
-        messageRepository.deleteByIdentity(identity);
+        
+        messageRepository.findByIdentity(identity)
+            .ifPresentOrElse(
+                message -> messageRepository.deleteByIdentity(identity),
+                () -> { throw new MessageNotFoundException(identity); }
+            );
     }
 }
