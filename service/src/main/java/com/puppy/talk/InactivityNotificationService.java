@@ -135,7 +135,6 @@ public class InactivityNotificationService {
      * 비활성 상황에 맞는 AI 메시지를 생성합니다.
      */
     private String generateInactivityMessage(Pet pet, ChatRoom chatRoom) {
-        // TODO: Replace with PersonaPort to resolve same-layer coupling
         Persona persona = personaLookUpService.findPersona(pet.personaId());
         
         List<Message> chatHistory = messageRepository

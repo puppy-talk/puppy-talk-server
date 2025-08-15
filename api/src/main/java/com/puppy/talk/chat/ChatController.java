@@ -6,6 +6,8 @@ import com.puppy.talk.chat.dto.response.MessageResponse;
 import com.puppy.talk.chat.dto.request.MessageSendRequest;
 import com.puppy.talk.chat.dto.response.MessageSendResponse;
 import com.puppy.talk.pet.PetIdentity;
+import com.puppy.talk.chat.ChatRoomIdentity;
+import com.puppy.talk.chat.Message;
 import com.puppy.talk.dto.ChatStartResult;
 import com.puppy.talk.dto.MessageSendResult;
 import com.puppy.talk.chat.command.MessageSendCommand;

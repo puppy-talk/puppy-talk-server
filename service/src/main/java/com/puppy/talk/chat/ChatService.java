@@ -35,7 +35,6 @@ public class ChatService {
     private final MessageRepository messageRepository;
     private final AiResponsePort aiResponsePort;
     private final RealtimeNotificationPort realtimeNotificationPort;
-    // TODO: Replace with PersonaPort interface to resolve same-layer coupling
     private final PersonaLookUpService personaLookUpService;
     private final ActivityTrackingService activityTrackingService;
 
@@ -201,7 +200,6 @@ public class ChatService {
     }
     
     private String generateAiResponse(Pet pet, String userMessage, ChatRoomIdentity chatRoomId) {
-        // TODO: Replace with PersonaPort to resolve same-layer coupling
         Persona persona = personaLookUpService.findPersona(pet.personaId());
         
         List<Message> chatHistory = messageRepository

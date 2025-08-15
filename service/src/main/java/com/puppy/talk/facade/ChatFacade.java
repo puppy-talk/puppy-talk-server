@@ -1,8 +1,13 @@
 package com.puppy.talk.facade;
 
 import com.puppy.talk.chat.ChatService;
+import com.puppy.talk.chat.ChatRoom;
 import com.puppy.talk.chat.ChatRoomIdentity;
+import com.puppy.talk.chat.ChatRoomNotFoundException;
 import com.puppy.talk.chat.ActivityTrackingService;
+import com.puppy.talk.chat.MessageRepository;
+import com.puppy.talk.chat.ChatRoomRepository;
+import com.puppy.talk.pet.PetRepository;
 import com.puppy.talk.pet.PersonaLookUpService;
 import com.puppy.talk.pet.PetIdentity;
 import com.puppy.talk.pet.Pet;
@@ -35,6 +40,9 @@ public class ChatFacade {
     private final PersonaLookUpService personaLookUpService;
     private final ActivityTrackingService activityTrackingService;
     private final DomainEventPublisher domainEventPublisher;
+    private final PetRepository petRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final MessageRepository messageRepository;
 
     /**
      * 펫과의 채팅을 시작하면서 페르소나 정보도 함께 로드합니다.
@@ -110,10 +118,27 @@ public class ChatFacade {
     public java.util.List<EnrichedChatRoomInfo> getUserChatRoomsWithPersona(UserIdentity userId) {
         log.debug("Getting chat rooms with persona for user: {}", userId.id());
         
-        // 이 메서드는 예시로, 실제 구현을 위해서는 추가 repository 메서드가 필요합니다
-        // 현재는 구조만 보여주는 용도입니다
+        // 사용자의 모든 펫 조회
+        java.util.List<Pet> userPets = petRepository.findByUserId(userId);
         
-        return java.util.List.of(); // TODO: 실제 구현 필요
+        return userPets.stream()
+            .map(pet -> {
+                // 각 펫의 채팅방 조회
+                ChatRoom chatRoom = chatRoomRepository.findByPetId(pet.identity())
+                    .orElseThrow(() -> new ChatRoomNotFoundException("채팅방을 찾을 수 없습니다: " + pet.identity().id()));
+                
+                // 페르소나 조회
+                Persona persona = personaLookUpService.findPersona(pet.personaId());
+                
+                // 읽지 않은 메시지 개수 계산 (간단한 구현)
+                int unreadCount = messageRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoom.identity()).size();
+                
+                // 마지막 활동 시간 (간단한 구현)
+                java.time.LocalDateTime lastActivity = java.time.LocalDateTime.now();
+                
+                return new EnrichedChatRoomInfo(chatRoom, pet, persona, unreadCount, lastActivity);
+            })
+            .collect(java.util.stream.Collectors.toList());
     }
 
     /**

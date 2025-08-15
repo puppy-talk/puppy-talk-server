@@ -41,7 +41,6 @@ class AiResponseServiceTest {
         mockProviderFactory = new MockAiProviderFactory(mockAiProvider);
         promptBuilder = new PromptBuilder();
 
-        // TODO : mock object로 변경
         // AiResponseService에 reflection으로 설정값 주입
         aiResponseService = new AiResponseService(mockProviderFactory, promptBuilder);
         setField(aiResponseService, "defaultModel", "mock-model");

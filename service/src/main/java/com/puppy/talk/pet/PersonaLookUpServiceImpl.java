@@ -11,7 +11,6 @@ public class PersonaLookUpServiceImpl implements PersonaLookUpService {
 
     private final PersonaRepository personaRepository;
     
-    // TODO: Consider adding caching for frequently accessed personas
     // @Cacheable("personas") could improve performance for read operations
 
     @Override
@@ -43,7 +42,6 @@ public class PersonaLookUpServiceImpl implements PersonaLookUpService {
             throw new IllegalArgumentException("Persona cannot be null");
         }
         
-        // TODO: Add validation for persona business rules
         // e.g., duplicate name checks, persona template validation
         
         return personaRepository.save(persona);
