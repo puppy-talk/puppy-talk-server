@@ -200,7 +200,7 @@ public class ChatService {
     }
     
     private String generateAiResponse(Pet pet, String userMessage, ChatRoomIdentity chatRoomId) {
-        Persona persona = personaRepository.findById(pet.personaId())
+        Persona persona = personaRepository.findByIdentity(pet.personaId())
             .orElseThrow(() -> new RuntimeException("Persona not found: " + pet.personaId().id()));
         
         List<Message> chatHistory = messageRepository

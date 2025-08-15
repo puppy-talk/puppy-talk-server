@@ -135,7 +135,7 @@ public class InactivityNotificationService {
      * 비활성 상황에 맞는 AI 메시지를 생성합니다.
      */
     private String generateInactivityMessage(Pet pet, ChatRoom chatRoom) {
-        Persona persona = personaRepository.findById(pet.personaId())
+        Persona persona = personaRepository.findByIdentity(pet.personaId())
             .orElseThrow(() -> new RuntimeException("Persona not found: " + pet.personaId().id()));
         
         List<Message> chatHistory = messageRepository

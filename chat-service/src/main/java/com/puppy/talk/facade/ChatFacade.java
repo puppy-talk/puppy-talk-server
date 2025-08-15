@@ -58,7 +58,7 @@ public class ChatFacade {
         ChatStartResult chatResult = chatService.startChatWithPet(petId);
         
         // 2. 페르소나 정보 로드 (infrastructure port 사용)
-        Persona persona = personaRepository.findById(chatResult.pet().personaId())
+        Persona persona = personaRepository.findByIdentity(chatResult.pet().personaId())
             .orElseThrow(() -> new RuntimeException("Persona not found: " + chatResult.pet().personaId().id()));
         
         // 3. 통합 결과 반환
@@ -129,7 +129,7 @@ public class ChatFacade {
                     .orElseThrow(() -> new ChatRoomNotFoundException("채팅방을 찾을 수 없습니다: " + pet.identity().id()));
                 
                 // 페르소나 조회
-                Persona persona = personaRepository.findById(pet.personaId())
+                Persona persona = personaRepository.findByIdentity(pet.personaId())
                     .orElseThrow(() -> new RuntimeException("Persona not found: " + pet.personaId().id()));
                 
                 // 읽지 않은 메시지 개수 계산 (간단한 구현)
