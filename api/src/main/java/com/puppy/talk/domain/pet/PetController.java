@@ -1,11 +1,11 @@
-package com.puppy.talk.pet;
+package com.puppy.talk.domain.pet;
 
-import com.puppy.talk.support.ApiResponse;
-import com.puppy.talk.pet.dto.request.PetCreateRequest;
-import com.puppy.talk.pet.dto.response.PetCreateResponse;
-import com.puppy.talk.user.UserIdentity;
+import com.puppy.talk.global.support.ApiResponse;
+import com.puppy.talk.domain.pet.dto.request.PetCreateRequest;
+import com.puppy.talk.domain.pet.dto.response.PetCreateResponse;
 import com.puppy.talk.dto.PetRegistrationResult;
 import com.puppy.talk.pet.command.PetCreateCommand;
+import com.puppy.talk.pet.PetRegistrationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

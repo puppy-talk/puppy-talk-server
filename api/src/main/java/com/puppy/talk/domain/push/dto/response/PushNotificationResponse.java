@@ -1,4 +1,4 @@
-package com.puppy.talk.push.dto.response;
+package com.puppy.talk.domain.push.dto.response;
 
 import com.puppy.talk.push.NotificationType;
 import com.puppy.talk.push.PushNotification;

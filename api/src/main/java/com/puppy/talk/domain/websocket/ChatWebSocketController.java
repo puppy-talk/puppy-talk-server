@@ -1,4 +1,4 @@
-package com.puppy.talk.websocket;
+package com.puppy.talk.domain.websocket;
 
 import com.puppy.talk.notification.RealtimeNotificationPort;
 import com.puppy.talk.chat.ChatRoomIdentity;

@@ -1,4 +1,4 @@
-package com.puppy.talk.pet.dto.request;
+package com.puppy.talk.domain.pet.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

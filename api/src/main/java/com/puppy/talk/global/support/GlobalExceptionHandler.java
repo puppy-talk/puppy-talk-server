@@ -1,4 +1,4 @@
-package com.puppy.talk.support;
+package com.puppy.talk.global.support;
 
 import com.puppy.talk.pet.PersonaNotFoundException;
 import com.puppy.talk.pet.PetNotFoundException;

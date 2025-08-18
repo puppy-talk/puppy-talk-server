@@ -1,4 +1,4 @@
-package com.puppy.talk.push.dto.response;
+package com.puppy.talk.domain.push.dto.response;
 
 import com.puppy.talk.push.DeviceToken;
 import io.swagger.v3.oas.annotations.media.Schema;

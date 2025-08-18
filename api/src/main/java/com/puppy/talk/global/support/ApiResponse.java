@@ -1,4 +1,4 @@
-package com.puppy.talk.support;
+package com.puppy.talk.global.support;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

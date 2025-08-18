@@ -1,4 +1,4 @@
-package com.puppy.talk.auth;
+package com.puppy.talk.domain.auth;
 
 import com.puppy.talk.auth.AuthService;
 import io.swagger.v3.oas.annotations.Operation;

@@ -1,4 +1,4 @@
-package com.puppy.talk.push.dto.request;
+package com.puppy.talk.domain.push.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

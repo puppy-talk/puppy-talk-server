@@ -1,14 +1,16 @@
-package com.puppy.talk.push;
+package com.puppy.talk.domain.push;
 
-import com.puppy.talk.support.ApiResponse;
-import com.puppy.talk.push.dto.request.DeviceTokenRequest;
-import com.puppy.talk.push.dto.response.DeviceTokenResponse;
-import com.puppy.talk.push.dto.response.PushNotificationResponse;
-import com.puppy.talk.push.dto.response.PushStatisticsResponse;
+import com.puppy.talk.global.support.ApiResponse;
+import com.puppy.talk.domain.push.dto.request.DeviceTokenRequest;
+import com.puppy.talk.domain.push.dto.response.DeviceTokenResponse;
+import com.puppy.talk.domain.push.dto.response.PushNotificationResponse;
+import com.puppy.talk.domain.push.dto.response.PushStatisticsResponse;
 import com.puppy.talk.user.UserIdentity;
 import com.puppy.talk.chat.DeviceTokenService;
 import com.puppy.talk.notification.PushNotificationService;
 import com.puppy.talk.push.command.DeviceTokenRegistrationCommand;
+import com.puppy.talk.push.DeviceToken;
+import com.puppy.talk.push.PushNotification;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -28,7 +28,7 @@ import java.util.List;
 @Tag(name = "Chat", description = "채팅 관리 API")
 public class ChatController {
 
-    private final ChatFacade chatFacade; // Facade 패턴 적용
+    private final ChatFacade chatFacade;
 
     @PostMapping("/start/{petId}")
     @Operation(summary = "채팅 시작", description = "지정된 반려동물과 채팅을 시작합니다.")

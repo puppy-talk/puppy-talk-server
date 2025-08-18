@@ -1,4 +1,4 @@
-package com.puppy.talk.chat.dto.response;
+package com.puppy.talk.domain.chat.dto.response;
 
 import com.puppy.talk.chat.Message;
 

@@ -1,4 +1,4 @@
-package com.puppy.talk.pet.dto.response;
+package com.puppy.talk.domain.pet.dto.response;
 
 import com.puppy.talk.pet.Pet;
 import lombok.Builder;
