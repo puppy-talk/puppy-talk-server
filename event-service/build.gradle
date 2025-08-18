@@ -14,8 +14,8 @@ dependencyManagement {
 
 dependencies {
     // Core modules
-    api project(':model')
-    api project(':exception')
+    implementation project(':model')
+    implementation project(':exception')
     implementation project(':infrastructure')
     
     // Spring Framework - migrated to Version Catalog

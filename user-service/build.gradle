@@ -1,11 +1,8 @@
 plugins {
     id 'java-library'
-    // Migrated to Version Catalog plugin references
     alias(libs.plugins.spring.boot) apply false
     alias(libs.plugins.spring.dependency.management)
 }
-
-// User Management Service - User CRUD and profile management
 
 dependencyManagement {
     imports {
@@ -15,19 +12,15 @@ dependencyManagement {
 }
 
 dependencies {
-    // Core modules - API exposure for user entities and exceptions
-    api project(':model')           // Exposes User entities
-    api project(':exception')       // Exposes user-specific exceptions
+    // Core modules - Internal use for user entities and exceptions
+    implementation project(':model')           // Uses User entities
+    implementation project(':exception')       // Uses user-specific exceptions
     implementation project(':infrastructure') // Uses repository interfaces
     
     // Spring Framework - migrated to Version Catalog bundles
     implementation libs.bundles.spring.core  // spring-context, spring-tx
     implementation libs.spring.boot.starter.validation
-    // Consolidated Spring core dependencies using bundles
-    
-    // Development Tools - inherited from root build.gradle
-    // Lombok and common tools managed centrally
-    
+
     // Testing - migrated to Version Catalog
     testImplementation libs.spring.boot.starter.test
     testImplementation libs.mockito.core  // Module-specific mocking for user service

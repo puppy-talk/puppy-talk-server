@@ -6,7 +6,7 @@ plugins {
 
 dependencies {
     // Core modules
-    api project(':model')                    // Exposes push notification entities
+    implementation project(':model')         // Uses push notification entities
     implementation project(':exception')     // Uses push-specific exceptions
     implementation project(':infrastructure') // Uses repository interfaces
 

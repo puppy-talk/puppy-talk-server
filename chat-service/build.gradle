@@ -14,9 +14,9 @@ dependencyManagement {
 }
 
 dependencies {
-    // Core modules - API exposure for chat entities and exceptions
-    api project(':model')           // Exposes Message, ChatRoom entities
-    api project(':exception')       // Exposes chat-specific exceptions
+    // Core modules - Internal use for chat entities and exceptions
+    implementation project(':model')           // Uses Message, ChatRoom entities
+    implementation project(':exception')       // Uses chat-specific exceptions
     implementation project(':infrastructure') // Uses repository interfaces
     
     // Service dependencies

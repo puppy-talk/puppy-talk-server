@@ -21,7 +21,7 @@ dependencies {
     // Application assembly - integrates all layers
     implementation project(':api')            // REST API layer
     implementation project(':repository-jdbc') // Data access implementation
-    api project(':schema')                   // Database schema (exposed for migrations)
+    implementation project(':schema')        // Database schema (internal use)
 
     // Domain Services - all business logic modules
     implementation project(':auth-service')        // Authentication service

@@ -3,6 +3,9 @@ plugins {
 }
 
 dependencies {
+    // Core domain models needed for DTO mapping
+    implementation project(':model')
+    
     // Exception handling for HTTP responses
     implementation project(':exception')
     

@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     // Domain layer dependencies
-    api project(':model')  // API exposure: exceptions reference domain entities
+    implementation project(':model')  // Internal use: exceptions reference domain entities
     
     // Version Catalog ready: All external dependencies managed centrally
     // Common development tools inherited from root build.gradle

@@ -14,9 +14,9 @@ dependencyManagement {
 }
 
 dependencies {
-    // Core modules - API exposure for authentication entities and exceptions
-    api project(':model')           // Exposes User, AuthToken entities
-    api project(':exception')       // Exposes AuthenticationException, etc.
+    // Core modules - Internal use for authentication entities and exceptions
+    implementation project(':model')           // Uses User, AuthToken entities
+    implementation project(':exception')       // Uses AuthenticationException, etc.
     implementation project(':infrastructure')  // Uses repository interfaces
     
     // Spring Framework - migrated to Version Catalog bundles
