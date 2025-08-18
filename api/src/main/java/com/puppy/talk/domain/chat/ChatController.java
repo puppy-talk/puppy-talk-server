@@ -101,10 +101,7 @@ public class ChatController {
     })
     public ApiResponse<Void> markMessagesAsRead(
         @Parameter(description = "채팅방 ID", required = true) @PathVariable @Positive Long chatRoomId) {
-        ChatRoomIdentity chatRoomIdentity = ;
-
         chatFacade.markMessagesAsRead(ChatRoomIdentity.of(chatRoomId));
-
         return ApiResponse.ok("Messages marked as read");
     }
 }
