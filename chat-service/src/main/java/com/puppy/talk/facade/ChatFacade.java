@@ -22,6 +22,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.util.Assert;
+
+import jakarta.validation.Valid;
 
 /**
  * 채팅 관련 서비스들을 조정하는 Facade 클래스
@@ -33,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Slf4j
 @Component
+@Validated
 @RequiredArgsConstructor
 public class ChatFacade {
 
@@ -79,7 +84,7 @@ public class ChatFacade {
      * @return 메시지 전송 결과
      */
     @Transactional
-    public MessageSendResult sendMessageWithEvents(ChatRoomIdentity chatRoomId, MessageSendCommand command, UserIdentity userId) {
+    public MessageSendResult sendMessageWithEvents(ChatRoomIdentity chatRoomId, @Valid MessageSendCommand command, UserIdentity userId) {
         log.debug("Sending message with domain events for chatRoom: {}", chatRoomId.id());
         
         // 1. 메시지 전송 (ChatService에 위임)
@@ -116,8 +121,8 @@ public class ChatFacade {
      * @return 채팅 시작 결과
      */
     @Transactional
-    public ChatStartResult startChatWithPet(PetIdentity petId) {
-        log.debug("Starting chat with pet: {}", petId.id());
+    public ChatStartResult startChat(PetIdentity petId) {
+        Assert.notNull(petId, "petId cannot be null");
         return chatService.startChatWithPet(petId);
     }
 
@@ -129,7 +134,7 @@ public class ChatFacade {
      * @return 메시지 전송 결과
      */
     @Transactional
-    public MessageSendResult sendMessageToPet(ChatRoomIdentity chatRoomId, MessageSendCommand command) {
+    public MessageSendResult sendMessageToPet(ChatRoomIdentity chatRoomId, @Valid MessageSendCommand command) {
         log.debug("Sending message to pet for chatRoom: {}", chatRoomId.id());
         return chatService.sendMessageToPet(chatRoomId, command);
     }

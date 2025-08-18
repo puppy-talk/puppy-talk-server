@@ -16,13 +16,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 import com.puppy.talk.user.UserIdentity;
+import org.springframework.util.Assert;
 
 @Slf4j
 @Service
+@Validated
 @RequiredArgsConstructor
 public class ChatService {
 
@@ -44,7 +48,7 @@ public class ChatService {
      */
     @Transactional
     public ChatStartResult startChatWithPet(PetIdentity petId) {
-        validatePetId(petId);
+        Assert.notNull(petId, "petId cannot be null");
 
         Pet pet = findPetOrThrow(petId);
         ChatRoom chatRoom = findOrCreateChatRoom(pet);
@@ -61,9 +65,9 @@ public class ChatService {
      * 사용자 메시지 저장 후 AI 펫 응답을 자동으로 생성하여 저장합니다.
      */
     @Transactional
-    public MessageSendResult sendMessageToPet(ChatRoomIdentity chatRoomId, MessageSendCommand command) {
+    public MessageSendResult sendMessageToPet(ChatRoomIdentity chatRoomId, @Valid MessageSendCommand command) {
         validateChatRoomId(chatRoomId);
-        validateMessageContent(command.content());
+        // Bean Validation으로 command 검증이 자동 처리됨
 
         ChatRoom chatRoom = findChatRoomOrThrow(chatRoomId);
         Pet pet = findPetOrThrow(chatRoom.petId());
@@ -146,11 +150,6 @@ public class ChatService {
         }
     }
     
-    private void validateMessageContent(String content) {
-        if (content == null || content.trim().isEmpty()) {
-            throw new IllegalArgumentException("Message content cannot be null or empty");
-        }
-    }
     
     private Pet findPetOrThrow(PetIdentity petId) {
         return petRepository.findByIdentity(petId)

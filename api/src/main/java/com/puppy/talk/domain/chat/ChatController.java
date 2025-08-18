@@ -7,7 +7,6 @@ import com.puppy.talk.domain.chat.dto.request.MessageSendRequest;
 import com.puppy.talk.domain.chat.dto.response.ChatStartResponse;
 import com.puppy.talk.domain.chat.dto.response.MessageResponse;
 import com.puppy.talk.domain.chat.dto.response.MessageSendResponse;
-import com.puppy.talk.dto.ChatStartResult;
 import com.puppy.talk.dto.MessageSendResult;
 import com.puppy.talk.facade.ChatFacade;
 import com.puppy.talk.global.support.ApiResponse;
@@ -45,7 +44,7 @@ public class ChatController {
     })
     public ApiResponse<ChatStartResponse> startChat(
         @Parameter(description = "반려동물 ID", required = true) @PathVariable @Positive Long petId) {
-        var result = chatFacade.startChatWithPet(PetIdentity.of(petId));
+        var result = chatFacade.startChat(PetIdentity.of(petId));
         return ApiResponse.ok(
             ChatStartResponse.from(result),
             "Chat started successfully"
@@ -64,14 +63,15 @@ public class ChatController {
         @Parameter(description = "채팅방 ID", required = true) @PathVariable @Positive Long chatRoomId,
         @Valid @RequestBody MessageSendRequest request
     ) {
-        ChatRoomIdentity chatRoomIdentity = ChatRoomIdentity.of(chatRoomId);
+        MessageSendResult result = chatFacade.sendMessageToPet(
+            ChatRoomIdentity.of(chatRoomId),
+            MessageSendCommand.of(request.content())
+        );
 
-        MessageSendCommand command = MessageSendCommand.of(request.content());
-        MessageSendResult result = chatFacade.sendMessageToPet(chatRoomIdentity, command);
-
-        MessageSendResponse response = MessageSendResponse.from(result);
-
-        return ApiResponse.ok(response, "Message sent successfully");
+        return ApiResponse.ok(
+            MessageSendResponse.from(result),
+            "Message sent successfully"
+        );
     }
 
     @GetMapping("/rooms/{chatRoomId}/messages")
@@ -83,9 +83,7 @@ public class ChatController {
     })
     public ApiResponse<List<MessageResponse>> getChatHistory(
         @Parameter(description = "채팅방 ID", required = true) @PathVariable @Positive Long chatRoomId) {
-        ChatRoomIdentity chatRoomIdentity = ChatRoomIdentity.of(chatRoomId);
-
-        List<Message> messages = chatFacade.getChatHistory(chatRoomIdentity);
+        List<Message> messages = chatFacade.getChatHistory(ChatRoomIdentity.of(chatRoomId));
 
         List<MessageResponse> responses = messages.stream()
             .map(MessageResponse::from)
@@ -103,9 +101,9 @@ public class ChatController {
     })
     public ApiResponse<Void> markMessagesAsRead(
         @Parameter(description = "채팅방 ID", required = true) @PathVariable @Positive Long chatRoomId) {
-        ChatRoomIdentity chatRoomIdentity = ChatRoomIdentity.of(chatRoomId);
+        ChatRoomIdentity chatRoomIdentity = ;
 
-        chatFacade.markMessagesAsRead(chatRoomIdentity);
+        chatFacade.markMessagesAsRead(ChatRoomIdentity.of(chatRoomId));
 
         return ApiResponse.ok("Messages marked as read");
     }

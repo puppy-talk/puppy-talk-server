@@ -8,4 +8,5 @@ public record MessageSendRequest(
     @Size(max = 1000, message = "Message content cannot exceed 1000 characters")
     String content
 ) {
+
 }
