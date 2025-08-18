@@ -4,7 +4,6 @@ import com.puppy.talk.activity.InactivityNotificationRepository;
 import com.puppy.talk.ai.AiResponsePort;
 import com.puppy.talk.chat.ChatRoomRepository;
 import com.puppy.talk.chat.MessageRepository;
-import com.puppy.talk.notification.RealtimeNotificationPort;
 import com.puppy.talk.pet.PetRepository;
 import com.puppy.talk.activity.InactivityNotification;
 import com.puppy.talk.activity.NotificationStatus;
@@ -17,8 +16,8 @@ import com.puppy.talk.pet.PetIdentity;
 import com.puppy.talk.pet.Persona;
 import com.puppy.talk.push.NotificationType;
 import com.puppy.talk.websocket.ChatMessage;
-import com.puppy.talk.notification.PushNotificationService;
 import com.puppy.talk.pet.PersonaRepository;
+import com.puppy.talk.notification.dto.InactivityNotificationStatistics;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -263,25 +262,15 @@ public class InactivityNotificationService {
      * 비활성 알림 상태 통계를 조회합니다.
      */
     @Transactional(readOnly = true)
-    public NotificationStatistics getStatistics() {
+    public InactivityNotificationStatistics getStatistics() {
         long totalCount = inactivityNotificationRepository.count();
         long pendingCount = inactivityNotificationRepository.countByStatus(NotificationStatus.PENDING);
         long sentCount = inactivityNotificationRepository.countByStatus(NotificationStatus.SENT);
         long disabledCount = inactivityNotificationRepository.countByStatus(NotificationStatus.DISABLED);
         
-        return new NotificationStatistics(totalCount, pendingCount, sentCount, disabledCount);
+        return new InactivityNotificationStatistics(totalCount, pendingCount, sentCount, disabledCount);
     }
 
-    /**
-     * 비활성 알림 상태 통계 DTO
-     */
-    public record NotificationStatistics(
-        long totalCount,
-        long pendingCount, 
-        long sentCount,
-        long disabledCount
-    ) {}
-    
     // === Helper Methods for Improved Readability and Error Handling ===
     
     private ChatRoom findChatRoomOrSkip(ChatRoomIdentity chatRoomId) {

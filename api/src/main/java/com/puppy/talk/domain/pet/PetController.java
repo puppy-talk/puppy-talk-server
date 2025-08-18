@@ -10,10 +10,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/pets")
 @RequiredArgsConstructor
@@ -30,6 +32,9 @@ public class PetController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     public ApiResponse<PetCreateResponse> createPet(@Valid @RequestBody PetCreateRequest request) {
+        log.info("Creating pet: name={}, breed={}, userId={}", 
+            request.name(), request.breed(), request.userId());
+        
         PetCreateCommand command = PetCreateCommand.of(
             request.userId(),
             request.personaId(),
@@ -45,6 +50,9 @@ public class PetController {
             result.pet(),
             result.chatRoom().identity().id()
         );
+        
+        log.info("Pet created successfully: petId={}, chatRoomId={}", 
+            result.pet().identity().id(), result.chatRoom().identity().id());
 
         return ApiResponse.ok(response, "Pet registered successfully");
     }

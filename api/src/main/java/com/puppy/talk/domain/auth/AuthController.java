@@ -1,6 +1,8 @@
 package com.puppy.talk.domain.auth;
 
 import com.puppy.talk.auth.AuthService;
+import com.puppy.talk.global.support.ApiResponse;
+import com.puppy.talk.global.support.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -9,8 +11,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -27,91 +27,121 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "인증", description = "사용자 로그인/회원가입 API")
 public class AuthController {
 
-    // private final AuthService authService;
+    private final AuthService authService;
 
     /**
      * 사용자 로그인
      */
-    /*
     @PostMapping("/login")
     @Operation(summary = "사용자 로그인", description = "사용자명과 패스워드로 로그인하여 JWT 토큰을 발급받습니다.")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ApiResponse<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         log.info("Login attempt for username: {}", request.username());
         
-        Optional<AuthService.AuthResult> result = authService.login(request.username(), request.password());
+        // TODO: AuthService.login 메소드가 구현되면 활성화
+        // var result = authService.login(request.username(), request.password());
         
+        // 임시 구현 - 실제 구현 시 제거
+        log.warn("Login endpoint not fully implemented yet");
+        throw new UnsupportedOperationException("Login functionality not yet implemented");
+        
+        /*
         if (result.isEmpty()) {
             log.warn("Login failed for username: {}", request.username());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new AuthResponse(null, null, "Invalid username or password"));
+            return ApiResponse.error("Invalid username or password", ErrorCode.AUTHENTICATION_FAILED);
         }
 
         AuthService.AuthResult authResult = result.get();
-        return ResponseEntity.ok(new AuthResponse(
-            authResult.token(),
-            UserResponse.from(authResult.user()),
+        return ApiResponse.ok(
+            new AuthResponse(
+                authResult.token(),
+                UserResponse.from(authResult.user()),
+                "Login successful"
+            ),
             "Login successful"
-        ));
+        );
+        */
     }
-    */
 
     /**
      * 사용자 회원가입
      */
-    /*
     @PostMapping("/register")
     @Operation(summary = "사용자 회원가입", description = "새 사용자 계정을 생성하고 JWT 토큰을 발급받습니다.")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+    public ApiResponse<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         log.info("Registration attempt for username: {}", request.username());
         
-        Optional<AuthService.AuthResult> result = authService.register(
-            request.username(), 
-            request.email(), 
-            request.password()
-        );
+        // TODO: AuthService.register 메소드가 구현되면 활성화
+        // var result = authService.register(request.username(), request.email(), request.password());
         
+        // 임시 구현 - 실제 구현 시 제거
+        log.warn("Register endpoint not fully implemented yet");
+        throw new UnsupportedOperationException("Registration functionality not yet implemented");
+        
+        /*
         if (result.isEmpty()) {
             log.warn("Registration failed for username: {}", request.username());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new AuthResponse(null, null, "Registration failed. Username or email may already exist."));
+            return ApiResponse.error(
+                "Registration failed. Username or email may already exist.",
+                ErrorCode.DUPLICATE_USERNAME
+            );
         }
 
         AuthService.AuthResult authResult = result.get();
-        return ResponseEntity.ok(new AuthResponse(
-            authResult.token(),
-            UserResponse.from(authResult.user()),
+        return ApiResponse.ok(
+            new AuthResponse(
+                authResult.token(),
+                UserResponse.from(authResult.user()),
+                "Registration successful"
+            ),
             "Registration successful"
-        ));
+        );
+        */
     }
-    */
 
     /**
      * 토큰 유효성 검증
      */
-    /*
     @PostMapping("/validate")
     @Operation(summary = "토큰 검증", description = "JWT 토큰의 유효성을 검증하고 사용자 정보를 반환합니다.")
-    public ResponseEntity<AuthResponse> validateToken(@RequestHeader("Authorization") String authHeader) {
+    public ApiResponse<AuthResponse> validateToken(
+        @RequestHeader("Authorization") String authHeader
+    ) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new AuthResponse(null, null, "Missing or invalid authorization header"));
+            log.warn("Invalid authorization header format");
+            return ApiResponse.error(
+                "Missing or invalid authorization header",
+                ErrorCode.AUTHENTICATION_FAILED
+            );
         }
 
         String token = authHeader.substring(7);
-        var userOpt = authService.validateToken(token);
         
+        // TODO: AuthService.validateToken 메소드가 구현되면 활성화
+        // var userOpt = authService.validateToken(token);
+        
+        // 임시 구현 - 실제 구현 시 제거
+        log.warn("Token validation endpoint not fully implemented yet");
+        throw new UnsupportedOperationException("Token validation functionality not yet implemented");
+        
+        /*
         if (userOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new AuthResponse(null, null, "Invalid or expired token"));
+            log.warn("Token validation failed");
+            return ApiResponse.error(
+                "Invalid or expired token",
+                ErrorCode.AUTHENTICATION_FAILED
+            );
         }
 
-        return ResponseEntity.ok(new AuthResponse(
-            token,
-            UserResponse.from(userOpt.get()),
+        return ApiResponse.ok(
+            new AuthResponse(
+                token,
+                UserResponse.from(userOpt.get()),
+                "Token is valid"
+            ),
             "Token is valid"
-        ));
+        );
+        */
     }
-    */
 
     /**
      * 로그인 요청 DTO

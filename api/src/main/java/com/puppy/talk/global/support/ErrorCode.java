@@ -6,6 +6,11 @@ public enum ErrorCode {
     DUPLICATE_USERNAME("USER_002"),
     DUPLICATE_EMAIL("USER_003"),
     
+    // Authentication related errors
+    AUTHENTICATION_FAILED("AUTH_001"),
+    AUTHORIZATION_REQUIRED("AUTH_002"),
+    TOKEN_EXPIRED("AUTH_003"),
+    
     // Pet related errors
     PET_NOT_FOUND("PET_001"),
     PERSONA_NOT_FOUND("PET_002"),

@@ -2,8 +2,6 @@ plugins {
     id 'java-library'
 }
 
-// API Layer - REST controllers and DTOs for external communication
-
 dependencies {
     // Exception handling for HTTP responses
     implementation project(':exception')
@@ -24,9 +22,4 @@ dependencies {
     
     // API Documentation - migrated to Version Catalog
     implementation libs.springdoc.openapi
-    
-    // Testing - migrated to Version Catalog
-    testImplementation libs.spring.boot.starter.test
-    // Common testing dependencies inherited from root build.gradle
-    // Using testing.basic bundle for standard testing setup
 }

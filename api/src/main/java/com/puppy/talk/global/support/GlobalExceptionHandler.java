@@ -9,9 +9,12 @@ import com.puppy.talk.chat.ChatRoomNotFoundException;
 import com.puppy.talk.chat.MessageNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -45,6 +48,24 @@ public class GlobalExceptionHandler {
     public ApiResponse<Void> handleBadRequest(IllegalArgumentException e) {
         log.warn("Bad request: {}", e.getMessage());
         return ApiResponse.error("Invalid request parameters", ErrorCode.VALIDATION_ERROR);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse<Void> handleValidationError(MethodArgumentNotValidException e) {
+        String errorMessage = e.getBindingResult().getFieldErrors().stream()
+            .map(FieldError::getDefaultMessage)
+            .collect(Collectors.joining(", "));
+        
+        log.warn("Validation error: {}", errorMessage);
+        return ApiResponse.error("Validation failed: " + errorMessage, ErrorCode.VALIDATION_ERROR);
+    }
+
+    @ExceptionHandler(UnsupportedOperationException.class)
+    @ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
+    public ApiResponse<Void> handleNotImplemented(UnsupportedOperationException e) {
+        log.warn("Feature not implemented: {}", e.getMessage());
+        return ApiResponse.error(e.getMessage(), ErrorCode.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(RuntimeException.class)

@@ -468,7 +468,7 @@ class ChatServiceTest {
     
     private static class MockActivityTrackingService extends ActivityTrackingService {
         public MockActivityTrackingService() {
-            super(null, null); // Mock repositories
+            super(null, null, null); // Mock repositories
         }
         
         @Override

@@ -35,7 +35,7 @@ class ActivityTrackingServiceTest {
         userActivityRepository = new MockUserActivityRepository();
         inactivityNotificationRepository = new MockInactivityNotificationRepository();
         
-        activityTrackingService = new ActivityTrackingService(userActivityRepository, inactivityNotificationRepository);
+        activityTrackingService = new ActivityTrackingService(userActivityRepository, inactivityNotificationRepository, null);
         
         userId = UserIdentity.of(1L);
         chatRoomId = ChatRoomIdentity.of(1L);

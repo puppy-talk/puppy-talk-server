@@ -21,12 +21,14 @@ dependencies {
     implementation project(':infrastructure') // Uses repository interfaces
     implementation project(':event-service')  // Publishes WebSocket events
     implementation project(':auth-service')   // Uses AuthService for WebSocket authentication
+    implementation project(':chat-service')   // Uses ChatService for message processing
     
     // Spring WebSocket Stack - migrated to Version Catalog bundles
     implementation libs.spring.context
     implementation libs.spring.websocket
     implementation libs.spring.messaging
     implementation libs.spring.boot.starter.validation
+    implementation libs.spring.tx // For @Transactional support
     // Using spring-web-stack bundle for coordinated WebSocket dependencies
     
     // Development Tools - inherited from root build.gradle

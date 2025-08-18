@@ -1,5 +1,6 @@
 package com.puppy.talk.notification;
 
+import com.puppy.talk.notification.dto.NotificationStatistics;
 import com.puppy.talk.push.DeviceTokenRepository;
 import com.puppy.talk.push.PushNotificationIdentity;
 import com.puppy.talk.push.PushNotificationRepository;
@@ -262,14 +263,4 @@ public class PushNotificationService {
         log.debug("Marked push notification as received: {}", notification.identity().id());
     }
     
-    /**
-     * 푸시 알림 통계 DTO
-     */
-    public record NotificationStatistics(
-        long totalCount,
-        long pendingCount,
-        long sentCount,
-        long failedCount,
-        long receivedCount
-    ) {}
 }

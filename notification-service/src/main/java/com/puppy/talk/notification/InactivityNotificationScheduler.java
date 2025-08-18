@@ -1,5 +1,6 @@
 package com.puppy.talk.notification;
 
+import com.puppy.talk.notification.dto.InactivityNotificationStatistics;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -40,7 +41,7 @@ public class InactivityNotificationScheduler {
     @Scheduled(cron = "0 */5 * * * *")
     public void logNotificationStatistics() {
         try {
-            InactivityNotificationService.NotificationStatistics stats = 
+            InactivityNotificationStatistics stats =
                 inactivityNotificationService.getStatistics();
                 
             log.info("Inactivity notification statistics - Total: {}, Pending: {}, Sent: {}, Disabled: {}", 

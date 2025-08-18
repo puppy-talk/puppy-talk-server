@@ -1,5 +1,6 @@
 package com.puppy.talk.notification;
 
+import com.puppy.talk.notification.dto.NotificationStatistics;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -36,7 +37,7 @@ public class PushNotificationScheduler {
     @Scheduled(cron = "0 */30 * * * *")
     public void logStatistics() {
         try {
-            PushNotificationService.NotificationStatistics stats = 
+            NotificationStatistics stats =
                 pushNotificationService.getStatistics();
                 
             log.info("Push Notification Statistics - Total: {}, Pending: {}, Sent: {}, Failed: {}, Received: {}",

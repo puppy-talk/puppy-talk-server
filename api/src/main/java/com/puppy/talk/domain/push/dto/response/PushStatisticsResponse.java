@@ -1,6 +1,6 @@
 package com.puppy.talk.domain.push.dto.response;
 
-import com.puppy.talk.notification.PushNotificationService;
+import com.puppy.talk.notification.dto.NotificationStatistics;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -31,7 +31,7 @@ public record PushStatisticsResponse(
     double receiptRate
 ) {
     
-    public static PushStatisticsResponse from(PushNotificationService.NotificationStatistics stats) {
+    public static PushStatisticsResponse from(NotificationStatistics stats) {
         double successRate = 0.0;
         double receiptRate = 0.0;
         
