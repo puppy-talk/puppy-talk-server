@@ -191,24 +191,4 @@ public class ChatFacade {
             .collect(java.util.stream.Collectors.toList());
     }
 
-    /**
-     * 페르소나 정보가 포함된 채팅 시작 결과
-     */
-    public record EnrichedChatStartResult(
-        com.puppy.talk.chat.ChatRoom chatRoom,
-        Pet pet,
-        Persona persona,
-        java.util.List<com.puppy.talk.chat.Message> recentMessages
-    ) {}
-
-    /**
-     * 페르소나 정보가 포함된 채팅방 정보
-     */
-    public record EnrichedChatRoomInfo(
-        com.puppy.talk.chat.ChatRoom chatRoom,
-        Pet pet,
-        Persona persona,
-        int unreadMessageCount,
-        java.time.LocalDateTime lastActivity
-    ) {}
 }
