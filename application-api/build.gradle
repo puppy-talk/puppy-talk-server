@@ -1,11 +1,8 @@
 plugins {
     id 'java-library'
-    // Migrated to Version Catalog plugin references
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependency.management)
 }
-
-// Main Application - Spring Boot executable JAR with all services integrated
 
 java {
     sourceCompatibility = '21'
@@ -25,7 +22,7 @@ dependencies {
     implementation project(':api')            // REST API layer
     implementation project(':repository-jdbc') // Data access implementation
     api project(':schema')                   // Database schema (exposed for migrations)
-    
+
     // Domain Services - all business logic modules
     implementation project(':auth-service')        // Authentication service
     implementation project(':chat-service')        // Chat messaging service
@@ -34,7 +31,7 @@ dependencies {
     implementation project(':notification-service') // Notification service
     implementation project(':websocket-service')   // Real-time messaging service
     implementation project(':event-service')       // Event publishing service
-    
+
     // External Services - third-party integrations
     implementation project(':ai-service')    // AI provider integration
     implementation project(':push-service')  // Push notification integration
@@ -44,20 +41,17 @@ dependencies {
     implementation libs.spring.boot.starter.jdbc
     implementation libs.spring.boot.starter.actuator
     implementation libs.spring.boot.starter.websocket
-    
+
     // API Documentation - migrated to Version Catalog
     implementation libs.springdoc.openapi
 
     // Database Driver - migrated to Version Catalog
     implementation libs.mariadb.client
-    implementation 'mysql:mysql-connector-java:8.0.33'
-    
+
     // Development Tools - inherited from root build.gradle (lombok, slf4j)
     // Centralized dependency management reduces duplication
 
     // Testing - migrated to Version Catalog bundles
     testImplementation libs.spring.boot.starter.test
     testImplementation libs.h2  // In-memory test database
-    // Common testing dependencies inherited from root build.gradle
-    // Using testing.database bundle for comprehensive database testing
 }
