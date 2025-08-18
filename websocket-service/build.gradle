@@ -20,6 +20,7 @@ dependencies {
     api project(':exception')       // Exposes WebSocket-specific exceptions
     implementation project(':infrastructure') // Uses repository interfaces
     implementation project(':event-service')  // Publishes WebSocket events
+    implementation project(':auth-service')   // Uses AuthService for WebSocket authentication
     
     // Spring WebSocket Stack - migrated to Version Catalog bundles
     implementation libs.spring.context
