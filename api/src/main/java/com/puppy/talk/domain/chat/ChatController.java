@@ -1,10 +1,10 @@
-package com.puppy.talk.chat;
+package com.puppy.talk.domain.chat;
 
-import com.puppy.talk.support.ApiResponse;
-import com.puppy.talk.chat.dto.response.ChatStartResponse;
-import com.puppy.talk.chat.dto.response.MessageResponse;
-import com.puppy.talk.chat.dto.request.MessageSendRequest;
-import com.puppy.talk.chat.dto.response.MessageSendResponse;
+import com.puppy.talk.global.support.ApiResponse;
+import com.puppy.talk.domain.chat.dto.response.ChatStartResponse;
+import com.puppy.talk.domain.chat.dto.response.MessageResponse;
+import com.puppy.talk.domain.chat.dto.request.MessageSendRequest;
+import com.puppy.talk.domain.chat.dto.response.MessageSendResponse;
 import com.puppy.talk.pet.PetIdentity;
 import com.puppy.talk.chat.ChatRoomIdentity;
 import com.puppy.talk.chat.Message;
@@ -28,7 +28,6 @@ import java.util.List;
 @Tag(name = "Chat", description = "채팅 관리 API")
 public class ChatController {
 
-    private final ChatService chatService;
     private final ChatFacade chatFacade; // Facade 패턴 적용
 
     @PostMapping("/start/{petId}")
@@ -42,7 +41,7 @@ public class ChatController {
         @Parameter(description = "반려동물 ID", required = true) @PathVariable @Positive Long petId) {
         PetIdentity petIdentity = PetIdentity.of(petId);
         
-        ChatStartResult result = chatService.startChatWithPet(petIdentity);
+        ChatStartResult result = chatFacade.startChatWithPet(petIdentity);
         
         ChatStartResponse response = ChatStartResponse.from(result);
         
@@ -64,7 +63,7 @@ public class ChatController {
         ChatRoomIdentity chatRoomIdentity = ChatRoomIdentity.of(chatRoomId);
         
         MessageSendCommand command = MessageSendCommand.of(request.content());
-        MessageSendResult result = chatService.sendMessageToPet(chatRoomIdentity, command);
+        MessageSendResult result = chatFacade.sendMessageToPet(chatRoomIdentity, command);
         
         MessageSendResponse response = MessageSendResponse.from(result);
         
@@ -82,7 +81,7 @@ public class ChatController {
         @Parameter(description = "채팅방 ID", required = true) @PathVariable @Positive Long chatRoomId) {
         ChatRoomIdentity chatRoomIdentity = ChatRoomIdentity.of(chatRoomId);
         
-        List<Message> messages = chatService.getChatHistory(chatRoomIdentity);
+        List<Message> messages = chatFacade.getChatHistory(chatRoomIdentity);
         
         List<MessageResponse> responses = messages.stream()
             .map(MessageResponse::from)
@@ -102,7 +101,7 @@ public class ChatController {
         @Parameter(description = "채팅방 ID", required = true) @PathVariable @Positive Long chatRoomId) {
         ChatRoomIdentity chatRoomIdentity = ChatRoomIdentity.of(chatRoomId);
         
-        chatService.markMessagesAsRead(chatRoomIdentity);
+        chatFacade.markMessagesAsRead(chatRoomIdentity);
         
         return ApiResponse.ok("Messages marked as read");
     }

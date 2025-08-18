@@ -110,6 +110,54 @@ public class ChatFacade {
     }
 
     /**
+     * 펫과의 채팅을 시작합니다 (기본 버전).
+     * 
+     * @param petId 펫 식별자
+     * @return 채팅 시작 결과
+     */
+    @Transactional
+    public ChatStartResult startChatWithPet(PetIdentity petId) {
+        log.debug("Starting chat with pet: {}", petId.id());
+        return chatService.startChatWithPet(petId);
+    }
+
+    /**
+     * 메시지를 전송합니다 (기본 버전).
+     * 
+     * @param chatRoomId 채팅방 식별자
+     * @param command 메시지 전송 명령
+     * @return 메시지 전송 결과
+     */
+    @Transactional
+    public MessageSendResult sendMessageToPet(ChatRoomIdentity chatRoomId, MessageSendCommand command) {
+        log.debug("Sending message to pet for chatRoom: {}", chatRoomId.id());
+        return chatService.sendMessageToPet(chatRoomId, command);
+    }
+
+    /**
+     * 채팅 히스토리를 조회합니다.
+     * 
+     * @param chatRoomId 채팅방 식별자
+     * @return 메시지 목록
+     */
+    @Transactional(readOnly = true)
+    public java.util.List<com.puppy.talk.chat.Message> getChatHistory(ChatRoomIdentity chatRoomId) {
+        log.debug("Getting chat history for chatRoom: {}", chatRoomId.id());
+        return chatService.getChatHistory(chatRoomId);
+    }
+
+    /**
+     * 메시지를 읽음 상태로 변경합니다.
+     * 
+     * @param chatRoomId 채팅방 식별자
+     */
+    @Transactional
+    public void markMessagesAsRead(ChatRoomIdentity chatRoomId) {
+        log.debug("Marking messages as read for chatRoom: {}", chatRoomId.id());
+        chatService.markMessagesAsRead(chatRoomId);
+    }
+
+    /**
      * 특정 사용자의 모든 채팅방을 페르소나 정보와 함께 조회합니다.
      * 
      * @param userId 사용자 식별자
