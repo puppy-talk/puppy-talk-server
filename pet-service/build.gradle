@@ -1,14 +1,14 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
 plugins {
     id 'java-library'
-    // Migrated to Version Catalog plugin references
     alias(libs.plugins.spring.boot) apply false
     alias(libs.plugins.spring.dependency.management)
 }
 
 dependencyManagement {
     imports {
-        // Version Catalog manages BOM versions
-        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+        mavenBom SpringBootPlugin.BOM_COORDINATES
     }
 }
 
@@ -22,15 +22,10 @@ dependencies {
     // Spring Framework - migrated to Version Catalog bundles
     implementation libs.bundles.spring.core  // spring-context, spring-tx
     implementation libs.spring.boot.starter.validation
-    // Consolidated Spring core dependencies using bundles
-    
-    // Development Tools - inherited from root build.gradle
-    // Lombok managed centrally for consistency
-    
+
     // Testing - migrated to Version Catalog
     testImplementation libs.spring.boot.starter.test
     testImplementation libs.mockito.core  // Module-specific mocking for pet service
-    // Common testing dependencies (JUnit, AssertJ) inherited from root build.gradle
 }
 
 test {
