@@ -1,13 +1,12 @@
 package com.puppy.talk.websocket;
 
 import com.puppy.talk.chat.ChatRoomIdentity;
-import com.puppy.talk.chat.ChatService;
+import com.puppy.talk.chat.ChatFacade;
 import com.puppy.talk.chat.SenderType;
-import com.puppy.talk.chat.command.MessageSendCommand;
-import com.puppy.talk.dto.MessageSendResult;
+import com.puppy.talk.chat.dto.MessageSendCommand;
+import com.puppy.talk.chat.dto.MessageSendResult;
 import com.puppy.talk.notification.RealtimeNotificationPort;
 import com.puppy.talk.user.UserIdentity;
-import com.puppy.talk.websocket.ChatMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,9 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class WebSocketMessageService {
+public class WebSocketMessageService implements WebSocketLookUpService {
     
-    private final ChatService chatService;
+    private final ChatFacade chatFacade;
     private final RealtimeNotificationPort realtimeNotificationPort;
     
     /**
@@ -41,7 +40,7 @@ public class WebSocketMessageService {
         
         // 도메인 서비스를 통한 메시지 저장 및 AI 응답 생성
         MessageSendCommand command = MessageSendCommand.of(content);
-        MessageSendResult result = chatService.sendMessageToPet(chatRoomId, command);
+        MessageSendResult result = chatFacade.sendMessageToPet(chatRoomId, command);
         
         // WebSocket을 통한 실시간 브로드캐스트
         broadcastUserMessage(result, chatRoomId, userId);
@@ -74,7 +73,7 @@ public class WebSocketMessageService {
             chatRoomId.id(), userId.id());
         
         // 도메인 서비스를 통한 읽음 처리
-        chatService.markMessagesAsRead(chatRoomId);
+        chatFacade.markMessagesAsRead(chatRoomId);
         
         // WebSocket을 통한 읽음 확인 브로드캐스트
         broadcastReadReceipt(chatRoomId, userId);

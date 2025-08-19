@@ -122,8 +122,8 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
             
             log.debug("Chat room access format validation passed: userId={}, chatRoomId={}", userId, chatRoomId);
             
-            // 실제 비즈니스 로직의 권한 검사는 ChatService에서 수행됨
-            // 예: ChatService.sendMessageToPet() 에서 Pet 소유권 확인
+            // 실제 비즈니스 로직의 권한 검사는 ChatFacade에서 수행됨
+            // 예: ChatFacade.sendMessageToPet() 에서 Pet 소유권 확인
             
         } catch (NumberFormatException e) {
             throw new SecurityException("Invalid chat room ID format: " + pathParts[3]);

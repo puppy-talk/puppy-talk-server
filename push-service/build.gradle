@@ -16,6 +16,8 @@ dependencies {
     // Spring Framework - migrated to Version Catalog
     implementation libs.spring.context
     implementation libs.spring.boot.autoconfigure
+    implementation libs.spring.tx  // For @Transactional support
+    implementation libs.spring.boot.starter.validation  // For validation annotations
     
     // JSON Processing - migrated to Version Catalog
     implementation libs.jackson.databind

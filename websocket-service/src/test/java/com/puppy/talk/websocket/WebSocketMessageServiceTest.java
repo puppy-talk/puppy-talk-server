@@ -1,15 +1,14 @@
 package com.puppy.talk.websocket;
 
 import com.puppy.talk.chat.ChatRoomIdentity;
-import com.puppy.talk.chat.ChatService;
+import com.puppy.talk.chat.ChatFacade;
 import com.puppy.talk.chat.MessageIdentity;
 import com.puppy.talk.chat.SenderType;
-import com.puppy.talk.chat.command.MessageSendCommand;
+import com.puppy.talk.chat.dto.MessageSendCommand;
 import com.puppy.talk.dto.MessageSendResult;
 import com.puppy.talk.chat.Message;
 import com.puppy.talk.notification.RealtimeNotificationPort;
 import com.puppy.talk.user.UserIdentity;
-import com.puppy.talk.websocket.ChatMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +31,7 @@ import static org.mockito.Mockito.when;
 class WebSocketMessageServiceTest {
     
     @Mock
-    private ChatService chatService;
+    private ChatFacade chatFacade;
     
     @Mock
     private RealtimeNotificationPort realtimeNotificationPort;
@@ -67,14 +66,14 @@ class WebSocketMessageServiceTest {
         );
         MessageSendResult result = new MessageSendResult(savedMessage, null);
         
-        when(chatService.sendMessageToPet(eq(chatRoomId), any(MessageSendCommand.class)))
+        when(chatFacade.sendMessageToPet(eq(chatRoomId), any(MessageSendCommand.class)))
             .thenReturn(result);
         
         // When
         webSocketMessageService.processUserMessage(chatRoomId, userId, messageContent);
         
         // Then
-        verify(chatService).sendMessageToPet(eq(chatRoomId), any(MessageSendCommand.class));
+        verify(chatFacade).sendMessageToPet(eq(chatRoomId), any(MessageSendCommand.class));
         
         ArgumentCaptor<ChatMessage> messageCaptor = ArgumentCaptor.forClass(ChatMessage.class);
         verify(realtimeNotificationPort).broadcastMessage(messageCaptor.capture());
@@ -135,7 +134,7 @@ class WebSocketMessageServiceTest {
         webSocketMessageService.processReadReceipt(chatRoomId, userId);
         
         // Then
-        verify(chatService).markMessagesAsRead(chatRoomId);
+        verify(chatFacade).markMessagesAsRead(chatRoomId);
         
         ArgumentCaptor<ChatMessage> messageCaptor = ArgumentCaptor.forClass(ChatMessage.class);
         verify(realtimeNotificationPort).broadcastReadReceipt(messageCaptor.capture());
@@ -164,7 +163,7 @@ class WebSocketMessageServiceTest {
         );
         MessageSendResult result = new MessageSendResult(savedMessage, null);
         
-        when(chatService.sendMessageToPet(eq(chatRoomId), any(MessageSendCommand.class)))
+        when(chatFacade.sendMessageToPet(eq(chatRoomId), any(MessageSendCommand.class)))
             .thenReturn(result);
         
         // When
@@ -172,7 +171,7 @@ class WebSocketMessageServiceTest {
         
         // Then
         ArgumentCaptor<MessageSendCommand> commandCaptor = ArgumentCaptor.forClass(MessageSendCommand.class);
-        verify(chatService).sendMessageToPet(eq(chatRoomId), commandCaptor.capture());
+        verify(chatFacade).sendMessageToPet(eq(chatRoomId), commandCaptor.capture());
         
         MessageSendCommand capturedCommand = commandCaptor.getValue();
         assertThat(capturedCommand.content()).isEqualTo(messageContent);
