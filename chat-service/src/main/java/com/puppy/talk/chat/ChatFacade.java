@@ -14,7 +14,7 @@ import com.puppy.talk.pet.Persona;
 import com.puppy.talk.pet.PersonaRepository;
 import com.puppy.talk.dto.ChatStartResult;
 import com.puppy.talk.dto.MessageSendResult;
-import com.puppy.talk.chat.command.MessageSendCommand;
+import com.puppy.talk.chat.dto.MessageSendCommand;
 import com.puppy.talk.user.UserIdentity;
 import com.puppy.talk.event.DomainEventPublisher;
 import com.puppy.talk.event.MessageSentEvent;
