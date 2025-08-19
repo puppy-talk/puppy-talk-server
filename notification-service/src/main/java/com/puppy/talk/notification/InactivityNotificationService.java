@@ -18,6 +18,7 @@ import com.puppy.talk.push.NotificationType;
 import com.puppy.talk.websocket.ChatMessage;
 import com.puppy.talk.pet.PersonaRepository;
 import com.puppy.talk.notification.dto.InactivityNotificationStatistics;
+import com.puppy.talk.user.UserIdentity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class InactivityNotificationService {
+public class InactivityNotificationService implements NotificationLookUpService {
 
     private final InactivityNotificationRepository inactivityNotificationRepository;
     private final ChatRoomRepository chatRoomRepository;
@@ -317,5 +318,26 @@ public class InactivityNotificationService {
         InactivityNotification updatedNotification = notification.withAiGeneratedMessage(aiMessage);
         InactivityNotification sentNotification = updatedNotification.markAsSent();
         inactivityNotificationRepository.save(sentNotification);
+    }
+    
+    // === NotificationLookUpService 인터페이스 구현 ===
+    
+    @Override
+    public void sendInactivityNotification(UserIdentity userId, LocalDateTime lastActivityTime) {
+        // TODO: 구현 필요 - 현재는 processEligibleNotifications()로 처리
+        log.debug("sendInactivityNotification called for user: {}", userId.id());
+    }
+    
+    @Override
+    public List<InactivityNotification> getInactivityNotifications(UserIdentity userId) {
+        // TODO: 구현 필요 - 사용자별 비활성 알림 조회
+        log.debug("getInactivityNotifications called for user: {}", userId.id());
+        return List.of();
+    }
+    
+    @Override
+    public void markInactivityNotificationAsRead(InactivityNotificationIdentity notificationId) {
+        // TODO: 구현 필요 - 비활성 알림 읽음 처리
+        log.debug("markInactivityNotificationAsRead called for notification: {}", notificationId.id());
     }
 }

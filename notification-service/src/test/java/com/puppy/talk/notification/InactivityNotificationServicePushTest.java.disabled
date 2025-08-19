@@ -18,7 +18,7 @@ import com.puppy.talk.pet.PersonaIdentity;
 import com.puppy.talk.push.NotificationType;
 import com.puppy.talk.user.UserIdentity;
 import com.puppy.talk.notification.PushNotificationService;
-import com.puppy.talk.pet.PersonaLookUpService;
+import com.puppy.talk.PersonaLookUpService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
