@@ -1,7 +1,6 @@
 package com.puppy.talk.push;
 
 import com.puppy.talk.user.UserIdentity;
-
 import java.time.LocalDateTime;
 
 /**
@@ -21,7 +20,7 @@ public record PushNotification(
     LocalDateTime sentAt,
     LocalDateTime createdAt
 ) {
-    
+
     public PushNotification {
         if (userId == null) {
             throw new IllegalArgumentException("UserId cannot be null");
@@ -44,7 +43,7 @@ public record PushNotification(
         if (createdAt == null) {
             throw new IllegalArgumentException("CreatedAt cannot be null");
         }
-        
+
         // normalize strings
         deviceToken = deviceToken.trim();
         title = title.trim();
@@ -56,7 +55,7 @@ public record PushNotification(
             errorMessage = errorMessage.trim();
         }
     }
-    
+
     /**
      * 새로운 푸시 알림을 생성합니다.
      */
@@ -84,7 +83,7 @@ public record PushNotification(
             LocalDateTime.now()
         );
     }
-    
+
     /**
      * 즉시 전송할 푸시 알림을 생성합니다.
      */
@@ -98,7 +97,7 @@ public record PushNotification(
     ) {
         return of(userId, deviceToken, notificationType, title, message, data, LocalDateTime.now());
     }
-    
+
     /**
      * 식별자를 포함한 새로운 PushNotification을 생성합니다.
      */
@@ -118,7 +117,7 @@ public record PushNotification(
             this.createdAt
         );
     }
-    
+
     /**
      * 전송 완료로 상태를 변경합니다.
      */
@@ -138,7 +137,7 @@ public record PushNotification(
             this.createdAt
         );
     }
-    
+
     /**
      * 전송 실패로 상태를 변경합니다.
      */
@@ -158,7 +157,7 @@ public record PushNotification(
             this.createdAt
         );
     }
-    
+
     /**
      * 수신 확인으로 상태를 변경합니다.
      */
@@ -178,12 +177,12 @@ public record PushNotification(
             this.createdAt
         );
     }
-    
+
     /**
      * 푸시 알림을 전송할 시간이 되었는지 확인합니다.
      */
     public boolean isReadyToSend() {
-        return status == PushNotificationStatus.PENDING && 
-               LocalDateTime.now().isAfter(scheduledAt);
+        return status == PushNotificationStatus.PENDING &&
+            LocalDateTime.now().isAfter(scheduledAt);
     }
 }
