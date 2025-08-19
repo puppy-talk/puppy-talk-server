@@ -1,4 +1,4 @@
-package com.puppy.talk.chat.command;
+package com.puppy.talk.chat.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

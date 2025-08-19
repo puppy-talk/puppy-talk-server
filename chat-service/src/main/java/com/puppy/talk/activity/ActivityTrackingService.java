@@ -1,10 +1,6 @@
-package com.puppy.talk.chat;
+package com.puppy.talk.activity;
 
-import com.puppy.talk.activity.InactivityNotificationRepository;
-import com.puppy.talk.activity.UserActivityRepository;
-import com.puppy.talk.activity.ActivityType;
-import com.puppy.talk.activity.InactivityNotification;
-import com.puppy.talk.activity.UserActivity;
+import com.puppy.talk.chat.ChatRoomIdentity;
 import com.puppy.talk.user.UserIdentity;
 import com.puppy.talk.event.UserActivityEvent;
 import com.puppy.talk.event.DomainEventPublisher;
@@ -12,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -99,30 +96,23 @@ public class ActivityTrackingService {
      * 활동 추적 매개변수를 검증합니다.
      */
     private void validateTrackingParameters(UserIdentity userId, ChatRoomIdentity chatRoomId, ActivityType activityType) {
-        validateUserId(userId);
-        validateChatRoomId(chatRoomId);
-        
-        if (activityType == null) {
-            throw new IllegalArgumentException("ActivityType cannot be null");
-        }
+        Assert.notNull(userId, "UserId cannot be null");
+        Assert.notNull(chatRoomId, "ChatRoomId cannot be null");
+        Assert.notNull(activityType, "ActivityType cannot be null");
     }
     
     /**
      * 사용자 ID를 검증합니다.
      */
     private void validateUserId(UserIdentity userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId cannot be null");
-        }
+        Assert.notNull(userId, "UserId cannot be null");
     }
     
     /**
      * 채팅방 ID를 검증합니다.
      */
     private void validateChatRoomId(ChatRoomIdentity chatRoomId) {
-        if (chatRoomId == null) {
-            throw new IllegalArgumentException("ChatRoomId cannot be null");
-        }
+        Assert.notNull(chatRoomId, "ChatRoomId cannot be null");
     }
 
     /**

@@ -1,9 +1,16 @@
-package com.puppy.talk.chat;
+package com.puppy.talk.chat.service.impl;
 
+import com.puppy.talk.chat.ChatRoomIdentity;
+import com.puppy.talk.chat.Message;
+import com.puppy.talk.chat.MessageIdentity;
+import com.puppy.talk.chat.MessageLookUpService;
+import com.puppy.talk.chat.MessageNotFoundException;
+import com.puppy.talk.chat.MessageRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 @Service
 @RequiredArgsConstructor
@@ -14,9 +21,7 @@ public class MessageLookUpServiceImpl implements MessageLookUpService {
     @Override
     @Transactional(readOnly = true)
     public Message findMessage(MessageIdentity identity) {
-        if (identity == null) {
-            throw new IllegalArgumentException("Identity cannot be null");
-        }
+        Assert.notNull(identity, "Identity cannot be null");
         return messageRepository.findByIdentity(identity)
             .orElseThrow(() -> new MessageNotFoundException(identity));
     }
@@ -46,26 +51,20 @@ public class MessageLookUpServiceImpl implements MessageLookUpService {
      * ChatRoomId 유효성을 검증합니다.
      */
     private void validateChatRoomId(ChatRoomIdentity chatRoomId) {
-        if (chatRoomId == null) {
-            throw new IllegalArgumentException("ChatRoomId cannot be null");
-        }
+        Assert.notNull(chatRoomId, "ChatRoomId cannot be null");
     }
 
     @Override
     @Transactional
     public Message sendMessage(Message message) {
-        if (message == null) {
-            throw new IllegalArgumentException("Message cannot be null");
-        }
+        Assert.notNull(message, "Message cannot be null");
         return messageRepository.save(message);
     }
 
     @Override
     @Transactional
     public void markMessageAsRead(MessageIdentity identity) {
-        if (identity == null) {
-            throw new IllegalArgumentException("Identity cannot be null");
-        }
+        Assert.notNull(identity, "Identity cannot be null");
         
         messageRepository.findByIdentity(identity)
             .ifPresentOrElse(
@@ -77,18 +76,14 @@ public class MessageLookUpServiceImpl implements MessageLookUpService {
     @Override
     @Transactional
     public void markAllMessagesAsReadByChatRoomId(ChatRoomIdentity chatRoomId) {
-        if (chatRoomId == null) {
-            throw new IllegalArgumentException("ChatRoomId cannot be null");
-        }
+        Assert.notNull(chatRoomId, "ChatRoomId cannot be null");
         messageRepository.markAllAsReadByChatRoomId(chatRoomId);
     }
 
     @Override
     @Transactional
     public void deleteMessage(MessageIdentity identity) {
-        if (identity == null) {
-            throw new IllegalArgumentException("Identity cannot be null");
-        }
+        Assert.notNull(identity, "Identity cannot be null");
         
         messageRepository.findByIdentity(identity)
             .ifPresentOrElse(

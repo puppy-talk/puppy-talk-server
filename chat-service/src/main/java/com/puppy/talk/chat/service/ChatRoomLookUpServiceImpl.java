@@ -1,10 +1,16 @@
-package com.puppy.talk.chat;
+package com.puppy.talk.chat.service.impl;
 
+import com.puppy.talk.chat.ChatRoom;
+import com.puppy.talk.chat.ChatRoomIdentity;
+import com.puppy.talk.chat.ChatRoomLookUpService;
+import com.puppy.talk.chat.ChatRoomNotFoundException;
+import com.puppy.talk.chat.ChatRoomRepository;
 import com.puppy.talk.pet.PetIdentity;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 @Service
 @RequiredArgsConstructor
@@ -15,9 +21,7 @@ public class ChatRoomLookUpServiceImpl implements ChatRoomLookUpService {
     @Override
     @Transactional(readOnly = true)
     public ChatRoom findChatRoom(ChatRoomIdentity identity) {
-        if (identity == null) {
-            throw new IllegalArgumentException("Identity cannot be null");
-        }
+        Assert.notNull(identity, "Identity cannot be null");
         return chatRoomRepository.findByIdentity(identity)
             .orElseThrow(() -> new ChatRoomNotFoundException(identity));
     }
@@ -25,9 +29,7 @@ public class ChatRoomLookUpServiceImpl implements ChatRoomLookUpService {
     @Override
     @Transactional(readOnly = true)
     public ChatRoom findChatRoomByPetId(PetIdentity petId) {
-        if (petId == null) {
-            throw new IllegalArgumentException("PetId cannot be null");
-        }
+        Assert.notNull(petId, "PetId cannot be null");
         return chatRoomRepository.findByPetId(petId)
             .orElseThrow(() -> new ChatRoomNotFoundException(
                 "ChatRoom not found for pet: " + petId.id()));
@@ -42,21 +44,19 @@ public class ChatRoomLookUpServiceImpl implements ChatRoomLookUpService {
     @Override
     @Transactional
     public ChatRoom createChatRoom(ChatRoom chatRoom) {
-        if (chatRoom == null) {
-            throw new IllegalArgumentException("ChatRoom cannot be null");
-        }
+        Assert.notNull(chatRoom, "ChatRoom cannot be null");
         return chatRoomRepository.save(chatRoom);
     }
 
     @Override
     @Transactional
     public void deleteChatRoom(ChatRoomIdentity identity) {
-        if (identity == null) {
-            throw new IllegalArgumentException("Identity cannot be null");
-        }
-        if (!chatRoomRepository.findByIdentity(identity).isPresent()) {
-            throw new ChatRoomNotFoundException(identity);
-        }
+        Assert.notNull(identity, "Identity cannot be null");
+        
+        // 존재 여부 확인
+        chatRoomRepository.findByIdentity(identity)
+            .orElseThrow(() -> new ChatRoomNotFoundException(identity));
+            
         chatRoomRepository.deleteByIdentity(identity);
     }
 }
