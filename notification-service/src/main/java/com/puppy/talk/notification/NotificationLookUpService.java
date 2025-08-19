@@ -1,5 +1,7 @@
 package com.puppy.talk.notification;
 
+import com.puppy.talk.activity.InactivityNotification;
+import com.puppy.talk.activity.InactivityNotificationIdentity;
 import com.puppy.talk.user.UserIdentity;
 import java.time.LocalDateTime;
 import java.util.List;

@@ -71,6 +71,70 @@ public class AiResponseService implements AiLookUpService {
     }
 
     /**
+     * AiLookUpService 인터페이스 구현 - AI 응답을 생성합니다.
+     */
+    @Override
+    public String generateResponse(List<String> messages, Persona persona) {
+        if (messages == null || messages.isEmpty()) {
+            throw new IllegalArgumentException("Messages cannot be null or empty");
+        }
+        if (persona == null) {
+            throw new IllegalArgumentException("Persona cannot be null");
+        }
+        
+        try {
+            // 메시지 목록을 단일 컨텍스트로 결합
+            String userMessage = String.join("\n", messages);
+            
+            // 프롬프트 생성 (기존 메서드 활용)
+            String prompt = promptBuilder.buildPrompt(null, persona, userMessage, null);
+            
+            // AI 요청 및 응답 생성
+            AiProvider provider = providerFactory.getAvailableProvider();
+            AiRequest request = AiRequest.of(prompt, defaultModel, maxTokens, temperature);
+            AiResponse response = provider.generateResponse(request);
+            
+            return response.content();
+            
+        } catch (Exception e) {
+            log.error("Failed to generate AI response with persona: {} - {}", persona.name(), e.getMessage(), e);
+            return generateFallbackResponseForPersona(persona);
+        }
+    }
+    
+    /**
+     * AiLookUpService 인터페이스 구현 - 비활성 알림용 메시지를 생성합니다.
+     */
+    @Override
+    public String generateInactivityMessage(List<String> messages, Persona persona) {
+        if (persona == null) {
+            throw new IllegalArgumentException("Persona cannot be null");
+        }
+        
+        try {
+            // 최근 대화 컨텍스트 준비
+            String context = messages != null && !messages.isEmpty() ? 
+                String.join("\n", messages.subList(Math.max(0, messages.size() - 3), messages.size())) : 
+                "최근 대화가 없습니다.";
+                
+            // 비활성 알림용 프롬프트 생성 (기존 메서드 활용)
+            String inactivityMessage = "오랜만이에요! 어떻게 지내셨나요?";
+            String prompt = promptBuilder.buildPrompt(null, persona, inactivityMessage, null);
+            
+            // AI 요청 및 응답 생성
+            AiProvider provider = providerFactory.getAvailableProvider();
+            AiRequest request = AiRequest.of(prompt, defaultModel, maxTokens * 2, temperature);
+            AiResponse response = provider.generateResponse(request);
+            
+            return response.content();
+            
+        } catch (Exception e) {
+            log.error("Failed to generate inactivity message with persona: {} - {}", persona.name(), e.getMessage(), e);
+            return generateFallbackInactivityMessage(persona);
+        }
+    }
+
+    /**
      * AI 응답 생성에 실패했을 때 사용할 대체 응답을 생성합니다.
      */
     private String generateFallbackResponse(Pet pet) {
@@ -83,5 +147,19 @@ public class AiResponseService implements AiLookUpService {
         
         int randomIndex = (int) (Math.random() * fallbackResponses.length);
         return fallbackResponses[randomIndex];
+    }
+    
+    /**
+     * 페르소나용 대체 응답을 생성합니다.
+     */
+    private String generateFallbackResponseForPersona(Persona persona) {
+        return "안녕하세요! " + persona.name() + " 페르소나로 대화하고 있어요. 잠시 후 다시 시도해주세요! 😊";
+    }
+    
+    /**
+     * 비활성 알림용 대체 메시지를 생성합니다.
+     */
+    private String generateFallbackInactivityMessage(Persona persona) {
+        return "안녕하세요! " + persona.name() + "입니다. 오랜만이에요! 어떻게 지내셨나요? 😊";
     }
 }

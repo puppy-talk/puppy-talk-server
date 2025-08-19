@@ -1,6 +1,6 @@
 package com.puppy.talk.chat;
 
-import com.puppy.talk.activity.service.ActivityTrackingService;
+import com.puppy.talk.activity.ActivityTrackingService;
 import com.puppy.talk.ai.AiResponsePort;
 import com.puppy.talk.chat.dto.ChatStartResult;
 import com.puppy.talk.chat.dto.MessageSendResult;

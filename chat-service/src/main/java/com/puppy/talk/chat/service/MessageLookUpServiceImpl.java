@@ -3,7 +3,7 @@ package com.puppy.talk.chat.service.impl;
 import com.puppy.talk.chat.ChatRoomIdentity;
 import com.puppy.talk.chat.Message;
 import com.puppy.talk.chat.MessageIdentity;
-import com.puppy.talk.chat.MessageLookUpService;
+import com.puppy.talk.chat.service.MessageLookUpService;
 import com.puppy.talk.chat.MessageNotFoundException;
 import com.puppy.talk.chat.MessageRepository;
 import java.util.List;

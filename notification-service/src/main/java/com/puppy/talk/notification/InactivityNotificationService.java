@@ -6,6 +6,7 @@ import com.puppy.talk.chat.ChatRoomRepository;
 import com.puppy.talk.chat.MessageRepository;
 import com.puppy.talk.pet.PetRepository;
 import com.puppy.talk.activity.InactivityNotification;
+import com.puppy.talk.activity.InactivityNotificationIdentity;
 import com.puppy.talk.activity.NotificationStatus;
 import com.puppy.talk.chat.ChatRoom;
 import com.puppy.talk.chat.ChatRoomIdentity;

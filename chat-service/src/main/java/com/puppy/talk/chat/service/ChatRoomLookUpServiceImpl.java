@@ -2,7 +2,7 @@ package com.puppy.talk.chat.service.impl;
 
 import com.puppy.talk.chat.ChatRoom;
 import com.puppy.talk.chat.ChatRoomIdentity;
-import com.puppy.talk.chat.ChatRoomLookUpService;
+import com.puppy.talk.chat.service.ChatRoomLookUpService;
 import com.puppy.talk.chat.ChatRoomNotFoundException;
 import com.puppy.talk.chat.ChatRoomRepository;
 import com.puppy.talk.pet.PetIdentity;

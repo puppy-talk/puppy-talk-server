@@ -1,6 +1,6 @@
 package com.puppy.talk.domain.push;
 
-import com.puppy.talk.push.DeviceTokenService;
+import com.puppy.talk.push.fcm.DeviceTokenService;
 import com.puppy.talk.domain.push.dto.request.DeviceTokenRequest;
 import com.puppy.talk.domain.push.dto.response.DeviceTokenResponse;
 import com.puppy.talk.domain.push.dto.response.PushNotificationResponse;

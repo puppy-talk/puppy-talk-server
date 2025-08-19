@@ -1,6 +1,6 @@
 package com.puppy.talk.domain.chat.dto.response;
 
-import com.puppy.talk.dto.MessageSendResult;
+import com.puppy.talk.chat.dto.MessageSendResult;
 
 import java.time.LocalDateTime;
 

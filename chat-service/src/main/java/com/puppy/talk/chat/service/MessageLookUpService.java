@@ -1,5 +1,8 @@
-package com.puppy.talk.chat;
+package com.puppy.talk.chat.service;
 
+import com.puppy.talk.chat.ChatRoomIdentity;
+import com.puppy.talk.chat.Message;
+import com.puppy.talk.chat.MessageIdentity;
 import java.util.List;
 
 public interface MessageLookUpService {

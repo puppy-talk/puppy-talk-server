@@ -7,7 +7,7 @@ import com.puppy.talk.domain.chat.dto.request.MessageSendRequest;
 import com.puppy.talk.domain.chat.dto.response.ChatStartResponse;
 import com.puppy.talk.domain.chat.dto.response.MessageResponse;
 import com.puppy.talk.domain.chat.dto.response.MessageSendResponse;
-import com.puppy.talk.dto.MessageSendResult;
+import com.puppy.talk.chat.dto.MessageSendResult;
 import com.puppy.talk.chat.ChatFacade;
 import com.puppy.talk.global.support.ApiResponse;
 import com.puppy.talk.pet.PetIdentity;

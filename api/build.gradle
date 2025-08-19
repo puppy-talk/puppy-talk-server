@@ -15,6 +15,7 @@ dependencies {
     implementation project(':pet-service')         // Pet management endpoints
     implementation project(':user-service')        // User profile endpoints
     implementation project(':notification-service') // Notification endpoints
+    implementation project(':push-service')        // Push notification endpoints
     implementation project(':websocket-service')   // WebSocket endpoints
 
     // Spring Web Stack - migrated to Version Catalog
