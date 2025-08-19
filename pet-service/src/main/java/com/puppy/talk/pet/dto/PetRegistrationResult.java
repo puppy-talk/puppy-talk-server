@@ -1,4 +1,4 @@
-package com.puppy.talk.dto;
+package com.puppy.talk.pet.dto;
 
 import com.puppy.talk.chat.ChatRoom;
 import com.puppy.talk.pet.Pet;

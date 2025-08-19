@@ -1,5 +1,7 @@
-package com.puppy.talk.pet;
+package com.puppy.talk.pet.service;
 
+import com.puppy.talk.pet.Pet;
+import com.puppy.talk.pet.PetIdentity;
 import com.puppy.talk.user.UserIdentity;
 import java.util.List;
 

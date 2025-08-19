@@ -1,4 +1,4 @@
-package com.puppy.talk.pet.command;
+package com.puppy.talk.pet.dto;
 
 import com.puppy.talk.user.UserIdentity;
 import com.puppy.talk.pet.PersonaIdentity;

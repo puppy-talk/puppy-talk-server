@@ -1,5 +1,7 @@
-package com.puppy.talk.pet;
+package com.puppy.talk.pet.service;
 
+import com.puppy.talk.pet.Persona;
+import com.puppy.talk.pet.PersonaIdentity;
 import java.util.List;
 
 public interface PersonaLookUpService {
