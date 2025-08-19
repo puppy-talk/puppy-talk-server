@@ -1,8 +1,6 @@
 package com.puppy.talk.auth;
 
 import com.puppy.talk.user.User;
-import com.puppy.talk.user.UserIdentity;
-import com.puppy.talk.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,14 +16,12 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AuthService {
+public class AuthService implements AuthLookUpService {
     
-    private static final int MIN_PASSWORD_LENGTH = 6;
-    private static final int TOKEN_SUBSTRING_LENGTH = 10;
-    
-    private final UserRepository userRepository;
+    private final LoginValidator loginValidator;
+    private final RegistrationHandler registrationHandler;
+    private final TokenValidator tokenValidator;
     private final JwtTokenProvider jwtTokenProvider;
-    private final PasswordEncoder passwordEncoder;
 
     /**
      * 사용자 로그인을 처리합니다.
@@ -36,23 +32,23 @@ public class AuthService {
      */
     @Transactional(readOnly = true)
     public Optional<AuthResult> login(String username, String password) {
-        if (!validateLoginInput(username, password)) {
+        if (!loginValidator.validateLoginInput(username, password)) {
             return Optional.empty();
         }
 
         String trimmedUsername = username.trim();
-        Optional<User> userOpt = findUserForLogin(trimmedUsername);
+        Optional<User> userOpt = loginValidator.findUserForLogin(trimmedUsername);
         if (userOpt.isEmpty()) {
             return Optional.empty();
         }
 
         User user = userOpt.get();
         
-        if (!validatePassword(password, user.passwordHash(), trimmedUsername)) {
+        if (!loginValidator.validatePassword(password, user.passwordHash(), trimmedUsername)) {
             return Optional.empty();
         }
 
-        return generateAuthResult(user, trimmedUsername);
+        return loginValidator.generateAuthResult(user, trimmedUsername);
     }
 
     /**
@@ -65,18 +61,18 @@ public class AuthService {
      */
     @Transactional
     public Optional<AuthResult> register(String username, String email, String password) {
-        if (!validateRegistrationInput(username, email, password)) {
+        if (!registrationHandler.validateRegistrationInput(username, email, password)) {
             return Optional.empty();
         }
 
         String trimmedUsername = username.trim();
         String trimmedEmail = email.trim();
 
-        if (checkUserExists(trimmedUsername, trimmedEmail)) {
+        if (registrationHandler.checkUserExists(trimmedUsername, trimmedEmail)) {
             return Optional.empty();
         }
 
-        return createNewUser(trimmedUsername, trimmedEmail, password);
+        return registrationHandler.createNewUser(trimmedUsername, trimmedEmail, password);
     }
 
     /**
@@ -87,15 +83,15 @@ public class AuthService {
      */
     @Transactional(readOnly = true)
     public Optional<User> validateToken(String token) {
-        if (!isValidTokenFormat(token)) {
+        if (!tokenValidator.isValidTokenFormat(token)) {
             return Optional.empty();
         }
 
-        if (!isValidTokenContent(token)) {
+        if (!tokenValidator.isValidTokenContent(token)) {
             return Optional.empty();
         }
 
-        return extractUserFromToken(token);
+        return tokenValidator.extractUserFromToken(token);
     }
 
     /**
@@ -115,123 +111,4 @@ public class AuthService {
             return Optional.empty();
         }
     }
-
-    // === Helper Methods for Login ===
-    
-    private boolean validateLoginInput(String username, String password) {
-        if (username == null || username.trim().isEmpty()) {
-            log.warn("Login attempt with empty username");
-            return false;
-        }
-        if (password == null || password.trim().isEmpty()) {
-            log.warn("Login attempt with empty password for username: {}", username);
-            return false;
-        }
-        return true;
-    }
-    
-    private Optional<User> findUserForLogin(String username) {
-        Optional<User> userOpt = userRepository.findByUsername(username);
-        if (userOpt.isEmpty()) {
-            log.warn("Login attempt with non-existent username: {}", username);
-        }
-        return userOpt;
-    }
-    
-    private boolean validatePassword(String password, String passwordHash, String username) {
-        if (!passwordEncoder.matches(password, passwordHash)) {
-            log.warn("Login attempt with invalid password for username: {}", username);
-            return false;
-        }
-        return true;
-    }
-    
-    private Optional<AuthResult> generateAuthResult(User user, String username) {
-        String token = jwtTokenProvider.createToken(user.identity().id(), user.username());
-        log.info("Successful login for user: {} (ID: {})", username, user.identity().id());
-        return Optional.of(new AuthResult(token, user));
-    }
-
-    // === Helper Methods for Registration ===
-    
-    private boolean validateRegistrationInput(String username, String email, String password) {
-        if (username == null || username.trim().isEmpty()) {
-            log.warn("Registration attempt with empty username");
-            return false;
-        }
-        if (email == null || email.trim().isEmpty()) {
-            log.warn("Registration attempt with empty email");
-            return false;
-        }
-        if (password == null || password.length() < MIN_PASSWORD_LENGTH) {
-            log.warn("Registration attempt with invalid password for username: {}", username);
-            return false;
-        }
-        return true;
-    }
-    
-    private boolean checkUserExists(String username, String email) {
-        if (userRepository.findByUsername(username).isPresent()) {
-            log.warn("Registration attempt with duplicate username: {}", username);
-            return true;
-        }
-        if (userRepository.findByEmail(email).isPresent()) {
-            log.warn("Registration attempt with duplicate email: {}", email);
-            return true;
-        }
-        return false;
-    }
-    
-    private Optional<AuthResult> createNewUser(String username, String email, String password) {
-        String hashedPassword = passwordEncoder.encode(password);
-        
-        User newUser = new User(UserIdentity.of(0L), username, email, hashedPassword);
-        User savedUser = userRepository.save(newUser);
-        
-        String token = jwtTokenProvider.createToken(savedUser.identity().id(), savedUser.username());
-        log.info("Successful registration for user: {} (ID: {})", username, savedUser.identity().id());
-        
-        return Optional.of(new AuthResult(token, savedUser));
-    }
-
-    // === Helper Methods for Token Validation ===
-    
-    private boolean isValidTokenFormat(String token) {
-        if (token == null || token.trim().isEmpty()) {
-            return false;
-        }
-        return true;
-    }
-    
-    private boolean isValidTokenContent(String token) {
-        if (!jwtTokenProvider.validateToken(token)) {
-            return false;
-        }
-        if (jwtTokenProvider.isTokenExpired(token)) {
-            String tokenSubstring = token.length() > TOKEN_SUBSTRING_LENGTH 
-                ? token.substring(0, TOKEN_SUBSTRING_LENGTH) + "..." 
-                : token;
-            log.debug("Token expired for token: {}", tokenSubstring);
-            return false;
-        }
-        return true;
-    }
-    
-    private Optional<User> extractUserFromToken(String token) {
-        try {
-            Long userId = jwtTokenProvider.getUserIdFromToken(token);
-            return userRepository.findByIdentity(UserIdentity.of(userId));
-        } catch (Exception e) {
-            log.warn("Error validating token: {}", e.getMessage());
-            return Optional.empty();
-        }
-    }
-
-    /**
-     * 인증 결과를 담는 레코드
-     */
-    public record AuthResult(
-        String token,
-        User user
-    ) {}
 }

@@ -18,6 +18,9 @@ class AuthServiceTest {
     private UserRepository userRepository;
     private JwtTokenProvider jwtTokenProvider;
     private PasswordEncoder passwordEncoder;
+    private LoginValidator loginValidator;
+    private RegistrationHandler registrationHandler;
+    private TokenValidator tokenValidator;
     private AuthService authService;
 
     private User testUser;
@@ -35,7 +38,11 @@ class AuthServiceTest {
         userRepository = new MockUserRepository();
         jwtTokenProvider = new MockJwtTokenProvider("mockSecretKeyForJwtTesting1234567890", 3600000L);
         
-        authService = new AuthService(userRepository, jwtTokenProvider, passwordEncoder);
+        loginValidator = new LoginValidator(userRepository, passwordEncoder, jwtTokenProvider);
+        registrationHandler = new RegistrationHandler(userRepository, passwordEncoder, jwtTokenProvider);
+        tokenValidator = new TokenValidator(jwtTokenProvider, userRepository);
+        
+        authService = new AuthService(loginValidator, registrationHandler, tokenValidator, jwtTokenProvider);
         
         testUser = new User(
             UserIdentity.of(1L),
@@ -58,7 +65,7 @@ class AuthServiceTest {
         ((MockJwtTokenProvider) jwtTokenProvider).setToken(testToken);
 
         // when
-        Optional<AuthService.AuthResult> result = authService.login("testuser", rawPassword);
+        Optional<AuthResult> result = authService.login("testuser", rawPassword);
 
         // then
         assertThat(result).isPresent();
@@ -73,7 +80,7 @@ class AuthServiceTest {
         ((MockUserRepository) userRepository).setUser(null);
 
         // when
-        Optional<AuthService.AuthResult> result = authService.login("nonexistent", rawPassword);
+        Optional<AuthResult> result = authService.login("nonexistent", rawPassword);
 
         // then
         assertThat(result).isEmpty();
@@ -85,7 +92,7 @@ class AuthServiceTest {
         // given - 틀린 패스워드로 테스트
 
         // when
-        Optional<AuthService.AuthResult> result = authService.login("testuser", "wrongpassword");
+        Optional<AuthResult> result = authService.login("testuser", "wrongpassword");
 
         // then
         assertThat(result).isEmpty();
@@ -95,7 +102,7 @@ class AuthServiceTest {
     @DisplayName("빈 사용자명으로 로그인에 실패한다")
     void login_EmptyUsername_Failure() {
         // when
-        Optional<AuthService.AuthResult> result = authService.login("", rawPassword);
+        Optional<AuthResult> result = authService.login("", rawPassword);
 
         // then
         assertThat(result).isEmpty();
@@ -105,7 +112,7 @@ class AuthServiceTest {
     @DisplayName("null 사용자명으로 로그인에 실패한다")
     void login_NullUsername_Failure() {
         // when
-        Optional<AuthService.AuthResult> result = authService.login(null, rawPassword);
+        Optional<AuthResult> result = authService.login(null, rawPassword);
 
         // then
         assertThat(result).isEmpty();
@@ -132,7 +139,7 @@ class AuthServiceTest {
         ((MockJwtTokenProvider) jwtTokenProvider).setToken(testToken);
 
         // when
-        Optional<AuthService.AuthResult> result = authService.register(username, email, rawPassword);
+        Optional<AuthResult> result = authService.register(username, email, rawPassword);
 
         // then
         assertThat(result).isPresent();
@@ -151,7 +158,7 @@ class AuthServiceTest {
         ((MockUserRepository) userRepository).setUser(testUser); // 중복 사용자 존재
 
         // when
-        Optional<AuthService.AuthResult> result = authService.register(username, email, rawPassword);
+        Optional<AuthResult> result = authService.register(username, email, rawPassword);
 
         // then
         assertThat(result).isEmpty();
@@ -168,7 +175,7 @@ class AuthServiceTest {
         ((MockUserRepository) userRepository).setEmailExists(true); // 중복 이메일 존재
 
         // when
-        Optional<AuthService.AuthResult> result = authService.register(username, email, rawPassword);
+        Optional<AuthResult> result = authService.register(username, email, rawPassword);
 
         // then
         assertThat(result).isEmpty();
@@ -183,7 +190,7 @@ class AuthServiceTest {
         String shortPassword = "123"; // 6자 미만
 
         // when
-        Optional<AuthService.AuthResult> result = authService.register(username, email, shortPassword);
+        Optional<AuthResult> result = authService.register(username, email, shortPassword);
 
         // then
         assertThat(result).isEmpty();
