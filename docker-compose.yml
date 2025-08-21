@@ -1,0 +1,66 @@
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: puppytalk-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-puppytalk123}
+      MYSQL_DATABASE: ${DB_NAME:-puppytalk}
+      MYSQL_USER: ${DB_USERNAME:-puppytalk}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-puppytalk123}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - puppytalk-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-puppytalk123}"]
+      timeout: 10s
+      retries: 5
+      interval: 30s
+
+  # PuppyTalk Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: puppytalk-app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # Spring Profile
+      SPRING_PROFILES_ACTIVE: docker
+      
+      # Database Configuration
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-puppytalk}
+      DB_USERNAME: ${DB_USERNAME:-puppytalk}
+      DB_PASSWORD: ${DB_PASSWORD:-puppytalk123}
+      
+      # JVM Options
+      JAVA_OPTS: "-Xmx512m -Xms256m"
+    ports:
+      - "8080:8080"
+    networks:
+      - puppytalk-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      timeout: 10s
+      retries: 5
+      interval: 30s
+      start_period: 60s
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  puppytalk-network:
+    driver: bridge

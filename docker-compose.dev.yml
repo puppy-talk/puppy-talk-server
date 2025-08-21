@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # MySQL Database for Development
+  mysql:
+    image: mysql:8.0
+    container_name: puppytalk-mysql-dev
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: puppytalk123
+      MYSQL_DATABASE: puppytalk_dev
+      MYSQL_USER: puppytalk
+      MYSQL_PASSWORD: puppytalk123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_dev_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - puppytalk-dev-network
+
+  # PuppyTalk Development Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: puppytalk-app-dev
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      # Spring Profile for Development
+      SPRING_PROFILES_ACTIVE: docker
+      
+      # Database Configuration
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: puppytalk_dev
+      DB_USERNAME: puppytalk
+      DB_PASSWORD: puppytalk123
+      
+      # JVM Options for Development
+      JAVA_OPTS: "-Xmx512m -Xms256m -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ports:
+      - "8080:8080"
+      - "5005:5005"  # Debug port
+    networks:
+      - puppytalk-dev-network
+    volumes:
+      # Hot reload for development (optional)
+      - ./puppytalk-bootstrap/src:/app/src:ro
+
+volumes:
+  mysql_dev_data:
+    driver: local
+
+networks:
+  puppytalk-dev-network:
+    driver: bridge

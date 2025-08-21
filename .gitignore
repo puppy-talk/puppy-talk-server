@@ -68,3 +68,6 @@ hs_err_pid*
 # Application specific
 application-*.yml
 !application-sample.yml
+
+# Docker
+.env

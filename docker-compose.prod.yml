@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # MySQL Database for Production
+  mysql:
+    image: mysql:8.0
+    container_name: puppytalk-mysql-prod
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql_prod_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+      - ./docker/mysql/conf:/etc/mysql/conf.d
+    networks:
+      - puppytalk-prod-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      timeout: 10s
+      retries: 5
+      interval: 30s
+
+  # PuppyTalk Production Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: puppytalk-app-prod
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # Spring Profile for Production
+      SPRING_PROFILES_ACTIVE: prod
+      
+      # Database Configuration
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      
+      # JVM Options for Production
+      JAVA_OPTS: "-Xmx1g -Xms512m -server -XX:+UseG1GC -XX:+UseStringDeduplication"
+    ports:
+      - "8080:8080"
+    networks:
+      - puppytalk-prod-network
+    deploy:
+      resources:
+        limits:
+          memory: 1.5G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      timeout: 10s
+      retries: 5
+      interval: 30s
+      start_period: 120s
+
+volumes:
+  mysql_prod_data:
+    driver: local
+
+networks:
+  puppytalk-prod-network:
+    driver: bridge

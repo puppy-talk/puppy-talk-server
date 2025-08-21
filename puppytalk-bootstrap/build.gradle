@@ -12,6 +12,7 @@ dependencies {
     
     // Bootstrap needs Spring Boot core for application startup
     implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     
     // Development tools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
