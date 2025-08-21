@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(value = "inactivity.scheduler.enabled", havingValue = "true", matchIfMissing = true)
 public class InactivityNotificationScheduler {
 
-    private final InactivityNotificationService inactivityNotificationService;
+    private final InactivityNotificationFacade inactivityNotificationFacade;
 
     /**
      * 매분마다 실행되어 알림 대상 비활성 알림들을 처리합니다.
@@ -28,7 +28,7 @@ public class InactivityNotificationScheduler {
         log.debug("Starting scheduled inactivity notification processing...");
         
         try {
-            inactivityNotificationService.processEligibleNotifications();
+            inactivityNotificationFacade.processEligibleNotifications();
         } catch (Exception e) {
             log.error("Scheduled inactivity notification processing failed", e);
         }
@@ -42,7 +42,7 @@ public class InactivityNotificationScheduler {
     public void logNotificationStatistics() {
         try {
             InactivityNotificationStatistics stats =
-                inactivityNotificationService.getStatistics();
+                inactivityNotificationFacade.getStatistics();
                 
             log.info("Inactivity notification statistics - Total: {}, Pending: {}, Sent: {}, Disabled: {}", 
                 stats.totalCount(), stats.pendingCount(), stats.sentCount(), stats.disabledCount());

@@ -1,46 +1,25 @@
 package com.puppy.talk.chat;
 
-import com.puppy.talk.chat.ChatRoom;
-import com.puppy.talk.chat.ChatRoomIdentity;
-import com.puppy.talk.chat.Message;
-import com.puppy.talk.chat.SenderType;
-import com.puppy.talk.chat.ChatLookUpService;
 import com.puppy.talk.chat.dto.ChatStartResult;
-import com.puppy.talk.chat.dto.MessageSendResult;
 import com.puppy.talk.chat.dto.MessageSendCommand;
+import com.puppy.talk.chat.dto.MessageSendResult;
 import com.puppy.talk.event.DomainEventPublisher;
 import com.puppy.talk.event.MessageSentEvent;
 import com.puppy.talk.pet.PetIdentity;
 import com.puppy.talk.user.UserIdentity;
+import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.util.Assert;
+import org.springframework.validation.annotation.Validated;
 
-import jakarta.validation.Valid;
-import java.util.List;
-
-/**
- * 채팅 애플리케이션 파사드
- * 
- * Application Layer에서 채팅 관련 유스케이스를 조정하는 Facade 패턴을 구현합니다.
- * 도메인 서비스에 모든 비즈니스 로직을 위임하고, 오직 흐름 제어와 조정만 담당합니다.
- * 
- * 📋 주요 책임:
- * ✅ 유스케이스 조정 (Use Case Orchestration)
- * ✅ 도메인 서비스 위임 (Domain Service Delegation)
- * ✅ 흐름 제어 (Flow Control)
- * ✅ 입력 검증 (Input Validation)
- * 
- * ❌ 비즈니스 로직 처리 (Business Logic) - ChatDomainService로 위임
- * ❌ 트랜잭션 관리 (Transaction Management) - Domain Service에서 담당
- */
 @Slf4j
 @Service
 @Validated
 @RequiredArgsConstructor
-public class ChatApplicationService implements ChatLookUpService {
+public class ChatFacade implements ChatLookUpService {
 
     private final ChatDomainService chatDomainService;
     private final DomainEventPublisher domainEventPublisher;

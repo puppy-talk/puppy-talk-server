@@ -25,12 +25,15 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * 비활성 알림 처리 서비스
+ * 비활성 알림 파사드
+ * 
+ * Application Layer에서 비활성 알림 관련 유스케이스를 조정하는 Facade 패턴을 구현합니다.
+ * 도메인 서비스와 외부 서비스(AI, Push)를 조정하여 복합적인 알림 처리를 담당합니다.
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class InactivityNotificationService implements InactivityNotificationLookUpService {
+public class InactivityNotificationFacade implements InactivityNotificationLookUpService {
 
     private final InactivityNotificationDomainService inactivityNotificationDomainService;
     private final PersonaLookUpService personaLookUpService;
