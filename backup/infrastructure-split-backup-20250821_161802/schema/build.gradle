@@ -1,0 +1,28 @@
+plugins {
+    id 'java-library'
+    // Migrated to Version Catalog plugin references
+    alias(libs.plugins.spring.boot) apply false
+    alias(libs.plugins.spring.dependency.management)
+}
+
+// Schema Management Layer - Database migrations and schema evolution
+
+dependencyManagement {
+    imports {
+        // Version Catalog manages BOM versions
+        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+    }
+}
+
+java {
+    sourceCompatibility = '21'
+}
+
+dependencies {
+    // Database migration tool - migrated to Version Catalog
+    implementation libs.liquibase.core
+
+    // Testing database - migrated to Version Catalog
+    testImplementation libs.h2  // In-memory database for schema testing
+    // Common testing dependencies inherited from root build.gradle
+}

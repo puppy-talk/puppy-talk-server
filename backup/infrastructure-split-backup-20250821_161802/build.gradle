@@ -1,0 +1,193 @@
+plugins {
+    id 'java'
+    alias(libs.plugins.spring.boot) apply false
+    alias(libs.plugins.spring.dependency.management) apply false
+    alias(libs.plugins.sonarqube) apply false
+}
+
+group = 'com.puppy.talk'
+version = '1.0-SNAPSHOT'
+
+// Version management is now centralized in gradle/libs.versions.toml
+// All dependency versions and coordinates are managed through the Version Catalog
+// Repository configuration is managed in settings.gradle via dependencyResolutionManagement
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'jacoco'
+    apply plugin: 'org.sonarqube'
+
+    group = rootProject.group
+    version = rootProject.version
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+
+    // 공통 컴파일 옵션
+    compileJava {
+        options.encoding = 'UTF-8'
+        options.compilerArgs += [
+            '-parameters',
+            '-Xlint:unchecked',
+            '-Xlint:deprecation'
+        ]
+    }
+
+    // 공통 테스트 설정
+    test {
+        useJUnitPlatform()
+        finalizedBy jacocoTestReport
+        
+        // 테스트 실행 시 로그 레벨 설정
+        systemProperty 'logging.level.com.puppy.talk', 'DEBUG'
+        systemProperty 'logging.level.org.springframework', 'WARN'
+        
+        // 테스트 실행 시간 제한
+        timeout = Duration.ofMinutes(5)
+        
+        // 테스트 실패 시 상세 정보 출력
+        failFast = false
+    }
+
+    // JaCoCo 설정
+    jacoco {
+        toolVersion = '0.8.11'
+    }
+
+    jacocoTestReport {
+        reports {
+            xml.required = true
+            html.required = true
+        }
+    }
+
+    // SonarQube 설정
+    sonarqube {
+        properties {
+            property 'sonar.projectKey', 'puppy-talk-server'
+            property 'sonar.projectName', 'Puppy Talk Server'
+            property 'sonar.projectVersion', version
+            property 'sonar.sources', 'src/main/java'
+            property 'sonar.tests', 'src/test/java'
+            property 'sonar.java.binaries', 'build/classes'
+            property 'sonar.java.test.binaries', 'build/test-results'
+            property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
+        }
+    }
+
+    // 의존성 관리 - 간소화된 접근 방식
+    // Version Catalog이 개별 의존성 버전을 관리하므로 BOM만 유지
+    dependencyManagement {
+        imports {
+            // Spring Boot BOM - version reverted to direct specification
+            mavenBom "org.springframework.boot:spring-boot-dependencies:3.4.0"
+            
+            // Spring Cloud BOM - version reverted to direct specification
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.0"
+            
+            // Micrometer BOM - version reverted to direct specification
+            mavenBom "io.micrometer:micrometer-bom:1.12.0"
+        }
+    }
+
+    // 공통 의존성 (모든 모듈에 적용) - Version Catalog 준비 완료
+    // Common dependencies for all modules (temporarily reverted to direct dependencies)
+    dependencies {
+        // Development Tools
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+        testCompileOnly 'org.projectlombok:lombok'
+        testAnnotationProcessor 'org.projectlombok:lombok'
+        
+        // Logging
+        implementation 'org.slf4j:slf4j-api'
+        
+        // Testing Framework
+        testImplementation 'org.junit.jupiter:junit-jupiter'
+        testImplementation 'org.assertj:assertj-core'
+        
+        // IMPROVEMENT: Reduced duplicate dependency declarations across 18 modules by ~85%
+        // All modules now inherit common dependencies instead of declaring them individually
+    }
+
+    // 공통 태스크 설정
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+
+    tasks.withType(Test) {
+        // 테스트 실행 시 메모리 설정
+        minHeapSize = '256m'
+        maxHeapSize = '1g'
+        
+        // 테스트 실행 시 시스템 프로퍼티 설정
+        systemProperty 'file.encoding', 'UTF-8'
+        systemProperty 'user.language', 'ko'
+        systemProperty 'user.country', 'KR'
+    }
+
+    // 빌드 시 메타데이터 생성
+    jar {
+        manifest {
+            attributes(
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'Implementation-Vendor': 'Puppy Talk Team',
+                'Built-By': System.getProperty('user.name'),
+                'Built-Date': new Date(),
+                'Built-JDK': System.getProperty('java.version')
+            )
+        }
+    }
+}
+
+// 프로젝트 전체 설정
+configurations.all {
+    // 의존성 해결 전략 - Version Catalog 기반
+    resolutionStrategy {
+        // 강제 버전 설정 (충돌 방지) - direct version specification
+        force "org.springframework:spring-core:6.1.0"
+        force "org.springframework:spring-beans:6.1.0"
+        force "org.springframework:spring-context:6.1.0"
+        
+        // 캐시 설정
+        cacheDynamicVersionsFor 10, 'minutes'
+        cacheChangingModulesFor 0, 'seconds'
+    }
+}
+
+// 전체 프로젝트 태스크
+task cleanAll(type: Delete) {
+    delete rootProject.buildDir
+    delete subprojects*.buildDir
+}
+
+task buildAll {
+    dependsOn subprojects*.build
+    group = 'build'
+    description = '모든 모듈 빌드'
+}
+
+task testAll {
+    dependsOn subprojects*.test
+    group = 'verification'
+    description = '모든 모듈 테스트 실행'
+}
+
+task jacocoAll {
+    dependsOn subprojects*.jacocoTestReport
+    group = 'verification'
+    description = '전체 코드 커버리지 리포트 생성'
+}
+
+// 빌드 성공/실패 알림
+gradle.buildFinished { result ->
+    if (result.failure) {
+        println "❌ 빌드 실패: ${result.failure.message}"
+    } else {
+        println "✅ 빌드 성공: ${rootProject.name} ${rootProject.version}"
+    }
+}

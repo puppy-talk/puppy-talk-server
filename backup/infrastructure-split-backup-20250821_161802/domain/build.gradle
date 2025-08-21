@@ -1,0 +1,41 @@
+plugins {
+    id 'java-library'
+    // Migrated to Version Catalog plugin references
+    alias(libs.plugins.spring.boot) apply false
+    alias(libs.plugins.spring.dependency.management)
+}
+
+// Domain Layer - Pure business logic and domain services
+
+dependencyManagement {
+    imports {
+        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+    }
+}
+
+dependencies {
+    // Core modules - Domain entities and exceptions only
+    implementation project(':model')           // Uses domain entities
+    implementation project(':exception')       // Uses domain exceptions
+    implementation project(':ports')           // Uses repository interfaces only
+    
+    // Spring Framework - domain services with DI and transaction support
+    implementation libs.bundles.spring.core  // spring-context, spring-tx
+    implementation libs.spring.security.crypto
+    implementation libs.spring.boot.starter.validation
+    
+    // JWT Authentication Stack - for auth domain services
+    implementation libs.bundles.jwt.auth  // jjwt-api, jjwt-impl, jjwt-jackson
+    
+    // Password Security - for auth domain services  
+    implementation libs.bcrypt
+    implementation libs.guava
+    
+    // Testing
+    testImplementation libs.spring.boot.starter.test
+    testImplementation libs.mockito.core
+}
+
+test {
+    useJUnitPlatform()
+}

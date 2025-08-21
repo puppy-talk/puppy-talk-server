@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+  <changeSet author="system" id="013">
+    <insert tableName="users">
+      <column name="id" value="1"/>
+      <column name="username" value="k.yu"/>
+      <column name="email" value="k.yu@dev.com"/>
+      <column name="password" value="$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa"/>
+      <column name="created_at" valueDate="2024-01-01"/>
+      <column name="updated_at" valueDate="2024-01-01"/>
+    </insert>
+    
+    <insert tableName="users">
+      <column name="id" value="2"/>
+      <column name="username" value="hj.lee"/>
+      <column name="email" value="hj.lee@dev.com"/>
+      <column name="password" value="$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa"/>
+      <column name="created_at" valueDate="2024-01-01"/>
+      <column name="updated_at" valueDate="2024-01-01"/>
+    </insert>
+    
+    <insert tableName="users">
+      <column name="id" value="3"/>
+      <column name="username" value="demo_user"/>
+      <column name="email" value="demo@example.com"/>
+      <column name="password" value="$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa"/>
+      <column name="created_at" valueDate="2024-01-01"/>
+      <column name="updated_at" valueDate="2024-01-01"/>
+    </insert>
+  </changeSet>
+
+</databaseChangeLog>
+

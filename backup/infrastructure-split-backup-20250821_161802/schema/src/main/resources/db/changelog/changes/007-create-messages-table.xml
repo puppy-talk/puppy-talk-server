@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+  <changeSet author="system" id="007">
+    <createTable tableName="messages">
+      <column autoIncrement="true" name="id" type="BIGINT">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="chat_room_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="sender_type" type="ENUM('USER', 'PET')">
+        <constraints nullable="false"/>
+      </column>
+      <column name="content" type="TEXT">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueBoolean="false" name="is_read" type="BOOLEAN">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint
+      baseColumnNames="chat_room_id" baseTableName="messages"
+      constraintName="fk_messages_chat_room_id" onDelete="CASCADE"
+      referencedColumnNames="id"
+      referencedTableName="chat_rooms"/>
+
+    <createIndex indexName="idx_messages_room_created_at" tableName="messages">
+      <column name="chat_room_id"/>
+      <column name="created_at"/>
+    </createIndex>
+
+    <createIndex indexName="idx_messages_room_unread" tableName="messages">
+      <column name="chat_room_id"/>
+      <column name="is_read"/>
+    </createIndex>
+
+    <createIndex indexName="idx_messages_sender_type" tableName="messages">
+      <column name="sender_type"/>
+    </createIndex>
+  </changeSet>
+
+</databaseChangeLog>

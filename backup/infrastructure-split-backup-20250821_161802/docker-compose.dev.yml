@@ -1,0 +1,37 @@
+# Development override for docker-compose.yml
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  puppy-talk-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker,dev
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_LIVERELOAD_ENABLED=true
+      - LOGGING_LEVEL_COM_PUPPY_TALK=DEBUG
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB_SOCKET=DEBUG
+    volumes:
+      - .:/app/source
+      - /app/source/build
+      - /app/source/.gradle
+    ports:
+      - "8080:8080"
+      - "35729:35729"  # LiveReload port
+    command: ["./gradlew", "bootRun", "--args='--spring.profiles.active=docker,dev'"]
+
+  # Development database with persistent data
+  mysql:
+    environment:
+      - MYSQL_ROOT_PASSWORD=dev123
+      - MYSQL_DATABASE=puppy_talk_dev_db
+    ports:
+      - "3307:3306"  # Different port to avoid conflicts
+
+  # Enable all development tools by default
+  adminer:
+    profiles: []  # Remove dev profile requirement
+
+  redis-commander:
+    profiles: []  # Remove dev profile requirement

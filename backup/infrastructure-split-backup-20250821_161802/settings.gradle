@@ -1,0 +1,41 @@
+rootProject.name = 'puppy-talk-server'
+
+// Repository configuration for dependency resolution
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+        maven { 
+            name = "Spring Milestones"
+            url = uri('https://repo.spring.io/milestone') 
+        }
+        maven { 
+            name = "Spring Snapshots"
+            url = uri('https://repo.spring.io/snapshot') 
+        }
+    }
+}
+
+// == Core Domain Modules ==
+include 'model'
+include 'exception'
+include 'ports'                // Repository interfaces and domain ports (extracted from infrastructure)
+include 'repository-jdbc'
+include 'api'
+include 'application-api'
+include 'schema'
+
+// == Infrastructure Adapters ==
+include 'adapters-websocket'   // WebSocket service implementations
+include 'adapters-push'        // Push notification implementations
+include 'adapters-events'      // Domain event publishing implementations
+
+// == Clean Architecture Layers ==
+include 'domain'           // Domain Layer - Business logic and domain services
+include 'application'      // Application Layer - Use case orchestration
+
+// == External Services ==
+include 'ai-service'              // AI provider integration
+
+// == Legacy Modules ==
+// REMOVED: 'service' module - domain service migration completed
+// REMOVED: 'infrastructure' module - split into ports and adapter modules

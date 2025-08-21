@@ -1,0 +1,12 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    // Domain layer - no external dependencies, only common development tools
+    // Version Catalog ready: libs.lombok (when Version Catalog is enabled)
+    
+    // Development tools - inherited from root build.gradle
+    // compileOnly libs.lombok
+    // annotationProcessor libs.lombok
+}

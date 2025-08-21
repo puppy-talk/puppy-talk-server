@@ -1,0 +1,11 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    // Domain layer dependencies
+    implementation project(':model')  // Internal use: exceptions reference domain entities
+    
+    // Version Catalog ready: All external dependencies managed centrally
+    // Common development tools inherited from root build.gradle
+}
