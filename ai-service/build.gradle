@@ -9,9 +9,11 @@ dependencies {
     implementation project(':model')         // Uses AI response entities
     implementation project(':exception')     // Uses AI-specific exceptions
     implementation project(':infrastructure') // Uses repository interfaces
+    implementation project(':domain')        // Uses PersonaLookUpService from domain
 
     // Spring Framework - migrated to Version Catalog
     implementation libs.spring.context
+    implementation libs.spring.tx
     implementation libs.spring.boot.starter.webflux
     implementation libs.spring.boot.autoconfigure
     

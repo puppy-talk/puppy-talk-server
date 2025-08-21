@@ -23,18 +23,12 @@ dependencies {
     implementation project(':repository-jdbc') // Data access implementation
     implementation project(':schema')        // Database schema (internal use)
 
-    // Domain Services - all business logic modules
-    implementation project(':auth-service')        // Authentication service
-    implementation project(':chat-service')        // Chat messaging service
-    implementation project(':pet-service')         // Pet management service
-    implementation project(':user-service')        // User profile service
-    implementation project(':notification-service') // Notification service
-    implementation project(':websocket-service')   // Real-time messaging service
-    implementation project(':event-service')       // Event publishing service
+    // Clean Architecture Layers
+    implementation project(':domain')              // Domain services (auth, chat, pet, user, notification)
+    implementation project(':infrastructure')      // Infrastructure services (websocket, push, event)
 
     // External Services - third-party integrations
     implementation project(':ai-service')    // AI provider integration
-    implementation project(':push-service')  // Push notification integration
 
     // Spring Boot Application Stack - migrated to Version Catalog
     implementation libs.spring.boot.starter.web

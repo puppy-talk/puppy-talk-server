@@ -9,14 +9,10 @@ dependencies {
     // Exception handling for HTTP responses
     implementation project(':exception')
     
-    // Domain Services - all business services integrated at API layer
-    implementation project(':auth-service')        // Authentication endpoints
-    implementation project(':chat-service')        // Chat messaging endpoints
-    implementation project(':pet-service')         // Pet management endpoints
-    implementation project(':user-service')        // User profile endpoints
-    implementation project(':notification-service') // Notification endpoints
-    implementation project(':push-service')        // Push notification endpoints
-    implementation project(':websocket-service')   // WebSocket endpoints
+    // Clean Architecture Layers
+    implementation project(':domain')             // Domain services (auth, chat, pet, user, notification)
+    implementation project(':application')        // Application services (use case orchestration)
+    implementation project(':infrastructure')     // Infrastructure services (websocket, push)
 
     // Spring Web Stack - migrated to Version Catalog
     implementation libs.spring.boot.starter.web

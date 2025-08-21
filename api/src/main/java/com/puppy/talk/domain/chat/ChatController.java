@@ -8,7 +8,7 @@ import com.puppy.talk.domain.chat.dto.response.ChatStartResponse;
 import com.puppy.talk.domain.chat.dto.response.MessageResponse;
 import com.puppy.talk.domain.chat.dto.response.MessageSendResponse;
 import com.puppy.talk.chat.dto.MessageSendResult;
-import com.puppy.talk.chat.ChatFacade;
+import com.puppy.talk.chat.ChatApplicationService;
 import com.puppy.talk.global.support.ApiResponse;
 import com.puppy.talk.pet.PetIdentity;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Chat", description = "채팅 관리 API")
 public class ChatController {
 
-    private final ChatFacade chatFacade;
+    private final ChatApplicationService chatApplicationService;
 
     @PostMapping("/start/{petId}")
     @Operation(summary = "채팅 시작", description = "지정된 반려동물과 채팅을 시작합니다.")
@@ -47,7 +47,7 @@ public class ChatController {
     public ApiResponse<ChatStartResponse> startChat(
         @Parameter(description = "반려동물 ID", required = true) @PathVariable @Positive Long petId) {
         log.info("Starting chat with pet: {}", petId);
-        var result = chatFacade.startChat(PetIdentity.of(petId));
+        var result = chatApplicationService.startChatWithPet(PetIdentity.of(petId));
         log.debug("Chat started successfully for pet: {}, chatRoomId: {}", 
             petId, result.chatRoom().identity().id());
         return ApiResponse.ok(
@@ -71,7 +71,7 @@ public class ChatController {
         log.info("Sending message to chatRoom: {}, content length: {}", 
             chatRoomId, request.content().length());
         
-        MessageSendResult result = chatFacade.sendMessageToPet(
+        MessageSendResult result = chatApplicationService.sendMessageToPet(
             ChatRoomIdentity.of(chatRoomId),
             MessageSendCommand.of(request.content())
         );
@@ -96,7 +96,7 @@ public class ChatController {
         @Parameter(description = "채팅방 ID", required = true) @PathVariable @Positive Long chatRoomId) {
         log.info("Retrieving chat history for chatRoom: {}", chatRoomId);
         
-        List<Message> messages = chatFacade.getChatHistory(ChatRoomIdentity.of(chatRoomId));
+        List<Message> messages = chatApplicationService.getChatHistory(ChatRoomIdentity.of(chatRoomId));
         
         List<MessageResponse> responses = messages.stream()
             .map(MessageResponse::from)
@@ -116,7 +116,7 @@ public class ChatController {
     public ApiResponse<Void> markMessagesAsRead(
         @Parameter(description = "채팅방 ID", required = true) @PathVariable @Positive Long chatRoomId) {
         log.info("Marking messages as read for chatRoom: {}", chatRoomId);
-        chatFacade.markMessagesAsRead(ChatRoomIdentity.of(chatRoomId));
+        chatApplicationService.markMessagesAsRead(ChatRoomIdentity.of(chatRoomId));
         return ApiResponse.ok("Messages marked as read");
     }
 }

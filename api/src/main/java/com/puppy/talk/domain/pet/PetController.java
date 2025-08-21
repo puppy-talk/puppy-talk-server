@@ -170,7 +170,7 @@ public class PetController {
                 persona.identity().id(),
                 persona.name(),
                 persona.description(),
-                persona.imageUrl()
+                null // imageUrl not available in current Persona model
             );
         }
     }
