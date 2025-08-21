@@ -1,0 +1,10 @@
+plugins {
+    id 'io.spring.dependency-management'
+}
+
+dependencies {
+    implementation project(':puppytalk-domain')
+    
+    implementation 'org.springframework:spring-context:6.2.7'
+    implementation 'org.springframework:spring-tx:6.1.13'
+}
