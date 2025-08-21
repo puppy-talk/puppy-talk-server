@@ -24,7 +24,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PushNotificationService {
+public class PushNotificationService implements PushNotificationLookUpService {
     
     private final PushNotificationRepository pushNotificationRepository;
     private final DeviceTokenRepository deviceTokenRepository;

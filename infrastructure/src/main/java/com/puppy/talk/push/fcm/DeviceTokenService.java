@@ -3,6 +3,7 @@ package com.puppy.talk.push.fcm;
 import com.puppy.talk.push.DeviceToken;
 import com.puppy.talk.push.DeviceTokenNotFoundException;
 import com.puppy.talk.push.DeviceTokenRepository;
+import com.puppy.talk.push.DeviceTokenLookUpService;
 import com.puppy.talk.push.dto.DeviceTokenRegistrationCommand;
 import com.puppy.talk.user.UserIdentity;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DeviceTokenService {
+public class DeviceTokenService implements DeviceTokenLookUpService {
     
     private final DeviceTokenRepository deviceTokenRepository;
     
@@ -73,6 +74,7 @@ public class DeviceTokenService {
     /**
      * 디바이스 토큰을 비활성화합니다.
      */
+    @Override
     @Transactional
     public void deactivateToken(String token) {
         Assert.hasText(token, "Token cannot be null or empty");
@@ -169,5 +171,41 @@ public class DeviceTokenService {
         log.info("Registered new device token for user={}, platform={}", 
             command.userId().id(), command.platform());
         return savedToken;
+    }
+    
+    // === DeviceTokenLookUpService Interface Implementation ===
+    
+    @Override
+    public void registerDeviceToken(DeviceTokenRegistrationCommand command) {
+        registerOrUpdateToken(command);
+    }
+    
+    @Override
+    public List<DeviceToken> getActiveTokens(UserIdentity userId) {
+        return getActiveTokensByUserId(userId);
+    }
+    
+    
+    @Override
+    public void deactivateAllTokensForUser(UserIdentity userId) {
+        if (userId == null) {
+            return;
+        }
+        
+        List<DeviceToken> userTokens = deviceTokenRepository.findByUserId(userId);
+        for (DeviceToken token : userTokens) {
+            if (token.isActive()) {
+                DeviceToken deactivatedToken = token.deactivate();
+                deviceTokenRepository.save(deactivatedToken);
+            }
+        }
+        log.info("Deactivated all tokens for user: {}", userId.id());
+    }
+    
+    @Override
+    public void cleanupExpiredTokens() {
+        // TODO: Implement expired token cleanup logic
+        // This would typically clean up tokens that haven't been used for a certain period
+        log.debug("Cleaning up expired device tokens (not implemented yet)");
     }
 }

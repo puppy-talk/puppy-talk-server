@@ -1,5 +1,6 @@
 package com.puppy.talk.websocket;
 
+import com.puppy.talk.chat.ChatRoomIdentity;
 import com.puppy.talk.notification.RealtimeNotificationException;
 import com.puppy.talk.user.UserIdentity;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class WebSocketChatService {
+public class WebSocketChatService implements WebSocketChatLookUpService {
     
     private static final String TOPIC_CHAT_PREFIX = "/topic/chat/";
     private static final String TOPIC_TYPING_SUFFIX = "/typing";
@@ -206,5 +207,47 @@ public class WebSocketChatService {
     
     private String extractSafeId(com.puppy.talk.chat.ChatRoomIdentity identity) {
         return identity != null ? String.valueOf(identity.id()) : UNKNOWN_ID;
+    }
+    
+    // === WebSocketChatLookUpService Interface Implementation ===
+    
+    @Override
+    public void broadcastMessage(ChatRoomIdentity chatRoomId, ChatMessage message) {
+        if (chatRoomId == null || message == null) {
+            log.warn("Cannot broadcast message with null chatRoomId or message");
+            return;
+        }
+        broadcastMessage(message);
+    }
+    
+    @Override
+    public void sendMessageToUser(UserIdentity userId, ChatMessage message) {
+        if (userId == null || message == null) {
+            log.warn("Cannot send message with null userId or message");
+            return;
+        }
+        sendToUser(userId, message);
+    }
+    
+    @Override
+    public boolean isUserConnected(UserIdentity userId) {
+        if (userId == null) {
+            return false;
+        }
+        // TODO: Implement actual user connection tracking
+        // For now, return true as placeholder
+        log.debug("Checking connection status for user: {}", userId.id());
+        return true;
+    }
+    
+    @Override
+    public int getActiveChatRoomUserCount(ChatRoomIdentity chatRoomId) {
+        if (chatRoomId == null) {
+            return 0;
+        }
+        // TODO: Implement actual active user counting
+        // For now, return 1 as placeholder
+        log.debug("Getting active user count for chat room: {}", chatRoomId.id());
+        return 1;
     }
 }

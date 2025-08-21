@@ -19,7 +19,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ActivityTrackingService {
+public class ActivityTrackingService implements ActivityTrackingLookUpService {
 
     private final UserActivityRepository userActivityRepository;
     private final InactivityNotificationRepository inactivityNotificationRepository;
@@ -86,6 +86,7 @@ public class ActivityTrackingService {
     /**
      * 특정 사용자의 마지막 활동을 조회합니다.
      */
+    @Override
     @Transactional(readOnly = true)
     public Optional<UserActivity> getLastActivity(UserIdentity userId) {
         validateUserId(userId);
@@ -147,6 +148,58 @@ public class ActivityTrackingService {
         } catch (Exception e) {
             log.warn("Failed to update inactivity notification for chatRoomId={}: {}. Activity tracking will continue.", 
                 chatRoomId.id(), e.getMessage());
+        }
+    }
+    
+    // === ActivityTrackingLookUpService Interface Implementation ===
+    
+    @Override
+    public void recordActivity(UserIdentity userId, ChatRoomIdentity chatRoomId, LocalDateTime activityTime) {
+        // trackActivity method only accepts 3 parameters and uses current time
+        // For interface compatibility, we'll call the existing method
+        trackActivity(userId, chatRoomId, ActivityType.MESSAGE_SENT);
+    }
+    
+    
+    @Override
+    public Optional<UserActivity> getLastActivityInChatRoom(UserIdentity userId, ChatRoomIdentity chatRoomId) {
+        validateUserId(userId);
+        validateChatRoomId(chatRoomId);
+        // Since findLastActivityByUserIdAndChatRoomId doesn't exist, 
+        // we'll use findByUserId and filter by chatRoomId
+        return userActivityRepository.findByUserId(userId)
+            .stream()
+            .filter(activity -> activity.chatRoomId().equals(chatRoomId))
+            .reduce((first, second) -> second); // Get the last one
+    }
+    
+    @Override
+    public void scheduleInactivityNotification(UserIdentity userId, ChatRoomIdentity chatRoomId, LocalDateTime scheduleTime) {
+        try {
+            // Create or update inactivity notification
+            Optional<InactivityNotification> existingNotification = 
+                inactivityNotificationRepository.findByChatRoomId(chatRoomId);
+
+            if (existingNotification.isPresent()) {
+                // Update existing notification
+                InactivityNotification updatedNotification = existingNotification.get()
+                    .updateLastActivity(scheduleTime.minusHours(1)); // Schedule for 1 hour from now
+                inactivityNotificationRepository.save(updatedNotification);
+                
+                log.debug("Updated inactivity notification schedule for user={}, chatRoom={}", 
+                    userId.id(), chatRoomId.id());
+            } else {
+                // Create new notification
+                InactivityNotification newNotification = InactivityNotification.of(
+                    chatRoomId, scheduleTime.minusHours(1));
+                inactivityNotificationRepository.save(newNotification);
+                
+                log.debug("Scheduled new inactivity notification for user={}, chatRoom={}", 
+                    userId.id(), chatRoomId.id());
+            }
+        } catch (Exception e) {
+            log.warn("Failed to schedule inactivity notification for user={}, chatRoom={}: {}", 
+                userId.id(), chatRoomId.id(), e.getMessage());
         }
     }
 }

@@ -31,7 +31,7 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class AiService {
+public class AiService implements AiLookUpService {
 
     private final AiProviderFactory providerFactory;
     private final PromptBuilder promptBuilder;
@@ -110,6 +110,7 @@ public class AiService {
      * @param persona 페르소나 정보
      * @return AI가 생성한 응답 메시지
      */
+    @Override
     public String generateResponse(List<String> messages, Persona persona) {
         if (messages == null || messages.isEmpty()) {
             throw new IllegalArgumentException("Messages cannot be null or empty");
@@ -134,6 +135,41 @@ public class AiService {
             
         } catch (Exception e) {
             log.error("Failed to generate AI response with persona: {} - {}", persona.name(), e.getMessage(), e);
+            return generateFallbackResponseForPersona(persona);
+        }
+    }
+    
+    // === AiLookUpService Interface Implementation ===
+    
+    @Override
+    public String generateInactivityMessage(List<String> messages, Persona persona) {
+        if (persona == null) {
+            throw new IllegalArgumentException("Persona cannot be null");
+        }
+        
+        try {
+            // Convert message strings to context string
+            String messageContext = messages != null && !messages.isEmpty() 
+                ? String.join("\n", messages) 
+                : "No recent conversation";
+                
+            // Build inactivity-specific prompt
+            String inactivityPrompt = String.format(
+                "사용자와 오랫동안 대화하지 않았습니다. %s 페르소나의 성격에 맞게 먼저 대화를 시작해주세요. " +
+                "이전 대화 내용: %s",
+                persona.name(),
+                messageContext
+            );
+            
+            // Generate AI response
+            AiProvider provider = providerFactory.getAvailableProvider();
+            AiRequest request = AiRequest.of(inactivityPrompt, defaultModel, maxTokens, temperature);
+            AiResponse response = provider.generateResponse(request);
+            
+            return response.content();
+            
+        } catch (Exception e) {
+            log.error("Failed to generate inactivity message with persona: {} - {}", persona.name(), e.getMessage(), e);
             return generateFallbackResponseForPersona(persona);
         }
     }

@@ -30,7 +30,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class InactivityNotificationService {
+public class InactivityNotificationService implements InactivityNotificationLookUpService {
 
     private final InactivityNotificationDomainService inactivityNotificationDomainService;
     private final PersonaLookUpService personaLookUpService;
