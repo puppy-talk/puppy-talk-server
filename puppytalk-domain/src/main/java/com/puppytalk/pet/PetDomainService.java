@@ -1,6 +1,7 @@
 package com.puppytalk.pet;
 
 import com.puppytalk.pet.exception.UnauthorizedPetAccessException;
+import java.util.List;
 
 /**
  * 반려동물 도메인 서비스
@@ -40,6 +41,43 @@ public class PetDomainService {
         validateOwnership(pet, ownerId);
         
         return pet;
+    }
+    
+    /**
+     * 반려동물을 생성하고 저장한다.
+     * 
+     * @param ownerId 소유자 ID
+     * @param petName 반려동물 이름
+     * @param persona 페르소나
+     */
+    public void createPet(Long ownerId, String petName, Persona persona) {
+        Pet pet = Pet.create(ownerId, petName, persona);
+        petRepository.save(pet);
+    }
+    
+    /**
+     * 소유자 ID로 반려동물 목록을 조회한다.
+     * 
+     * @param ownerId 소유자 ID
+     * @return 반려동물 목록
+     */
+    public List<Pet> findPetsByOwnerId(Long ownerId) {
+        if (ownerId == null) {
+            throw new IllegalArgumentException("OwnerId must not be null");
+        }
+        return petRepository.findByOwnerId(ownerId);
+    }
+    
+    /**
+     * 반려동물을 삭제하고 저장한다.
+     * 
+     * @param petId 반려동물 ID
+     * @param ownerId 소유자 ID
+     */
+    public void deletePet(PetId petId, Long ownerId) {
+        Pet pet = findPetWithOwnershipValidation(petId, ownerId);
+        pet.delete();
+        petRepository.save(pet);
     }
     
     /**
