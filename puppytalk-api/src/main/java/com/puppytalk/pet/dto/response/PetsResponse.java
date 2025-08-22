@@ -18,6 +18,6 @@ public record PetsResponse(
                 .map(PetResponse::from)
                 .toList();
         
-        return new PetsResponse(petResponses, petsResult.totalCount());
+        return new PetsResponse(petResponses, petResponses.size());
     }
 }

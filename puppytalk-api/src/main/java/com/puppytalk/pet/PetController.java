@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -40,7 +41,7 @@ public class PetController {
     }
 
     @Operation(summary = "반려동물 생성", description = "새로운 반려동물을 생성합니다.")
-    @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
+    @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "반려동물 생성 성공"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
@@ -62,7 +63,7 @@ public class PetController {
     }
 
     @Operation(summary = "반려동물 목록 조회", description = "사용자의 모든 반려동물 목록을 조회합니다.")
-    @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
+    @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "반려동물 목록 조회 성공"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
@@ -83,7 +84,7 @@ public class PetController {
     }
 
     @Operation(summary = "반려동물 상세 조회", description = "특정 반려동물의 상세 정보를 조회합니다.")
-    @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
+    @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "반려동물 상세 조회 성공",
             content = @Content(schema = @Schema(implementation = ApiResponse.class))),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
@@ -108,7 +109,7 @@ public class PetController {
 
 
     @Operation(summary = "반려동물 삭제", description = "반려동물을 삭제합니다. (소프트 삭제)")
-    @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
+    @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "반려동물 삭제 성공",
             content = @Content(schema = @Schema(implementation = ApiResponse.class))),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),

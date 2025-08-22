@@ -1,6 +1,5 @@
 package com.puppytalk.pet;
 
-import com.puppytalk.pet.exception.UnauthorizedPetAccessException;
 import com.puppytalk.pet.dto.request.PetCreateCommand;
 import com.puppytalk.pet.dto.request.PetDeleteCommand;
 import com.puppytalk.pet.dto.request.PetListQuery;
@@ -19,16 +18,20 @@ public class PetFacade {
     
     private final PetRepository petRepository;
     private final PersonaRepository personaRepository;
+    private final PetDomainService petDomainService;
     
     public PetFacade(
         PetRepository petRepository,
-        PersonaRepository personaRepository
+        PersonaRepository personaRepository,
+        PetDomainService petDomainService
     ) {
         Assert.notNull(petRepository, "PetRepository must not be null");
         Assert.notNull(personaRepository, "PersonaRepository must not be null");
+        Assert.notNull(petDomainService, "PetDomainService must not be null");
         
         this.petRepository = petRepository;
         this.personaRepository = personaRepository;
+        this.petDomainService = petDomainService;
     }
     
     /**
@@ -74,7 +77,7 @@ public class PetFacade {
         PetId petId = PetId.of(query.petId());
         Long ownerId = query.ownerId();
 
-        Pet pet = findPetByPetIdAndOwnerId(petId, ownerId);
+        Pet pet = petDomainService.findPetWithOwnershipValidation(petId, ownerId);
         return PetResult.from(pet);
     }
 
@@ -86,26 +89,12 @@ public class PetFacade {
         Assert.notNull(command.petId(), "PetId must not be null");
         Assert.notNull(command.ownerId(), "OwnerId must not be null");
         
-        Pet pet = findPetByPetIdAndOwnerId(
+        Pet pet = petDomainService.findPetWithOwnershipValidation(
             PetId.of(command.petId()),
             command.ownerId()
         );
 
         pet.delete();
         petRepository.save(pet);
-    }
-    
-    private Pet findPetByPetIdAndOwnerId(PetId petId, Long ownerId) {
-        Assert.notNull(petId, "PetId must not be null");
-        Assert.notNull(ownerId, "OwnerId must not be null");
-        
-        Pet pet = petRepository.findById(petId)
-            .orElseThrow(() -> new PetNotFoundException(petId));
-        
-        if (pet.isOwnedBy(ownerId)) {
-            return pet;
-        }
-
-        throw new UnauthorizedPetAccessException(petId.value(), ownerId);
     }
 }
