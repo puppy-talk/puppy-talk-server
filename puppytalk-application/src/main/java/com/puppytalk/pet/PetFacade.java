@@ -16,17 +16,17 @@ import org.springframework.util.Assert;
 @Transactional
 public class PetFacade {
     
-    private final PersonaRepository personaRepository;
+    private final PersonaDomainService personaDomainService;
     private final PetDomainService petDomainService;
     
     public PetFacade(
-        PersonaRepository personaRepository,
+        PersonaDomainService personaDomainService,
         PetDomainService petDomainService
     ) {
-        Assert.notNull(personaRepository, "PersonaRepository must not be null");
+        Assert.notNull(personaDomainService, "PersonaDomainService must not be null");
         Assert.notNull(petDomainService, "PetDomainService must not be null");
         
-        this.personaRepository = personaRepository;
+        this.personaDomainService = personaDomainService;
         this.petDomainService = petDomainService;
     }
     
@@ -41,8 +41,7 @@ public class PetFacade {
         
         PersonaId personaId = PersonaId.of(command.personaId());
         
-        Persona persona = personaRepository.findById(personaId)
-            .orElseThrow(() -> new PersonaNotFoundException(personaId));
+        Persona persona = personaDomainService.findPersonaById(personaId);
         
         petDomainService.createPet(command.ownerId(), command.petName(), persona);
     }
