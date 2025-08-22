@@ -67,12 +67,12 @@ public class PetController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
     @GetMapping
-    public ResponseEntity<ApiResponse<PetsResponse>> getUserPets(
+    public ResponseEntity<ApiResponse<PetsResponse>> getPetList(
         @Parameter(description = "반려동물 소유자 ID", required = true, example = "1")
         @RequestParam Long ownerId
     ) {
         PetListQuery query = PetListQuery.of(ownerId);
-        PetListResult result = petFacade.getUserPets(query);
+        PetListResult result = petFacade.getPetList(query);
 
         return ResponseEntity.ok(
             ApiResponse.success(
