@@ -10,7 +10,7 @@ public interface PetRepository {
     /**
      * 반려동물 저장
      */
-    Pet save(Pet pet);
+    void save(Pet pet);
     
     /**
      * ID로 반려동물 조회

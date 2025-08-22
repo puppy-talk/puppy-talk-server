@@ -1,8 +1,14 @@
 package com.puppytalk.pet;
 
+import com.puppytalk.pet.dto.request.PetCreateCommand;
 import com.puppytalk.pet.dto.request.PetCreateRequest;
+import com.puppytalk.pet.dto.request.PetDeleteCommand;
+import com.puppytalk.pet.dto.request.PetGetQuery;
+import com.puppytalk.pet.dto.request.PetListQuery;
 import com.puppytalk.pet.dto.response.PetResponse;
+import com.puppytalk.pet.dto.response.PetResult;
 import com.puppytalk.pet.dto.response.PetsResponse;
+import com.puppytalk.pet.dto.response.PetsResult;
 import com.puppytalk.support.ApiResponse;
 import com.puppytalk.support.ApiSuccessMessage;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,15 +42,13 @@ public class PetController {
     @Operation(summary = "반려동물 생성", description = "새로운 반려동물을 생성합니다.")
     @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "반려동물 생성 성공"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "반려동물 개수 제한 초과")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> createPet(
         @Parameter(description = "반려동물 생성 요청 정보", required = true)
         @Valid @RequestBody PetCreateRequest request
     ) {
-
         PetCreateCommand command = PetCreateCommand.of(
             request.ownerId(),
             request.name(),
@@ -68,12 +72,14 @@ public class PetController {
         @RequestParam Long ownerId
     ) {
 
-        UserPetsQueryCommand command = UserPetsQueryCommand.of(ownerId);
-        PetsResult petsResult = petFacade.getUserPets(command);
-        PetsResponse response = PetsResponse.from(petsResult);
+        PetListQuery query = PetListQuery.of(ownerId);
+        PetsResult result = petFacade.getUserPets(query);
 
         return ResponseEntity.ok(
-            ApiResponse.success(response, ApiSuccessMessage.PET_LIST_SUCCESS.getMessage()));
+            ApiResponse.success(
+                PetsResponse.from(result),
+                ApiSuccessMessage.PET_LIST_SUCCESS.getMessage())
+        );
     }
 
     @Operation(summary = "반려동물 상세 조회", description = "특정 반려동물의 상세 정보를 조회합니다.")
@@ -92,8 +98,8 @@ public class PetController {
         @RequestParam Long ownerId
     ) {
 
-        PetQueryCommand command = PetQueryCommand.of(petId, ownerId);
-        PetResult petResult = petFacade.getPet(command);
+        PetGetQuery query = PetGetQuery.of(petId, ownerId);
+        PetResult petResult = petFacade.getPet(query);
         PetResponse response = PetResponse.from(petResult);
 
         return ResponseEntity.ok(
@@ -116,7 +122,7 @@ public class PetController {
         @Parameter(description = "반려동물 소유자 ID", required = true, example = "1")
         @RequestParam Long ownerId) {
 
-        PetStatusCommand command = PetStatusCommand.of(petId, ownerId);
+        PetDeleteCommand command = PetDeleteCommand.of(petId, ownerId);
         petFacade.deletePet(command);
 
         return ResponseEntity.ok(

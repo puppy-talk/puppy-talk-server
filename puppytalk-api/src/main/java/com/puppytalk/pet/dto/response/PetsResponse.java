@@ -1,6 +1,5 @@
 package com.puppytalk.pet.dto.response;
 
-import com.puppytalk.pet.PetsResult;
 import java.util.List;
 
 /**

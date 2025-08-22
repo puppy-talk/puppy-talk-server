@@ -1,7 +1,5 @@
 package com.puppytalk.pet.dto.response;
 
-import com.puppytalk.pet.PersonaResult;
-
 /**
  * 페르소나 응답 DTO
  */

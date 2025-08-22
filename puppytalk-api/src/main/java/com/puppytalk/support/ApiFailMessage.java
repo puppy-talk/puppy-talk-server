@@ -8,7 +8,6 @@ public enum ApiFailMessage {
     // Pet 관련 실패 메시지
     PET_NOT_FOUND("반려동물을 찾을 수 없습니다"),
     PET_ACCESS_DENIED("반려동물에 대한 접근 권한이 없습니다"),
-    PET_LIMIT_EXCEEDED("반려동물 개수 제한을 초과했습니다"),
     PET_ALREADY_DELETED("이미 삭제된 반려동물입니다"),
     PET_NAME_INVALID("반려동물 이름이 유효하지 않습니다"),
     PET_PERSONA_NOT_FOUND("페르소나를 찾을 수 없습니다"),

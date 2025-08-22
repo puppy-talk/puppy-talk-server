@@ -1,13 +1,13 @@
-package com.puppytalk.pet;
+package com.puppytalk.pet.dto.request;
 
 /**
- * 반려동물 상태 변경 커맨드
+ * 반려동물 삭제 커맨드
  */
-public record PetStatusCommand(
+public record PetDeleteCommand(
     Long petId,
     Long ownerId
 ) {
-    public PetStatusCommand {
+    public PetDeleteCommand {
         if (petId == null || petId <= 0) {
             throw new IllegalArgumentException("Pet ID는 필수이며 양수여야 합니다");
         }
@@ -19,7 +19,7 @@ public record PetStatusCommand(
     /**
      * API 요청으로부터 커맨드 생성
      */
-    public static PetStatusCommand of(Long petId, Long ownerId) {
-        return new PetStatusCommand(petId, ownerId);
+    public static PetDeleteCommand of(Long petId, Long ownerId) {
+        return new PetDeleteCommand(petId, ownerId);
     }
 }

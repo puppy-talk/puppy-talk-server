@@ -1,13 +1,13 @@
-package com.puppytalk.pet;
+package com.puppytalk.pet.dto.response;
 
+import com.puppytalk.pet.Pet;
 import java.util.List;
 
 /**
  * 반려동물 목록 결과 DTO
  */
 public record PetsResult(
-    List<PetResult> pets,
-    int totalCount
+    List<PetResult> pets
 ) {
     
     /**
@@ -18,6 +18,6 @@ public record PetsResult(
                 .map(PetResult::from)
                 .toList();
         
-        return new PetsResult(petResults, petResults.size());
+        return new PetsResult(petResults);
     }
 }

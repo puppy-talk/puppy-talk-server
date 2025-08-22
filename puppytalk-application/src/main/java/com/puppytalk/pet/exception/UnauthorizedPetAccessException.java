@@ -1,4 +1,4 @@
-package com.puppytalk.pet;
+package com.puppytalk.pet.exception;
 
 /**
  * 반려동물 접근 권한 예외

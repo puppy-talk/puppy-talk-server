@@ -1,11 +1,11 @@
-package com.puppytalk.pet;
+package com.puppytalk.pet.dto.request;
 
 /**
  * 반려동물 생성 커맨드
  */
 public record PetCreateCommand(
     Long ownerId,
-    String name,
+    String petName,
     Long personaId
 ) {
     /**

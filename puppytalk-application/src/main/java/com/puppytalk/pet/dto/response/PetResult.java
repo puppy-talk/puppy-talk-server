@@ -1,5 +1,6 @@
-package com.puppytalk.pet;
+package com.puppytalk.pet.dto.response;
 
+import com.puppytalk.pet.Pet;
 import java.time.LocalDateTime;
 
 /**

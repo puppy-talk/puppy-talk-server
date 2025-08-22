@@ -31,7 +31,11 @@ public class Pet {
     /**
      * 새로운 반려동물 생성 정적 팩토리 메서드
      */
-    public static Pet create(Long ownerId, String name, Persona persona) {
+    public static Pet create(
+        Long ownerId,
+        String name,
+        Persona persona
+    ) {
         validateCreation(ownerId, name, persona);
         
         return new Pet(

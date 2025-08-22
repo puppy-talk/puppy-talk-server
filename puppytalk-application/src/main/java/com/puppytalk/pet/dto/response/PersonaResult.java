@@ -1,4 +1,6 @@
-package com.puppytalk.pet;
+package com.puppytalk.pet.dto.response;
+
+import com.puppytalk.pet.Persona;
 
 /**
  * 페르소나 결과 DTO
