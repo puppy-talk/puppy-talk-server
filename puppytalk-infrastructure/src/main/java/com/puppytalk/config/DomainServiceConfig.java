@@ -1,4 +1,4 @@
-package com.puppytalk.pet.config;
+package com.puppytalk.config;
 
 import com.puppytalk.pet.PersonaDomainService;
 import com.puppytalk.pet.PersonaRepository;
@@ -8,10 +8,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Pet 도메인 관련 Bean 설정
+ * Domain Service Bean 설정
+ * Infrastructure 계층에서 Domain Service를 Bean으로 등록
  */
 @Configuration
-public class PetDomainConfig {
+public class DomainServiceConfig {
     
     /**
      * PersonaDomainService Bean 등록
