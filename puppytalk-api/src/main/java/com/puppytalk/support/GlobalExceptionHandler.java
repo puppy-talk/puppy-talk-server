@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
         
         log.warn("Validation error: {}", errors);
         return ResponseEntity.badRequest()
-                .body(ApiResponse.fail(errors, "입력값 검증에 실패했습니다."));
+                .body(ApiResponse.fail(errors, ApiFailMessage.VALIDATION_FAILED.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -50,13 +50,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleRuntimeException(RuntimeException ex) {
         log.error("Unexpected runtime exception", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.fail("서버 오류가 발생했습니다."));
+                .body(ApiResponse.fail(ApiFailMessage.INTERNAL_SERVER_ERROR.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex) {
         log.error("Unexpected exception", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.fail("서버 오류가 발생했습니다."));
+                .body(ApiResponse.fail(ApiFailMessage.INTERNAL_SERVER_ERROR.getMessage()));
     }
 }

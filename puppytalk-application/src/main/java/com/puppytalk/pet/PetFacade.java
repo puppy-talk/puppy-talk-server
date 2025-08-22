@@ -3,6 +3,8 @@ package com.puppytalk.pet;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * 반려동물 애플리케이션 서비스 (Facade 패턴)
  * 
@@ -14,50 +16,39 @@ public class PetFacade {
     
     private final PetRepository petRepository;
     private final PersonaRepository personaRepository;
+    private final PetCreationPolicy creationPolicy;
     
-    // 한 사용자당 최대 반려동물 개수 제한
-    private static final int MAX_PETS_PER_USER = 5;
-    
-    public PetFacade(PetRepository petRepository, PersonaRepository personaRepository) {
+    public PetFacade(PetRepository petRepository, 
+                     PersonaRepository personaRepository,
+                     PetCreationPolicy creationPolicy) {
         this.petRepository = petRepository;
         this.personaRepository = personaRepository;
+        this.creationPolicy = creationPolicy;
     }
     
     /**
      * 반려동물 생성
      */
-    public Pet createPet(Long ownerId, String petName, PersonaId personaId) {
-        // 비즈니스 규칙 검증
-        validatePetCreation(ownerId, personaId);
+    public PetResult createPet(PetCreateCommand command) {
+        PersonaId personaId = PersonaId.of(command.personaId());
+        
+        // 도메인 정책을 통한 비즈니스 규칙 검증
+        creationPolicy.validateUserCanCreatePet(command.ownerId(), personaId);
         
         // 페르소나 조회
         Persona persona = personaRepository.findById(personaId)
             .orElseThrow(() -> new PersonaNotFoundException(personaId));
         
-        // 반려동물 생성
-        Pet pet = Pet.create(ownerId, petName, persona);
+        // 반려동물 생성 (도메인 로직 위임)
+        Pet pet = Pet.create(command.ownerId(), command.name(), persona);
         
         // 저장
-        return petRepository.save(pet);
+        Pet savedPet = petRepository.save(pet);
+        
+        return PetResult.from(savedPet);
     }
     
-    /**
-     * 반려동물 활성화
-     */
-    public void activatePet(PetId petId, Long ownerId) {
-        Pet pet = findPetByIdAndOwner(petId, ownerId);
-        pet.activate();
-        petRepository.save(pet);
-    }
     
-    /**
-     * 반려동물 비활성화
-     */
-    public void deactivatePet(PetId petId, Long ownerId) {
-        Pet pet = findPetByIdAndOwner(petId, ownerId);
-        pet.deactivate();
-        petRepository.save(pet);
-    }
     
     /**
      * 반려동물 삭제 (소프트 삭제)
@@ -93,25 +84,86 @@ public class PetFacade {
         return petRepository.countByPersonaId(personaId);
     }
     
-    private void validatePetCreation(Long ownerId, PersonaId personaId) {
-        // 사용자당 반려동물 개수 제한 확인
-        long currentPetCount = petRepository.countByOwnerId(ownerId);
-        if (currentPetCount >= MAX_PETS_PER_USER) {
-            throw new IllegalStateException("반려동물은 최대 " + MAX_PETS_PER_USER + "마리까지 생성할 수 있습니다");
-        }
-        
-        // 페르소나 존재 여부 확인
-        if (!personaRepository.existsById(personaId)) {
-            throw new PersonaNotFoundException(personaId);
-        }
+    /**
+     * 페르소나 사용 횟수 확인 (API 레이어 호환용)
+     */
+    @Transactional(readOnly = true)
+    public long getPersonaUsageCountByLongId(Long personaId) {
+        PersonaId convertedPersonaId = PersonaId.of(personaId);
+        return getPersonaUsageCount(convertedPersonaId);
     }
     
+    /**
+     * 사용자의 반려동물 목록 조회
+     */
+    @Transactional(readOnly = true)
+    public PetsResult getUserPets(Long ownerId) {
+        List<Pet> pets = petRepository.findByOwnerId(ownerId);
+        return PetsResult.from(pets);
+    }
+    
+    /**
+     * 사용자의 반려동물 목록 조회 (Command 사용)
+     */
+    @Transactional(readOnly = true)
+    public PetsResult getUserPets(UserPetsQueryCommand command) {
+        return getUserPets(command.ownerId());
+    }
+    
+    /**
+     * 반려동물 상세 조회
+     */
+    @Transactional(readOnly = true)
+    public PetResult getPet(PetId petId, Long ownerId) {
+        Pet pet = findPetByIdAndOwner(petId, ownerId);
+        return PetResult.from(pet);
+    }
+    
+    /**
+     * 반려동물 상세 조회 (API 레이어 호환용)
+     */
+    @Transactional(readOnly = true)
+    public PetResult getPetByLongId(Long petId, Long ownerId) {
+        PetId convertedPetId = PetId.of(petId);
+        return getPet(convertedPetId, ownerId);
+    }
+    
+    /**
+     * 반려동물 상세 조회 (Command 사용)
+     */
+    @Transactional(readOnly = true)
+    public PetResult getPet(PetQueryCommand command) {
+        return getPetByLongId(command.petId(), command.ownerId());
+    }
+    
+    
+    /**
+     * 반려동물 삭제 (API 레이어 호환용)
+     */
+    public void deletePetByLongId(Long petId, Long ownerId) {
+        PetId convertedPetId = PetId.of(petId);
+        deletePet(convertedPetId, ownerId);
+    }
+    
+    /**
+     * 반려동물 삭제 (Command 사용)
+     */
+    public void deletePet(PetStatusCommand command) {
+        deletePetByLongId(command.petId(), command.ownerId());
+    }
+    
+    
+    /**
+     * 반려동물 조회 및 소유권 검증
+     * 
+     * 도메인별 예외를 사용하여 더 명확한 에러 핸들링
+     */
     private Pet findPetByIdAndOwner(PetId petId, Long ownerId) {
         Pet pet = petRepository.findById(petId)
             .orElseThrow(() -> new PetNotFoundException(petId));
         
         if (!pet.isOwnedBy(ownerId)) {
-            throw new IllegalArgumentException("해당 반려동물에 대한 권한이 없습니다");
+            throw new UnauthorizedPetAccessException(petId.value(), ownerId);
         }
         
         return pet;

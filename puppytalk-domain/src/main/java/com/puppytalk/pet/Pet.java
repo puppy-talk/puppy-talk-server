@@ -86,25 +86,6 @@ public class Pet {
         }
     }
     
-    /**
-     * 반려동물 활성화
-     */
-    public void activate() {
-        if (status == PetStatus.DELETED) {
-            throw new IllegalStateException("삭제된 반려동물은 활성화할 수 없습니다");
-        }
-        this.status = PetStatus.ACTIVE;
-    }
-    
-    /**
-     * 반려동물 비활성화
-     */
-    public void deactivate() {
-        if (status == PetStatus.DELETED) {
-            throw new IllegalStateException("삭제된 반려동물은 비활성화할 수 없습니다");
-        }
-        this.status = PetStatus.INACTIVE;
-    }
     
     /**
      * 반려동물 삭제 (소프트 삭제)
@@ -117,7 +98,7 @@ public class Pet {
      * 반려동물이 채팅 가능한 상태인지 확인
      */
     public boolean canChat() {
-        return status == PetStatus.ACTIVE && persona.isAvailable();
+        return status.isActive() && persona.isAvailable();
     }
     
     /**

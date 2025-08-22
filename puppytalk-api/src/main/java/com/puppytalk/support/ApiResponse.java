@@ -1,5 +1,8 @@
 package com.puppytalk.support;
 
+/**
+ * 공통 API 응답 래퍼 클래스
+ */
 public record ApiResponse<T>(
         boolean success,
         T data,
