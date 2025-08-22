@@ -34,10 +34,10 @@ public class PetFacade {
     }
 
     /**
-     * 사용자의 반려동물 목록 조회
+     * 반려동물 목록 조회
      */
     @Transactional(readOnly = true)
-    public PetListResult getUserPets(PetListQuery query) {
+    public PetListResult getPetList(PetListQuery query) {
         Assert.notNull(query, "PetListQuery must not be null");
 
         UserId ownerId = UserId.of(query.ownerId());
