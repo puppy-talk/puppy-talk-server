@@ -59,7 +59,7 @@ public class PetController {
         petFacade.createPet(command);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.success(null, ApiSuccessMessage.PET_CREATE_SUCCESS.getMessage()));
+            .body(ApiResponse.success(ApiSuccessMessage.PET_CREATE_SUCCESS.getMessage()));
     }
 
     @Operation(summary = "반려동물 목록 조회", description = "사용자의 모든 반려동물 목록을 조회합니다.")
@@ -127,6 +127,6 @@ public class PetController {
         petFacade.deletePet(command);
 
         return ResponseEntity.ok(
-            ApiResponse.success(null, ApiSuccessMessage.PET_DELETE_SUCCESS.getMessage()));
+            ApiResponse.success(ApiSuccessMessage.PET_DELETE_SUCCESS.getMessage()));
     }
 }
