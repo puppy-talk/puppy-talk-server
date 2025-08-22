@@ -6,6 +6,13 @@ package com.puppytalk.pet;
 public record PetId(Long value) {
     
     /**
+     * Get the value (alias for compatibility)
+     */
+    public Long getValue() {
+        return value;
+    }
+    
+    /**
      * PetId 생성 정적 팩토리 메서드
      */
     public static PetId of(Long value) {
@@ -21,7 +28,11 @@ public record PetId(Long value) {
     public static PetId newPet() {
         return new PetId(null);
     }
-    
+
+    public static PetId from(Long petId) {
+        return new PetId(petId);
+    }
+
     /**
      * 저장된 반려동물인지 확인
      */

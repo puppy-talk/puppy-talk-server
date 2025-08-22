@@ -1,11 +1,93 @@
 package com.puppytalk.pet;
 
+import com.puppytalk.infrastructure.common.BaseEntity;
+import com.puppytalk.user.UserId;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
-public class PetJpaEntity {
+@Table(name = "pets")
+public class PetJpaEntity extends BaseEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @Column(name = "owner_id", nullable = false)
+    private Long ownerId;
+    
+    @Column(name = "name", nullable = false, length = 20)
+    private String name;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private PetStatus status;
+    
+    protected PetJpaEntity() {}
+    
+    private PetJpaEntity(Long id, Long ownerId, String name, PetStatus status, 
+                        LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.ownerId = ownerId;
+        this.name = name;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+    
+    public static PetJpaEntity from(Pet pet) {
+        return new PetJpaEntity(
+            pet.getId().isStored() ? pet.getId().value() : null,
+            pet.getOwnerId().value(),
+            pet.getName(),
+            pet.getStatus(),
+            pet.getCreatedAt(),
+            LocalDateTime.now()
+        );
+    }
+    
+    /**
+     * JPA 엔티티를 도메인 객체로 변환
+     */
+    public Pet toDomain() {
+        return Pet.restore(
+            PetId.of(this.id),
+            UserId.of(this.ownerId),
+            this.name,
+            this.createdAt,
+            this.status
+        );
+    }
+    
+    // Getters
+    public Long getId() { return id; }
+    public Long getOwnerId() { return ownerId; }
+    public String getName() { return name; }
+    public PetStatus getStatus() { return status; }
+    
+    public void update(Pet pet) {
+        this.name = pet.getName();
+        this.status = pet.getStatus();
+        this.updatedAt = LocalDateTime.now();
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof PetJpaEntity other)) return false;
+        return Objects.equals(id, other.id);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
 }

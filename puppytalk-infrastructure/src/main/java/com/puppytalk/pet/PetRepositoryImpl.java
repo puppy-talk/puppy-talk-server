@@ -4,13 +4,14 @@ import com.puppytalk.user.UserId;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 반려동물 저장소 구현체
- * TODO: 실제 JPA 구현으로 교체 필요
+ * 반려동물 저장소 JPA 구현체
  */
 @Repository
-public class PetRepositoryImpl implements PetRepository{
+@Transactional(readOnly = true)
+public class PetRepositoryImpl implements PetRepository {
 
     private final PetJpaRepository petJpaRepository;
 
@@ -19,44 +20,57 @@ public class PetRepositoryImpl implements PetRepository{
     }
 
     @Override
+    @Transactional
     public void save(Pet pet) {
-        // TODO: 실제 JPA 저장 로직 구현
+        if (pet.getId().isStored()) {
+            // 기존 반려동물 업데이트
+            PetJpaEntity existingEntity = petJpaRepository.findById(pet.getId().value())
+                .orElseThrow(() -> new IllegalStateException("반려동물을 찾을 수 없습니다: " + pet.getId().value()));
+            
+            existingEntity.update(pet);
+            petJpaRepository.save(existingEntity);
+        } else {
+            // 새로운 반려동물 생성
+            PetJpaEntity entity = PetJpaEntity.from(pet);
+            petJpaRepository.save(entity);
+        }
     }
 
     @Override
     public Optional<Pet> findById(PetId id) {
-        // TODO: 실제 JPA 조회 로직 구현
-        return Optional.empty();
+        return petJpaRepository.findById(id.value())
+            .map(PetJpaEntity::toDomain);
     }
 
     @Override
     public Optional<Pet> findByIdAndOwnerId(PetId id, UserId ownerId) {
-        // TODO: 실제 JPA 조회 로직 구현 (소유권 필터링 포함)
-        return Optional.empty();
+        return petJpaRepository.findByIdAndOwnerId(id.value(), ownerId.value())
+            .map(PetJpaEntity::toDomain);
     }
 
     @Override
     public List<Pet> findByOwnerId(UserId ownerId) {
-        // TODO: 실제 JPA 조회 로직 구현
-        return List.of();
+        return petJpaRepository.findByOwnerIdAndStatusNot(ownerId.value(), PetStatus.DELETED)
+            .stream()
+            .map(PetJpaEntity::toDomain)
+            .toList();
     }
 
     @Override
     public List<Pet> findActiveByOwnerId(UserId ownerId) {
-        // TODO: 실제 JPA 조회 로직 구현 (활성 상태 필터링 포함)
-        return List.of();
+        return petJpaRepository.findByOwnerIdAndStatus(ownerId.value(), PetStatus.ACTIVE)
+            .stream()
+            .map(PetJpaEntity::toDomain)
+            .toList();
     }
 
     @Override
     public boolean existsById(PetId id) {
-        // TODO: 실제 JPA 존재 확인 로직 구현
-        return false;
+        return petJpaRepository.existsById(id.value());
     }
 
     @Override
     public long countByOwnerId(UserId ownerId) {
-        // TODO: 실제 JPA 개수 조회 로직 구현
-        return 0;
+        return petJpaRepository.countByOwnerIdAndStatusNot(ownerId.value(), PetStatus.DELETED);
     }
-
 }

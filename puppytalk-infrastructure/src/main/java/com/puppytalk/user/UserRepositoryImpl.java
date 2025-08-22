@@ -1,81 +1,74 @@
 package com.puppytalk.user;
 
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * 사용자 저장소 구현체 (임시 인메모리 구현)
- * TODO: 실제 JPA 구현으로 교체 필요
+ * 사용자 저장소 JPA 구현체
  */
 @Repository
+@Transactional(readOnly = true)
 public class UserRepositoryImpl implements UserRepository {
     
-    private final ConcurrentHashMap<Long, User> userStore = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Long> usernameIndex = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Long> emailIndex = new ConcurrentHashMap<>();
-    private final AtomicLong idGenerator = new AtomicLong(1);
+    private final UserJpaRepository userJpaRepository;
+    
+    public UserRepositoryImpl(UserJpaRepository userJpaRepository) {
+        this.userJpaRepository = userJpaRepository;
+    }
     
     @Override
+    @Transactional
     public UserId save(User user) {
-        if (user.getId().value() == null) {
-            // 새로운 사용자
-            Long newId = idGenerator.getAndIncrement();
-            UserId userId = UserId.of(newId);
-            
-            User savedUser = User.restore(
-                userId,
-                user.getUsername(),
-                user.getEmail(),
-                user.getCreatedAt(),
-                user.getStatus()
-            );
-            
-            userStore.put(newId, savedUser);
-            usernameIndex.put(user.getUsername(), newId);
-            emailIndex.put(user.getEmail(), newId);
-            
-            return userId;
-        } else {
+        if (user.getId().isStored()) {
             // 기존 사용자 업데이트
-            userStore.put(user.getId().value(), user);
+            UserJpaEntity existingEntity = userJpaRepository.findById(user.getId().value())
+                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다: " + user.getId().value()));
+            
+            existingEntity.updateFromDomain(user);
+            userJpaRepository.save(existingEntity);
             return user.getId();
+        } else {
+            // 새로운 사용자 생성
+            UserJpaEntity entity = UserJpaEntity.fromDomain(user);
+            UserJpaEntity savedEntity = userJpaRepository.save(entity);
+            return UserId.of(savedEntity.getId());
         }
     }
     
     @Override
     public Optional<User> findById(UserId userId) {
-        return Optional.ofNullable(userStore.get(userId.value()));
+        return userJpaRepository.findById(userId.value())
+            .map(UserJpaEntity::toDomain);
     }
     
     @Override
     public Optional<User> findByUsername(String username) {
-        Long userId = usernameIndex.get(username);
-        return userId != null ? Optional.ofNullable(userStore.get(userId)) : Optional.empty();
+        return userJpaRepository.findByUsername(username)
+            .map(UserJpaEntity::toDomain);
     }
     
     @Override
     public Optional<User> findByEmail(String email) {
-        Long userId = emailIndex.get(email);
-        return userId != null ? Optional.ofNullable(userStore.get(userId)) : Optional.empty();
+        return userJpaRepository.findByEmail(email)
+            .map(UserJpaEntity::toDomain);
     }
     
     @Override
     public List<User> findByStatus(UserStatus status) {
-        return userStore.values().stream()
-            .filter(user -> user.getStatus() == status)
+        return userJpaRepository.findByStatus(status).stream()
+            .map(UserJpaEntity::toDomain)
             .toList();
     }
     
     @Override
     public boolean existsByUsername(String username) {
-        return usernameIndex.containsKey(username);
+        return userJpaRepository.existsByUsername(username);
     }
     
     @Override
     public boolean existsByEmail(String email) {
-        return emailIndex.containsKey(email);
+        return userJpaRepository.existsByEmail(email);
     }
 }

@@ -1,5 +1,8 @@
 package com.puppytalk.config;
 
+import com.puppytalk.chat.ChatDomainService;
+import com.puppytalk.chat.ChatRoomRepository;
+import com.puppytalk.chat.MessageRepository;
 import com.puppytalk.pet.PetDomainService;
 import com.puppytalk.pet.PetRepository;
 import com.puppytalk.user.UserDomainService;
@@ -18,5 +21,11 @@ public class DomainAssemblyConfig {
     @Bean
     public UserDomainService userDomainService(UserRepository userRepository) {
         return new UserDomainService(userRepository);
+    }
+    
+    @Bean
+    public ChatDomainService chatDomainService(ChatRoomRepository chatRoomRepository,
+                                              MessageRepository messageRepository) {
+        return new ChatDomainService(chatRoomRepository, messageRepository);
     }
 }
