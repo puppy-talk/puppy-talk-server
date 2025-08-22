@@ -72,6 +72,10 @@ root/
 
 # 개발 원칙
 
+## 메서드명
+- 목록 조회 : {domain}List
+- 단건 조회 : {domain}
+
 ## 예외 처리
 - GlobalExceptionHandler를 구현하여 예외를 처리
 - try catch 사용 지양

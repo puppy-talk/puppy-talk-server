@@ -10,7 +10,6 @@ public record PetResult(
     Long id,
     Long ownerId,
     String name,
-    PersonaResult persona,
     LocalDateTime createdAt,
     String status
 ) {
@@ -21,9 +20,8 @@ public record PetResult(
     public static PetResult from(Pet pet) {
         return new PetResult(
             pet.getId().value(),
-            pet.getOwnerId(),
+            pet.getOwnerId().value(),
             pet.getName(),
-            PersonaResult.from(pet.getPersona()),
             pet.getCreatedAt(),
             pet.getStatus().name()
         );

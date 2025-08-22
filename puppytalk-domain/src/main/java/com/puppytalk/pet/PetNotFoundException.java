@@ -12,9 +12,9 @@ public class PetNotFoundException extends RuntimeException {
         this.petId = petId;
     }
     
-    public PetNotFoundException(String message) {
-        super(message);
-        this.petId = null;
+    public PetNotFoundException(PetId petId, Throwable cause) {
+        super("반려동물을 찾을 수 없습니다. ID: " + petId, cause);
+        this.petId = petId;
     }
     
     public PetId getPetId() {

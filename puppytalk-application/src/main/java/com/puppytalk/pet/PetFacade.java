@@ -4,8 +4,8 @@ import com.puppytalk.pet.dto.request.PetCreateCommand;
 import com.puppytalk.pet.dto.request.PetDeleteCommand;
 import com.puppytalk.pet.dto.request.PetGetQuery;
 import com.puppytalk.pet.dto.request.PetListQuery;
+import com.puppytalk.pet.dto.response.PetListResult;
 import com.puppytalk.pet.dto.response.PetResult;
-import com.puppytalk.pet.dto.response.PetsResult;
 import com.puppytalk.user.UserId;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -16,14 +16,9 @@ import org.springframework.util.Assert;
 @Transactional
 public class PetFacade {
     
-    private final PersonaDomainService personaDomainService;
     private final PetDomainService petDomainService;
     
-    public PetFacade(
-        PersonaDomainService personaDomainService,
-        PetDomainService petDomainService
-    ) {
-        this.personaDomainService = personaDomainService;
+    public PetFacade(PetDomainService petDomainService) {
         this.petDomainService = petDomainService;
     }
     
@@ -32,27 +27,22 @@ public class PetFacade {
      */
     public void createPet(PetCreateCommand command) {
         Assert.notNull(command, "PetCreateCommand must not be null");
-        Assert.notNull(command.personaId(), "PersonaId must not be null");
-        Assert.notNull(command.ownerId(), "OwnerId must not be null");
-        Assert.hasText(command.petName(), "Pet name must not be null or empty");
         
-        PersonaId personaId = PersonaId.of(command.personaId());
+        UserId ownerId = UserId.of(command.ownerId());
         
-        Persona persona = personaDomainService.findPersonaById(personaId);
-        
-        petDomainService.createPet(command.ownerId(), command.petName(), persona);
+        petDomainService.createPet(ownerId, command.petName());
     }
 
     /**
      * 사용자의 반려동물 목록 조회
      */
     @Transactional(readOnly = true)
-    public PetsResult getUserPets(PetListQuery query) {
+    public PetListResult getUserPets(PetListQuery query) {
         Assert.notNull(query, "PetListQuery must not be null");
-        Assert.notNull(query.ownerId(), "OwnerId must not be null");
-        
-        List<Pet> pets = petDomainService.findPetsByOwnerId(query.ownerId());
-        return PetsResult.from(pets);
+
+        UserId ownerId = UserId.of(query.ownerId());
+        List<Pet> pets = petDomainService.findPetList(ownerId);
+        return PetListResult.from(pets);
     }
 
     /**
@@ -61,13 +51,11 @@ public class PetFacade {
     @Transactional(readOnly = true)
     public PetResult getPet(PetGetQuery query) {
         Assert.notNull(query, "PetGetQuery must not be null");
-        Assert.notNull(query.petId(), "PetId must not be null");
-        Assert.notNull(query.ownerId(), "OwnerId must not be null");
         
         PetId petId = PetId.of(query.petId());
-        UserId userId = UserId.of(query.ownerId());
+        UserId ownerId = UserId.of(query.ownerId());
 
-        Pet pet = petDomainService.findPetWithOwnershipValidation(petId, userId.value());
+        Pet pet = petDomainService.findPet(petId, ownerId);
         return PetResult.from(pet);
     }
 
@@ -76,12 +64,10 @@ public class PetFacade {
      */
     public void deletePet(PetDeleteCommand command) {
         Assert.notNull(command, "PetDeleteCommand must not be null");
-        Assert.notNull(command.petId(), "PetId must not be null");
-        Assert.notNull(command.ownerId(), "OwnerId must not be null");
         
         petDomainService.deletePet(
             PetId.of(command.petId()),
-            command.ownerId()
+            UserId.of(command.ownerId())
         );
     }
 }

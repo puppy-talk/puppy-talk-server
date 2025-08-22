@@ -8,7 +8,7 @@ import com.puppytalk.pet.dto.request.PetListQuery;
 import com.puppytalk.pet.dto.response.PetResponse;
 import com.puppytalk.pet.dto.response.PetResult;
 import com.puppytalk.pet.dto.response.PetsResponse;
-import com.puppytalk.pet.dto.response.PetsResult;
+import com.puppytalk.pet.dto.response.PetListResult;
 import com.puppytalk.support.ApiResponse;
 import com.puppytalk.support.ApiSuccessMessage;
 import io.swagger.v3.oas.annotations.Operation;
@@ -52,8 +52,7 @@ public class PetController {
     ) {
         PetCreateCommand command = PetCreateCommand.of(
             request.ownerId(),
-            request.name(),
-            request.personaId()
+            request.name()
         );
 
         petFacade.createPet(command);
@@ -72,9 +71,8 @@ public class PetController {
         @Parameter(description = "반려동물 소유자 ID", required = true, example = "1")
         @RequestParam Long ownerId
     ) {
-
         PetListQuery query = PetListQuery.of(ownerId);
-        PetsResult result = petFacade.getUserPets(query);
+        PetListResult result = petFacade.getUserPets(query);
 
         return ResponseEntity.ok(
             ApiResponse.success(

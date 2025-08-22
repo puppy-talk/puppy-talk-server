@@ -1,13 +1,8 @@
 package com.puppytalk.pet;
 
-import com.puppytalk.pet.exception.UnauthorizedPetAccessException;
 import com.puppytalk.user.UserId;
 import java.util.List;
 
-/**
- * 반려동물 도메인 서비스
- * 반려동물 관련 비즈니스 규칙과 정책을 담당
- */
 public class PetDomainService {
     
     private final PetRepository petRepository;
@@ -20,77 +15,48 @@ public class PetDomainService {
     }
     
     /**
-     * 반려동물 ID와 소유자 ID로 반려동물을 조회하고 소유권을 검증한다.
+     * 반려동물 ID와 소유자 ID로 반려동물을 조회한다.
+     * 쿼리 레벨에서 소유권을 필터링하여 효율적이고 안전하다.
      * 
      * @param petId 반려동물 ID
      * @param ownerId 소유자 ID
-     * @return 소유권이 검증된 반려동물
-     * @throws PetNotFoundException 반려동물이 존재하지 않는 경우
-     * @throws UnauthorizedPetAccessException 소유권이 없는 경우
+     * @return 소유권이 확인된 반려동물
+     * @throws PetNotFoundException 반려동물이 존재하지 않거나 소유권이 없는 경우
      */
-    public Pet findPetWithOwnershipValidation(PetId petId, UserId ownerId) {
+    public Pet findPet(PetId petId, UserId ownerId) {
         if (petId == null) {
             throw new IllegalArgumentException("PetId must not be null");
         }
         if (ownerId == null) {
             throw new IllegalArgumentException("OwnerId must not be null");
         }
-        
-        Pet pet = petRepository.findById(petId)
+
+        return petRepository.findByIdAndOwnerId(petId, ownerId)
             .orElseThrow(() -> new PetNotFoundException(petId));
-        
-        validateOwnership(pet, ownerId);
-        
-        return pet;
     }
     
-    /**
-     * 반려동물을 생성하고 저장한다.
-     * 
-     * @param ownerId 소유자 ID
-     * @param petName 반려동물 이름
-     * @param persona 페르소나
-     */
-    public void createPet(Long ownerId, String petName, Persona persona) {
-        Pet pet = Pet.create(ownerId, petName, persona);
+    public void createPet(UserId ownerId, String petName) {
+        Pet pet = Pet.create(ownerId, petName);
         petRepository.save(pet);
     }
     
     /**
-     * 소유자 ID로 반려동물 목록을 조회한다.
+     * 소유자의 반려동물 목록을 조회한다.
+     * 소유자 ID로만 조회하므로 별도의 소유권 검증이 불필요하다.
      * 
      * @param ownerId 소유자 ID
-     * @return 반려동물 목록
+     * @return 해당 소유자의 반려동물 목록
      */
-    public List<Pet> findPetsByOwnerId(Long ownerId) {
+    public List<Pet> findPetList(UserId ownerId) {
         if (ownerId == null) {
             throw new IllegalArgumentException("OwnerId must not be null");
         }
         return petRepository.findByOwnerId(ownerId);
     }
     
-    /**
-     * 반려동물을 삭제하고 저장한다.
-     * 
-     * @param petId 반려동물 ID
-     * @param ownerId 소유자 ID
-     */
-    public void deletePet(PetId petId, Long ownerId) {
-        Pet pet = findPetWithOwnershipValidation(petId, ownerId);
+    public void deletePet(PetId petId, UserId ownerId) {
+        Pet pet = findPet(petId, ownerId);
         pet.delete();
         petRepository.save(pet);
-    }
-    
-    /**
-     * 반려동물의 소유권을 검증한다.
-     * 
-     * @param pet 반려동물
-     * @param ownerId 소유자 ID
-     * @throws UnauthorizedPetAccessException 소유권이 없는 경우
-     */
-    private void validateOwnership(Pet pet, Long ownerId) {
-        if (!pet.isOwnedBy(ownerId)) {
-            throw new UnauthorizedPetAccessException(pet.getId().value(), ownerId);
-        }
     }
 }

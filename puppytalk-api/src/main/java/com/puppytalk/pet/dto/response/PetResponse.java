@@ -17,9 +17,6 @@ public record PetResponse(
     @Schema(description = "반려동물 이름", example = "뽀삐")
     String name,
     
-    @Schema(description = "페르소나 정보")
-    PersonaResponse persona,
-    
     @Schema(description = "생성일시", example = "2024-01-01T10:00:00")
     LocalDateTime createdAt,
     
@@ -35,7 +32,6 @@ public record PetResponse(
             petResult.id(),
             petResult.ownerId(),
             petResult.name(),
-            PersonaResponse.from(petResult.persona()),
             petResult.createdAt(),
             petResult.status()
         );

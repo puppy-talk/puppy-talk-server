@@ -11,10 +11,10 @@ public record PetsResponse(
 ) {
     
     /**
-     * PetsResult로부터 응답 DTO 생성
+     * PetListResult로부터 응답 DTO 생성
      */
-    public static PetsResponse from(PetsResult petsResult) {
-        List<PetResponse> petResponses = petsResult.pets().stream()
+    public static PetsResponse from(PetListResult petListResult) {
+        List<PetResponse> petResponses = petListResult.pets().stream()
                 .map(PetResponse::from)
                 .toList();
         
