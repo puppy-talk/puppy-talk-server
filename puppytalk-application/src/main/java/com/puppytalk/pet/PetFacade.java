@@ -2,14 +2,14 @@ package com.puppytalk.pet;
 
 import com.puppytalk.pet.dto.request.PetCreateCommand;
 import com.puppytalk.pet.dto.request.PetDeleteCommand;
-import com.puppytalk.pet.dto.request.PetListQuery;
 import com.puppytalk.pet.dto.request.PetGetQuery;
+import com.puppytalk.pet.dto.request.PetListQuery;
 import com.puppytalk.pet.dto.response.PetResult;
 import com.puppytalk.pet.dto.response.PetsResult;
+import com.puppytalk.user.UserId;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 import org.springframework.util.Assert;
 
 @Service
@@ -23,9 +23,6 @@ public class PetFacade {
         PersonaDomainService personaDomainService,
         PetDomainService petDomainService
     ) {
-        Assert.notNull(personaDomainService, "PersonaDomainService must not be null");
-        Assert.notNull(petDomainService, "PetDomainService must not be null");
-        
         this.personaDomainService = personaDomainService;
         this.petDomainService = petDomainService;
     }
@@ -68,9 +65,9 @@ public class PetFacade {
         Assert.notNull(query.ownerId(), "OwnerId must not be null");
         
         PetId petId = PetId.of(query.petId());
-        Long ownerId = query.ownerId();
+        UserId userId = UserId.of(query.ownerId());
 
-        Pet pet = petDomainService.findPetWithOwnershipValidation(petId, ownerId);
+        Pet pet = petDomainService.findPetWithOwnershipValidation(petId, userId.value());
         return PetResult.from(pet);
     }
 

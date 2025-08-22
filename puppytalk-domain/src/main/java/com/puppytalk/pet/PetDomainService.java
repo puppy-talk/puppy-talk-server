@@ -1,6 +1,7 @@
 package com.puppytalk.pet;
 
 import com.puppytalk.pet.exception.UnauthorizedPetAccessException;
+import com.puppytalk.user.UserId;
 import java.util.List;
 
 /**
@@ -27,7 +28,7 @@ public class PetDomainService {
      * @throws PetNotFoundException 반려동물이 존재하지 않는 경우
      * @throws UnauthorizedPetAccessException 소유권이 없는 경우
      */
-    public Pet findPetWithOwnershipValidation(PetId petId, Long ownerId) {
+    public Pet findPetWithOwnershipValidation(PetId petId, UserId ownerId) {
         if (petId == null) {
             throw new IllegalArgumentException("PetId must not be null");
         }

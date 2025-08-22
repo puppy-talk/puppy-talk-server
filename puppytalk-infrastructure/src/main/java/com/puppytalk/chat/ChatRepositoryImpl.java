@@ -1,50 +1,56 @@
-package com.puppytalk.pet;
+package com.puppytalk.chat;
 
+import com.puppytalk.pet.PetId;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class PetRepositoryImpl implements PetRepository{
+public class ChatRepositoryImpl implements ChatRoomRepository {
 
-    PetJpaRepository petJpaRepository;
+    private final ChatJpaRepository chatJpaRepository;
 
-    public PetRepositoryImpl(PetJpaRepository petJpaRepository) {
-        this.petJpaRepository = petJpaRepository;
+    public ChatRepositoryImpl(ChatJpaRepository chatJpaRepository) {
+        this.chatJpaRepository = chatJpaRepository;
     }
 
     @Override
-    public void save(Pet pet) {
-
+    public ChatRoom save(ChatRoom chatRoom) {
+        return null;
     }
 
     @Override
-    public Optional<Pet> findById(PetId id) {
+    public Optional<ChatRoom> findById(ChatRoomId chatRoomId) {
         return Optional.empty();
     }
 
     @Override
-    public List<Pet> findByOwnerId(Long ownerId) {
+    public List<ChatRoom> findByUserId(Long userId) {
         return List.of();
     }
 
     @Override
-    public List<Pet> findActiveByOwnerId(Long ownerId) {
+    public Optional<ChatRoom> findByPetId(PetId petId) {
+        return Optional.empty();
+    }
+
+    @Override
+    public List<ChatRoom> findActiveByUserId(Long userId) {
         return List.of();
     }
 
     @Override
-    public boolean existsById(PetId id) {
+    public List<ChatRoom> findInactiveAfterMinutes(int minutes) {
+        return List.of();
+    }
+
+    @Override
+    public boolean existsByPetId(PetId petId) {
         return false;
     }
 
     @Override
-    public long countByOwnerId(Long ownerId) {
-        return 0;
-    }
+    public void deleteById(ChatRoomId chatRoomId) {
 
-    @Override
-    public long countByPersonaId(PersonaId personaId) {
-        return 0;
     }
 }

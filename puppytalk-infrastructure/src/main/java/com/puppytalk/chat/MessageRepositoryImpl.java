@@ -1,56 +1,68 @@
 package com.puppytalk.chat;
 
-import com.puppytalk.pet.PetId;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class ChatRepositoryImpl implements ChatRoomRepository {
+public class MessageRepositoryImpl implements MessageRepository {
 
-    private final ChatJpaRepository chatJpaRepository;
+    private final MessageJpaRepository messageJpaRepository;
 
-    public ChatRepositoryImpl(ChatJpaRepository chatJpaRepository) {
-        this.chatJpaRepository = chatJpaRepository;
+    public MessageRepositoryImpl(MessageJpaRepository messageJpaRepository) {
+        this.messageJpaRepository = messageJpaRepository;
     }
 
     @Override
-    public ChatRoom save(ChatRoom chatRoom) {
+    public Message save(Message message) {
         return null;
     }
 
     @Override
-    public Optional<ChatRoom> findById(ChatRoomId chatRoomId) {
+    public Optional<Message> findById(MessageId messageId) {
         return Optional.empty();
     }
 
     @Override
-    public List<ChatRoom> findByUserId(Long userId) {
+    public List<Message> findByChatRoomIdOrderBySentAtDesc(ChatRoomId chatRoomId) {
         return List.of();
     }
 
     @Override
-    public Optional<ChatRoom> findByPetId(PetId petId) {
+    public List<Message> findByChatRoomIdOrderBySentAtDesc(ChatRoomId chatRoomId, int offset,
+        int limit) {
+        return List.of();
+    }
+
+    @Override
+    public Optional<Message> findLatestByChatRoomId(ChatRoomId chatRoomId) {
         return Optional.empty();
     }
 
     @Override
-    public List<ChatRoom> findActiveByUserId(Long userId) {
+    public List<Message> findByChatRoomIdAndType(ChatRoomId chatRoomId, MessageType type) {
         return List.of();
     }
 
     @Override
-    public List<ChatRoom> findInactiveAfterMinutes(int minutes) {
+    public List<Message> findByChatRoomIdAndSentAtAfter(ChatRoomId chatRoomId,
+        LocalDateTime after) {
         return List.of();
     }
 
     @Override
-    public boolean existsByPetId(PetId petId) {
-        return false;
+    public long countByChatRoomId(ChatRoomId chatRoomId) {
+        return 0;
     }
 
     @Override
-    public void deleteById(ChatRoomId chatRoomId) {
+    public void deleteById(MessageId messageId) {
+
+    }
+
+    @Override
+    public void deleteByChatRoomId(ChatRoomId chatRoomId) {
 
     }
 }

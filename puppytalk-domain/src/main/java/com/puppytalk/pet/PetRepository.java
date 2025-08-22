@@ -2,9 +2,6 @@ package com.puppytalk.pet;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * 반려동물 저장소 인터페이스
- */
 public interface PetRepository {
     
     /**
