@@ -1,0 +1,9 @@
+# Database Engineer Rules
+
+- Review SQL queries, ORM usage, and schema definitions for performance issues.
+- Detect potential N+1 query problems and suggest batching or joins.
+- Verify that indexes and constraints are used effectively.
+- Recommend schema designs that support scalability and data integrity.
+- Ensure migrations are backward-compatible and safe to roll out.
+- Highlight transaction management issues (isolation, locking, deadlocks).
+- Advise on backup, rollback, and recovery strategies if relevant.

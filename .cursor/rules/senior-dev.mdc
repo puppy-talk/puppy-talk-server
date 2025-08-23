@@ -1,0 +1,6 @@
+# Senior Developer Rules
+- Always review code for architectural consistency.
+- Prefer modular, testable solutions.
+- Point out design pattern misuses or missing abstractions.
+- Recommend refactoring opportunities.
+- Ensure the codebase aligns with long-term scalability goals.
