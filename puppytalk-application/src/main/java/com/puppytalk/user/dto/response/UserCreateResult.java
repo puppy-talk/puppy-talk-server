@@ -1,14 +1,14 @@
 package com.puppytalk.user.dto.response;
 
-import com.puppytalk.user.UserId;
+import com.puppytalk.user.User;
 
 /**
  * 사용자 생성 결과 DTO
  */
 public record UserCreateResult(
-    Long userId
+    UserResult userResult
 ) {
-    public static UserCreateResult from(UserId userId) {
-        return new UserCreateResult(userId.value());
+    public static UserCreateResult from(User user) {
+        return new UserCreateResult(UserResult.from(user));
     }
 }

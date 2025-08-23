@@ -35,7 +35,9 @@ public class UserFacade {
             command.email()
         );
         
-        return UserCreateResult.from(userId);
+        // 생성된 사용자 정보를 조회하여 완전한 결과 반환
+        User createdUser = userDomainService.findUserById(userId);
+        return UserCreateResult.from(createdUser);
     }
     
     /**
@@ -53,6 +55,28 @@ public class UserFacade {
     }
     
     /**
+     * 사용자명으로 사용자를 조회한다.
+     */
+    @Transactional(readOnly = true)
+    public UserResult getUserByUsername(String username) {
+        Assert.hasText(username, "Username must not be null or empty");
+        
+        User user = userDomainService.findUserByUsername(username);
+        return UserResult.from(user);
+    }
+    
+    /**
+     * 이메일로 사용자를 조회한다.
+     */
+    @Transactional(readOnly = true)
+    public UserResult getUserByEmail(String email) {
+        Assert.hasText(email, "Email must not be null or empty");
+        
+        User user = userDomainService.findUserByEmail(email);
+        return UserResult.from(user);
+    }
+    
+    /**
      * 사용자를 비활성화한다.
      */
     public void deactivateUser(Long userId) {
@@ -60,5 +84,15 @@ public class UserFacade {
         
         UserId id = UserId.of(userId);
         userDomainService.deactivateUser(id);
+    }
+    
+    /**
+     * 사용자를 활성화한다.
+     */
+    public void activateUser(Long userId) {
+        Assert.notNull(userId, "UserId must not be null");
+        
+        UserId id = UserId.of(userId);
+        userDomainService.activateUser(id);
     }
 }

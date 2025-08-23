@@ -52,7 +52,8 @@ public class PetController {
     ) {
         PetCreateCommand command = PetCreateCommand.of(
             request.ownerId(),
-            request.name()
+            request.name(),
+            request.persona()
         );
 
         petFacade.createPet(command);

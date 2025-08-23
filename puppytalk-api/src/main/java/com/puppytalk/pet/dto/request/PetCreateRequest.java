@@ -19,7 +19,8 @@ public record PetCreateRequest(
     @Size(max = 20, message = "반려동물 이름은 20자를 초과할 수 없습니다")
     String name,
     
-    @Schema(description = "페르소나 ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "페르소나 ID는 필수입니다")
-    Long personaId
+    @Schema(description = "반려동물 페르소나", example = "활발하고 친근한 골든 리트리버", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "반려동물 페르소나는 필수입니다")
+    @Size(max = 500, message = "반려동물 페르소나는 500자를 초과할 수 없습니다")
+    String persona
 ) {}

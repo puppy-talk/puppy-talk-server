@@ -1,8 +1,10 @@
 package com.puppytalk.support;
 
+import com.puppytalk.activity.ActivityTrackingException;
 import com.puppytalk.chat.ChatRoomAccessDeniedException;
 import com.puppytalk.chat.ChatRoomNotFoundException;
 import com.puppytalk.chat.MessageNotFoundException;
+import com.puppytalk.notification.NotificationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -68,6 +70,20 @@ public class GlobalExceptionHandler {
         log.warn("Message not found: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.fail("메시지를 찾을 수 없습니다"));
+    }
+    
+    @ExceptionHandler(ActivityTrackingException.class)
+    public ResponseEntity<ApiResponse<Void>> handleActivityTrackingException(ActivityTrackingException ex) {
+        log.warn("Activity tracking error: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.fail("활동 추적 중 오류가 발생했습니다"));
+    }
+    
+    @ExceptionHandler(NotificationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotificationException(NotificationException ex) {
+        log.warn("Notification error: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.fail("알림 처리 중 오류가 발생했습니다"));
     }
 
     @ExceptionHandler(RuntimeException.class)
