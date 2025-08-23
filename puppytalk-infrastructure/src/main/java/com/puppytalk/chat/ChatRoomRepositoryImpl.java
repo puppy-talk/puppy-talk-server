@@ -36,7 +36,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
     
     @Override
     public Optional<ChatRoom> findByUserIdAndPetId(UserId userId, PetId petId) {
-        if (userId == null || !userId.isStored() || petId == null || !petId.isStored()) {
+        if (userId == null || !userId.isStored() || petId == null || !petId.isValid()) {
             return Optional.empty();
         }
         
@@ -58,7 +58,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
     
     @Override
     public Optional<ChatRoom> findByPetId(PetId petId) {
-        if (petId == null || !petId.isStored()) {
+        if (petId == null || !petId.isValid()) {
             return Optional.empty();
         }
         
@@ -77,7 +77,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
     
     @Override
     public boolean existsByUserIdAndPetId(UserId userId, PetId petId) {
-        if (userId == null || !userId.isStored() || petId == null || !petId.isStored()) {
+        if (userId == null || !userId.isStored() || petId == null || !petId.isValid()) {
             return false;
         }
         

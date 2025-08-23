@@ -22,7 +22,7 @@ public class ChatRoom {
         if (userId == null || !userId.isStored()) {
             throw new IllegalArgumentException("사용자 ID는 필수입니다");
         }
-        if (petId == null || !petId.isStored()) {
+        if (petId == null || !petId.isValid()) {
             throw new IllegalArgumentException("반려동물 ID는 필수입니다");
         }
         if (createdAt == null) {

@@ -4,11 +4,6 @@ import com.puppytalk.user.UserId;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-/**
- * 반려동물 엔티티
- * 
- * 사용자가 생성하는 반려동물입니다.
- */
 public class Pet {
     private final PetId id;
     private final UserId ownerId;
@@ -62,7 +57,7 @@ public class Pet {
 
     public static Pet of(PetId id, UserId ownerId, String name, String persona,
                          LocalDateTime createdAt, PetStatus status) {
-        if (id == null || !id.isStored()) {
+        if (id == null || !id.isValid()) {
             throw new IllegalArgumentException("저장된 반려동물 ID가 필요합니다");
         }
 
@@ -80,21 +75,14 @@ public class Pet {
         return new Pet(id, ownerId, name, persona, createdAt, PetStatus.DELETED);
     }
 
-    /**
-     * 반려동물이 채팅 가능한 상태인지 확인
-     */
     public boolean canChat() {
         return status.isActive();
     }
 
-    /**
-     * 특정 사용자의 반려동물인지 확인
-     */
     public boolean isOwnedBy(UserId userId) {
         return Objects.equals(this.ownerId, userId);
     }
 
-    // getter
     public PetId id() { return id; }
     public UserId ownerId() { return ownerId; }
     public String name() { return name; }

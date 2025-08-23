@@ -21,7 +21,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     @Transactional
     public UserId save(User user) {
-        if (user.id().isStored()) {
+        if (user.id() != null && user.id().isStored()) {
             // 기존 사용자 업데이트
             UserJpaEntity existingEntity = userJpaRepository.findById(user.id().value())
                 .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다: " + user.id().value()));
@@ -56,8 +56,15 @@ public class UserRepositoryImpl implements UserRepository {
     }
     
     @Override
-    public List<User> findByStatus(UserStatus status) {
-        return userJpaRepository.findByStatus(status).stream()
+    public List<User> findActiveUsers() {
+        return userJpaRepository.findByIsDeletedFalse().stream()
+            .map(UserJpaEntity::toDomain)
+            .toList();
+    }
+    
+    @Override
+    public List<User> findDeletedUsers() {
+        return userJpaRepository.findByIsDeletedTrue().stream()
             .map(UserJpaEntity::toDomain)
             .toList();
     }

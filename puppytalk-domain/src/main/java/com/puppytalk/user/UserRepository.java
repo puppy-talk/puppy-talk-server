@@ -29,9 +29,14 @@ public interface UserRepository {
     Optional<User> findByEmail(String email);
     
     /**
-     * 상태별 사용자 목록을 조회한다.
+     * 활성 사용자 목록을 조회한다 (삭제되지 않은 사용자).
      */
-    List<User> findByStatus(UserStatus status);
+    List<User> findActiveUsers();
+    
+    /**
+     * 삭제된 사용자 목록을 조회한다.
+     */
+    List<User> findDeletedUsers();
     
     /**
      * 사용자명 존재 여부를 확인한다.

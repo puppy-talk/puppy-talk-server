@@ -19,8 +19,8 @@ public record UserResponse(
     @Schema(description = "이메일", example = "john@example.com")
     String email,
     
-    @Schema(description = "상태", example = "ACTIVE")
-    String status,
+    @Schema(description = "삭제 여부", example = "false")
+    boolean isDeleted,
     
     @Schema(description = "생성일시", example = "2023-12-01T10:00:00")
     LocalDateTime createdAt
@@ -31,7 +31,7 @@ public record UserResponse(
             result.userId(),
             result.username(),
             result.email(),
-            result.status().name(),
+            result.isDeleted(),
             result.createdAt()
         );
     }

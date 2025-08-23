@@ -1,7 +1,6 @@
 package com.puppytalk.user.dto.response;
 
 import com.puppytalk.user.User;
-import com.puppytalk.user.UserStatus;
 import java.time.LocalDateTime;
 
 /**
@@ -11,7 +10,7 @@ public record UserResult(
     Long userId,
     String username,
     String email,
-    UserStatus status,
+    boolean isDeleted,
     LocalDateTime createdAt
 ) {
     public static UserResult from(User user) {
@@ -19,7 +18,7 @@ public record UserResult(
             user.id().value(),
             user.username(),
             user.email(),
-            user.status(),
+            user.isDeleted(),
             user.createdAt()
         );
     }

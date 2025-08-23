@@ -13,10 +13,10 @@ public class User {
     private final String username;
     private final String email;
     private final LocalDateTime createdAt;
-    private final UserStatus status;
+    private final boolean isDeleted;
 
     private User(UserId id, String username, String email, 
-                 LocalDateTime createdAt, UserStatus status) {
+                 LocalDateTime createdAt, boolean isDeleted) {
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("사용자명은 필수입니다");
         }
@@ -32,15 +32,12 @@ public class User {
         if (createdAt == null) {
             throw new IllegalArgumentException("생성 시각은 필수입니다");
         }
-        if (status == null) {
-            throw new IllegalArgumentException("사용자 상태는 필수입니다");
-        }
 
         this.id = id;
         this.username = username;
         this.email = email;
         this.createdAt = createdAt;
-        this.status = status;
+        this.isDeleted = isDeleted;
     }
 
     public static User create(String username, String email) {
@@ -49,17 +46,17 @@ public class User {
             username.trim(),
             email.trim().toLowerCase(),
             LocalDateTime.now(),
-            UserStatus.ACTIVE
+            false // 기본적으로 삭제되지 않은 상태
         );
     }
 
     public static User of(UserId id, String username, String email, 
-                          LocalDateTime createdAt, UserStatus status) {
+                          LocalDateTime createdAt, boolean isDeleted) {
         if (id == null || !id.isStored()) {
             throw new IllegalArgumentException("저장된 사용자 ID가 필요합니다");
         }
 
-        return new User(id, username, email, createdAt, status);
+        return new User(id, username, email, createdAt, isDeleted);
     }
 
     private static boolean isValidEmail(String email) {
@@ -71,24 +68,31 @@ public class User {
     }
 
     /**
-     * 사용자 비활성화 (소프트 삭제)
+     * 사용자 삭제 (소프트 삭제)
      */
-    public User withDeactivatedStatus() {
-        return new User(id, username, email, createdAt, UserStatus.INACTIVE);
+    public User withDeletedStatus() {
+        return new User(id, username, email, createdAt, true);
     }
 
     /**
-     * 사용자 활성화
+     * 사용자 복구 (삭제 취소)
      */
-    public User withActivatedStatus() {
-        return new User(id, username, email, createdAt, UserStatus.ACTIVE);
+    public User withRestoredStatus() {
+        return new User(id, username, email, createdAt, false);
     }
 
     /**
-     * 사용자가 활성 상태인지 확인
+     * 사용자가 삭제되었는지 확인
+     */
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    /**
+     * 사용자가 활성 상태인지 확인 (삭제되지 않은 상태)
      */
     public boolean isActive() {
-        return status == UserStatus.ACTIVE;
+        return !isDeleted;
     }
 
     // getter
@@ -96,7 +100,6 @@ public class User {
     public String username() { return username; }
     public String email() { return email; }
     public LocalDateTime createdAt() { return createdAt; }
-    public UserStatus status() { return status; }
 
     @Override
     public boolean equals(Object obj) {
@@ -116,7 +119,7 @@ public class User {
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
-                ", status=" + status +
+                ", isDeleted=" + isDeleted +
                 '}';
     }
 }

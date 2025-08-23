@@ -3,8 +3,6 @@ package com.puppytalk.user;
 import com.puppytalk.infrastructure.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,20 +24,19 @@ public class UserJpaEntity extends BaseEntity {
     @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
     
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private UserStatus status;
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted;
     
     protected UserJpaEntity() {
         // JPA 전용 기본 생성자
     }
     
-    private UserJpaEntity(Long id, String username, String email, UserStatus status,
+    private UserJpaEntity(Long id, String username, String email, boolean isDeleted,
                          LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.username = username;
         this.email = email;
-        this.status = status;
+        this.isDeleted = isDeleted;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -49,10 +46,10 @@ public class UserJpaEntity extends BaseEntity {
      */
     public static UserJpaEntity fromDomain(User user) {
         return new UserJpaEntity(
-            user.id().isStored() ? user.id().value() : null,
+            user.id() != null ? user.id().value() : null,
             user.username(),
             user.email(),
-            user.status(),
+            user.isDeleted(),
             user.createdAt(),
             LocalDateTime.now()
         );
@@ -67,7 +64,7 @@ public class UserJpaEntity extends BaseEntity {
             this.username,
             this.email,
             this.createdAt,
-            this.status
+            this.isDeleted
         );
     }
     
@@ -75,13 +72,13 @@ public class UserJpaEntity extends BaseEntity {
     public Long getId() { return id; }
     public String getUsername() { return username; }
     public String getEmail() { return email; }
-    public UserStatus getStatus() { return status; }
+    public boolean isDeleted() { return isDeleted; }
     
     // Setters for JPA updates
     public void updateFromDomain(User user) {
         this.username = user.username();
         this.email = user.email();
-        this.status = user.status();
+        this.isDeleted = user.isDeleted();
         this.updatedAt = LocalDateTime.now();
     }
     

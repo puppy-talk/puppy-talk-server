@@ -78,7 +78,7 @@ public class UserDomainService {
      * @return 활성 사용자 목록
      */
     public List<User> findActiveUsers() {
-        return userRepository.findByStatus(UserStatus.ACTIVE);
+        return userRepository.findActiveUsers();
     }
     
     /**
@@ -98,27 +98,27 @@ public class UserDomainService {
     }
     
     /**
-     * 사용자를 비활성화한다.
+     * 사용자를 삭제한다 (소프트 삭제).
      * 
      * @param userId 사용자 ID
      * @throws UserNotFoundException 사용자가 존재하지 않는 경우
      */
-    public void deactivateUser(UserId userId) {
+    public void deleteUser(UserId userId) {
         User user = findUserById(userId);
-        User deactivatedUser = user.withDeactivatedStatus();
-        userRepository.save(deactivatedUser);
+        User deletedUser = user.withDeletedStatus();
+        userRepository.save(deletedUser);
     }
     
     /**
-     * 사용자를 활성화한다.
+     * 사용자를 복구한다 (삭제 취소).
      * 
      * @param userId 사용자 ID
      * @throws UserNotFoundException 사용자가 존재하지 않는 경우
      */
-    public void activateUser(UserId userId) {
+    public void restoreUser(UserId userId) {
         User user = findUserById(userId);
-        User activatedUser = user.withActivatedStatus();
-        userRepository.save(activatedUser);
+        User restoredUser = user.withRestoredStatus();
+        userRepository.save(restoredUser);
     }
     
     /**

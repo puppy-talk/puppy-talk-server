@@ -19,9 +19,14 @@ public interface UserJpaRepository extends JpaRepository<UserJpaEntity, Long> {
     Optional<UserJpaEntity> findByEmail(String email);
     
     /**
-     * 상태별 사용자 목록 조회
+     * 활성 사용자 목록 조회 (삭제되지 않은 사용자)
      */
-    List<UserJpaEntity> findByStatus(UserStatus status);
+    List<UserJpaEntity> findByIsDeletedFalse();
+    
+    /**
+     * 삭제된 사용자 목록 조회
+     */
+    List<UserJpaEntity> findByIsDeletedTrue();
     
     /**
      * 사용자명 존재 여부 확인
@@ -36,6 +41,12 @@ public interface UserJpaRepository extends JpaRepository<UserJpaEntity, Long> {
     /**
      * 활성 사용자 수 조회
      */
-    @Query("SELECT COUNT(u) FROM UserJpaEntity u WHERE u.status = :status")
-    long countByStatus(@Param("status") UserStatus status);
+    @Query("SELECT COUNT(u) FROM UserJpaEntity u WHERE u.isDeleted = false")
+    long countActiveUsers();
+    
+    /**
+     * 삭제된 사용자 수 조회
+     */
+    @Query("SELECT COUNT(u) FROM UserJpaEntity u WHERE u.isDeleted = true")
+    long countDeletedUsers();
 }
