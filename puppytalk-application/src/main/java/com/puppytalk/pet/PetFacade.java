@@ -30,7 +30,7 @@ public class PetFacade {
         
         UserId ownerId = UserId.of(command.ownerId());
         
-        petDomainService.createPet(ownerId, command.petName());
+        petDomainService.createPet(ownerId, command.petName(), command.petPersona());
     }
 
     /**
