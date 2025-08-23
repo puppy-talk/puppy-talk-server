@@ -5,6 +5,10 @@ package com.puppytalk.support;
  */
 public enum ApiSuccessMessage {
     
+    // User
+    USER_CREATE_SUCCESS("사용자가 생성되었습니다"),
+    USER_GET_SUCCESS("사용자 정보를 조회했습니다"),
+
     // Pet
     PET_CREATE_SUCCESS("반려동물이 생성되었습니다"),
     PET_LIST_SUCCESS("반려동물 목록을 조회했습니다"),
@@ -22,10 +26,7 @@ public enum ApiSuccessMessage {
     NOTIFICATION_CREATE_SUCCESS("알림이 생성되었습니다"),
     NOTIFICATION_STATUS_UPDATE_SUCCESS("알림 상태가 업데이트되었습니다"),
     NOTIFICATION_LIST_SUCCESS("알림 목록을 조회했습니다"),
-    NOTIFICATION_CLEANUP_SUCCESS("알림 정리가 완료되었습니다"),
-    
-    // Common
-    OPERATION_SUCCESS("작업이 완료되었습니다");
+    NOTIFICATION_CLEANUP_SUCCESS("알림 정리가 완료되었습니다");
     
     private final String message;
     
