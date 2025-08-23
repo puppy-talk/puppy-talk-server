@@ -49,4 +49,11 @@ public interface MessageJpaRepository extends JpaRepository<MessageJpaEntity, Lo
      * 채팅방의 특정 타입 메시지 개수 조회
      */
     long countByChatRoomIdAndType(Long chatRoomId, MessageType type);
+    
+    /**
+     * AI 메시지 생성을 위한 최근 메시지 조회 (최신순)
+     */
+    @Query("SELECT m FROM MessageJpaEntity m WHERE m.chatRoomId = :chatRoomId ORDER BY m.createdAt DESC LIMIT :limit")
+    List<MessageJpaEntity> findByChatRoomIdOrderByCreatedAtDesc(@Param("chatRoomId") Long chatRoomId, 
+                                                               @Param("limit") int limit);
 }

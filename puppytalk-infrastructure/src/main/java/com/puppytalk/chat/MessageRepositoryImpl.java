@@ -101,6 +101,18 @@ public class MessageRepositoryImpl implements MessageRepository {
         return jpaRepository.existsById(id.getValue());
     }
     
+    @Override
+    public List<Message> findRecentMessages(ChatRoomId chatRoomId, int limit) {
+        if (chatRoomId == null || !chatRoomId.isStored() || limit <= 0) {
+            return List.of();
+        }
+        
+        return jpaRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId.getValue(), limit)
+                .stream()
+                .map(this::toDomainEntity)
+                .toList();
+    }
+    
     private MessageJpaEntity toJpaEntity(Message message) {
         MessageJpaEntity entity = new MessageJpaEntity(
             message.getChatRoomId().getValue(),

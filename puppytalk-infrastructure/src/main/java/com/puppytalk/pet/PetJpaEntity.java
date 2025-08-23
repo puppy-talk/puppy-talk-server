@@ -27,17 +27,21 @@ public class PetJpaEntity extends BaseEntity {
     @Column(name = "name", nullable = false, length = 20)
     private String name;
     
+    @Column(name = "persona", nullable = false, length = 500)
+    private String persona;
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private PetStatus status;
     
     protected PetJpaEntity() {}
     
-    private PetJpaEntity(Long id, Long ownerId, String name, PetStatus status, 
+    private PetJpaEntity(Long id, Long ownerId, String name, String persona, PetStatus status, 
                         LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.ownerId = ownerId;
         this.name = name;
+        this.persona = persona;
         this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -48,6 +52,7 @@ public class PetJpaEntity extends BaseEntity {
             pet.getId().isStored() ? pet.getId().value() : null,
             pet.getOwnerId().value(),
             pet.getName(),
+            pet.getPersona(),
             pet.getStatus(),
             pet.getCreatedAt(),
             LocalDateTime.now()
@@ -62,6 +67,7 @@ public class PetJpaEntity extends BaseEntity {
             PetId.of(this.id),
             UserId.of(this.ownerId),
             this.name,
+            this.persona,
             this.createdAt,
             this.status
         );
@@ -71,10 +77,12 @@ public class PetJpaEntity extends BaseEntity {
     public Long getId() { return id; }
     public Long getOwnerId() { return ownerId; }
     public String getName() { return name; }
+    public String getPersona() { return persona; }
     public PetStatus getStatus() { return status; }
     
     public void update(Pet pet) {
         this.name = pet.getName();
+        this.persona = pet.getPersona();
         this.status = pet.getStatus();
         this.updatedAt = LocalDateTime.now();
     }
