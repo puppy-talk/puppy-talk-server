@@ -6,13 +6,14 @@ import com.puppytalk.chat.dto.request.ChatRoomListQuery;
 import com.puppytalk.chat.dto.request.MessageListQuery;
 import com.puppytalk.chat.dto.request.MessageSendCommand;
 import com.puppytalk.chat.dto.request.MessageSendRequest;
-import com.puppytalk.chat.dto.response.ChatRoomCreateResult;
+import com.puppytalk.chat.dto.response.ChatRoomCreateResponse;
 import com.puppytalk.chat.dto.response.ChatRoomListResult;
 import com.puppytalk.chat.dto.response.ChatRoomResponse;
 import com.puppytalk.chat.dto.response.ChatRoomsResponse;
 import com.puppytalk.chat.dto.response.MessageListResult;
 import com.puppytalk.chat.dto.response.MessagesResponse;
 import com.puppytalk.support.ApiResponse;
+import com.puppytalk.support.ApiSuccessMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -44,7 +45,7 @@ public class ChatController {
         this.chatFacade = chatFacade;
     }
 
-    @Operation(summary = "채팅방 생성/조회", description = "사용자와 반려동물의 1:1 채팅방을 생성하거나 기존 채팅방을 조회합니다.")
+    @Operation(summary = "채팅방 생성/조회", description = "채팅방을 생성하거나 기존 채팅방을 조회합니다.")
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "새 채팅방 생성 성공"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "기존 채팅방 조회 성공"),
@@ -60,14 +61,17 @@ public class ChatController {
             request.petId()
         );
 
-        ChatRoomCreateResult result = chatFacade.createOrFindChatRoom(command);
-        ChatRoomResponse response = ChatRoomResponse.from(result);
+        ChatRoomCreateResponse response = chatFacade.createOrFindChatRoom(command);
 
-        HttpStatus status = result.isNewlyCreated() ? HttpStatus.CREATED : HttpStatus.OK;
-        String message = result.isNewlyCreated() ? "채팅방 생성 성공" : "기존 채팅방 조회 성공";
+        HttpStatus status = response.isCreated() ? HttpStatus.CREATED : HttpStatus.OK;
+        String message = response.isCreated() ?
+            ApiSuccessMessage.CHAT_ROOM_CREATE_SUCCESS.getMessage() :
+            ApiSuccessMessage.CHAT_ROOM_FIND_SUCCESS.getMessage();
+
+        ChatRoomResponse chatRoomResponse = ChatRoomResponse.from(response.chatRoom());
 
         return ResponseEntity.status(status)
-            .body(ApiResponse.success(response, message));
+            .body(ApiResponse.success(chatRoomResponse, message));
     }
 
     @Operation(summary = "채팅방 목록 조회", description = "사용자의 모든 채팅방 목록을 조회합니다.")
@@ -83,10 +87,11 @@ public class ChatController {
         ChatRoomListQuery query = ChatRoomListQuery.of(userId);
         ChatRoomListResult result = chatFacade.getChatRoomList(query);
 
-        return ResponseEntity.ok(   
+        return ResponseEntity.ok(
             ApiResponse.success(
                 ChatRoomsResponse.from(result),
-                "채팅방 목록 조회 성공")
+                ApiSuccessMessage.CHAT_ROOM_LIST_SUCCESS.getMessage()
+            )
         );
     }
 
@@ -102,7 +107,7 @@ public class ChatController {
         @Parameter(description = "채팅방 ID", required = true, example = "1")
         @PathVariable @Positive(message = "채팅방 ID는 양수여야 합니다") Long chatRoomId,
         @Parameter(description = "사용자 ID", required = true, example = "1")
-        @RequestParam @Positive(message = "사용자 ID는 양수여야 합니다") Long userId,
+        @RequestParam @Positive(message = "user ID는 양수여야 합니다") Long userId,
         @Parameter(description = "메시지 전송 요청 정보", required = true)
         @Valid @RequestBody MessageSendRequest request
     ) {
@@ -115,12 +120,10 @@ public class ChatController {
         chatFacade.sendMessage(command);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.success("메시지 전송 성공"));
+            .body(ApiResponse.success(ApiSuccessMessage.CHAT_MESSAGE_SEND_SUCCESS.getMessage()));
     }
 
-    @Operation(summary = "메시지 목록 조회 (커서 기반 페이징)", 
-               description = "채팅방의 메시지 목록을 커서 기반 페이징으로 조회합니다. " +
-                           "스크롤 형태의 메시지 조회에 최적화되어 있습니다.")
+    @Operation(summary = "메시지 목록 조회", description = "메시지 목록을 커서 기반 페이징으로 조회합니다. ")
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "메시지 목록 조회 성공",
             content = @Content(schema = @Schema(implementation = ApiResponse.class))),
@@ -145,7 +148,7 @@ public class ChatController {
         return ResponseEntity.ok(
             ApiResponse.success(
                 MessagesResponse.from(result),
-                "메시지 목록 조회 성공")
+                ApiSuccessMessage.CHAT_MESSAGE_LIST_SUCCESS.getMessage())
         );
     }
 }

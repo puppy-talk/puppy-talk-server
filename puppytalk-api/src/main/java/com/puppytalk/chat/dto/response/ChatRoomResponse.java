@@ -1,5 +1,6 @@
 package com.puppytalk.chat.dto.response;
 
+import com.puppytalk.chat.ChatRoom;
 import com.puppytalk.chat.dto.response.ChatRoomCreateResult;
 import com.puppytalk.chat.dto.response.ChatRoomResult;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,6 +32,20 @@ public record ChatRoomResponse(
 ) {
     
     /**
+     * ChatRoom 도메인 객체로부터 응답 생성
+     */
+    public static ChatRoomResponse from(ChatRoom chatRoom) {
+        return new ChatRoomResponse(
+            chatRoom.getId().getValue(),
+            chatRoom.getUserId().getValue(),
+            chatRoom.getPetId().getValue(),
+            null, // isNewlyCreated는 Application Layer에서 결정
+            chatRoom.getCreatedAt(),
+            chatRoom.getLastMessageAt()
+        );
+    }
+    
+    /**
      * ChatRoomCreateResult로부터 응답 생성
      */
     public static ChatRoomResponse from(ChatRoomCreateResult result) {
@@ -52,7 +67,7 @@ public record ChatRoomResponse(
             result.chatRoomId(),
             result.userId(),
             result.petId(),
-            null, // isNewlyCreated not available in ChatRoomResult
+            null, // isCreated not available in ChatRoomResult
             result.createdAt(),
             result.lastMessageAt()
         );

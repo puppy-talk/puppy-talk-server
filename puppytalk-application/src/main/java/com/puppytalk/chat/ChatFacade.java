@@ -4,7 +4,7 @@ import com.puppytalk.chat.dto.request.ChatRoomCreateCommand;
 import com.puppytalk.chat.dto.request.ChatRoomListQuery;
 import com.puppytalk.chat.dto.request.MessageListQuery;
 import com.puppytalk.chat.dto.request.MessageSendCommand;
-import com.puppytalk.chat.dto.response.ChatRoomCreateResult;
+import com.puppytalk.chat.dto.response.ChatRoomCreateResponse;
 import com.puppytalk.chat.dto.response.ChatRoomListResult;
 import com.puppytalk.chat.dto.response.MessageListResult;
 import com.puppytalk.pet.PetId;
@@ -30,7 +30,7 @@ public class ChatFacade {
     /**
      * 채팅방 생성 (또는 기존 채팅방 조회)
      */
-    public ChatRoomCreateResult createOrFindChatRoom(ChatRoomCreateCommand command) {
+    public ChatRoomCreateResponse createOrFindChatRoom(ChatRoomCreateCommand command) {
         Assert.notNull(command, "ChatRoomCreateCommand must not be null");
         
         UserId userId = UserId.of(command.userId());
@@ -39,9 +39,9 @@ public class ChatFacade {
         ChatDomainService.ChatRoomResult result = chatDomainService.findOrCreateChatRoom(userId, petId);
         
         if (result.isNewlyCreated()) {
-            return ChatRoomCreateResult.created(result.chatRoom());
+            return ChatRoomCreateResponse.created(result.chatRoom());
         } else {
-            return ChatRoomCreateResult.existing(result.chatRoom());
+            return ChatRoomCreateResponse.existing(result.chatRoom());
         }
     }
     
