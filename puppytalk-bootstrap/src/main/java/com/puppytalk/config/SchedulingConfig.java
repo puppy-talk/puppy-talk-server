@@ -12,6 +12,4 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class SchedulingConfig {
     
-    // 기본 스케줄링 설정
-    // 필요에 따라 TaskScheduler Bean을 커스텀 설정 가능
 }

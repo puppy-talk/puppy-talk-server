@@ -5,31 +5,18 @@ plugins {
 }
 
 dependencies {
-    // All layer dependencies - composition root responsibility
     implementation project(':puppytalk-domain')
     implementation project(':puppytalk-infrastructure')
     implementation project(':puppytalk-application')
     implementation project(':puppytalk-api')
     
-    // Bootstrap needs Spring Boot core for application startup
+    // Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     
     // Database migration
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-mysql'
-    
-    // Development tools
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    
-    // Annotation processor
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
 }
 
 flyway {
