@@ -21,7 +21,7 @@ import java.util.List;
  * Backend 관점: 안정적인 트랜잭션 관리와 흐름 제어
  */
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class NotificationFacade {
     
     private final NotificationDomainService notificationDomainService;
@@ -33,6 +33,7 @@ public class NotificationFacade {
     /**
      * 비활성 사용자 알림 생성
      */
+    @Transactional
     public NotificationResult createInactivityNotification(NotificationCreateCommand command) {
         Assert.notNull(command, "NotificationCreateCommand must not be null");
         Assert.notNull(command.petId(), "PetId must not be null for inactivity notification");
@@ -52,6 +53,7 @@ public class NotificationFacade {
     /**
      * 시스템 알림 생성
      */
+    @Transactional
     public NotificationResult createSystemNotification(NotificationCreateCommand command) {
         Assert.notNull(command, "NotificationCreateCommand must not be null");
         
@@ -79,6 +81,7 @@ public class NotificationFacade {
     /**
      * 알림 상태 업데이트
      */
+    @Transactional
     public void updateNotificationStatus(NotificationStatusUpdateCommand command) {
         Assert.notNull(command, "NotificationStatusUpdateCommand must not be null");
         
@@ -159,6 +162,7 @@ public class NotificationFacade {
     /**
      * 만료된 알림 정리
      */
+    @Transactional
     public int cleanupExpiredNotifications() {
         return notificationDomainService.cleanupExpiredNotifications();
     }
@@ -166,6 +170,7 @@ public class NotificationFacade {
     /**
      * 오래된 알림 정리
      */
+    @Transactional
     public int cleanupOldNotifications() {
         return notificationDomainService.cleanupOldNotifications();
     }

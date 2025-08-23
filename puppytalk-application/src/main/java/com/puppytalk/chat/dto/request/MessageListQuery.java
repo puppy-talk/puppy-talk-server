@@ -14,8 +14,6 @@ public record MessageListQuery(
     public MessageListQuery {
         Assert.notNull(chatRoomId, "ChatRoomId cannot be null");
         Assert.notNull(userId, "UserId cannot be null");
-        // cursor는 null일 수 있음 (첫 페이지)
-        // size는 null일 수 있음 (기본 사이즈 사용)
     }
     
     /**
@@ -47,13 +45,6 @@ public record MessageListQuery(
     }
     
     /**
-     * 모든 메시지를 조회하는 쿼리 생성 (무제한)
-     */
-    public static MessageListQuery allMessages(Long chatRoomId, Long userId) {
-        return new MessageListQuery(chatRoomId, userId, null, -1);
-    }
-    
-    /**
      * 첫 페이지인지 확인
      */
     public boolean isFirstPage() {
@@ -61,23 +52,9 @@ public record MessageListQuery(
     }
     
     /**
-     * 크기 제한 없이 모든 메시지를 조회하는지 확인
-     * size가 -1인 경우 모든 메시지 조회로 처리
-     */
-    public boolean isUnlimited() {
-        return size != null && size == -1;
-    }
-    
-    /**
      * 실제 페이지 크기 반환
      */
-    public int getEffectiveSize() {
-        if (size == null) {
-            return 20; // 기본 20개
-        }
-        if (size == -1) {
-            return Integer.MAX_VALUE; // 제한 없음
-        }
-        return size;
+    public int getSize() {
+        return size != null ? size : 10; // 기본 10개
     }
 }

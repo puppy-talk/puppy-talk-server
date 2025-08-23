@@ -117,7 +117,7 @@ public class ChatController {
             request.content()
         );
 
-        chatFacade.sendMessage(command);
+        chatFacade.sendUserMessage(command);
 
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.success(ApiSuccessMessage.CHAT_MESSAGE_SEND_SUCCESS.getMessage()));

@@ -13,7 +13,7 @@ import org.springframework.util.Assert;
  * 사용자 관련 유스케이스를 조율하고 트랜잭션 경계를 관리한다.
  */
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class UserFacade {
     
     private final UserDomainService userDomainService;
@@ -25,6 +25,7 @@ public class UserFacade {
     /**
      * 새로운 사용자를 등록한다.
      */
+    @Transactional
     public UserCreateResult createUser(UserCreateCommand command) {
         Assert.notNull(command, "UserCreateCommand must not be null");
         Assert.hasText(command.username(), "Username must not be null or empty");
@@ -43,7 +44,6 @@ public class UserFacade {
     /**
      * 사용자 ID로 사용자를 조회한다.
      */
-    @Transactional(readOnly = true)
     public UserResult getUser(UserGetQuery query) {
         Assert.notNull(query, "UserGetQuery must not be null");
         Assert.notNull(query.userId(), "UserId must not be null");
@@ -52,47 +52,5 @@ public class UserFacade {
         User user = userDomainService.findUserById(userId);
         
         return UserResult.from(user);
-    }
-    
-    /**
-     * 사용자명으로 사용자를 조회한다.
-     */
-    @Transactional(readOnly = true)
-    public UserResult getUserByUsername(String username) {
-        Assert.hasText(username, "Username must not be null or empty");
-        
-        User user = userDomainService.findUserByUsername(username);
-        return UserResult.from(user);
-    }
-    
-    /**
-     * 이메일로 사용자를 조회한다.
-     */
-    @Transactional(readOnly = true)
-    public UserResult getUserByEmail(String email) {
-        Assert.hasText(email, "Email must not be null or empty");
-        
-        User user = userDomainService.findUserByEmail(email);
-        return UserResult.from(user);
-    }
-    
-    /**
-     * 사용자를 비활성화한다.
-     */
-    public void deactivateUser(Long userId) {
-        Assert.notNull(userId, "UserId must not be null");
-        
-        UserId id = UserId.of(userId);
-        userDomainService.deactivateUser(id);
-    }
-    
-    /**
-     * 사용자를 활성화한다.
-     */
-    public void activateUser(Long userId) {
-        Assert.notNull(userId, "UserId must not be null");
-        
-        UserId id = UserId.of(userId);
-        userDomainService.activateUser(id);
     }
 }

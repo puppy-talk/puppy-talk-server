@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class PetFacade {
     
     private final PetDomainService petDomainService;
@@ -25,6 +25,7 @@ public class PetFacade {
     /**
      * 반려동물 생성
      */
+    @Transactional
     public void createPet(PetCreateCommand command) {
         Assert.notNull(command, "PetCreateCommand must not be null");
         
@@ -36,7 +37,6 @@ public class PetFacade {
     /**
      * 반려동물 목록 조회
      */
-    @Transactional(readOnly = true)
     public PetListResult getPetList(PetListQuery query) {
         Assert.notNull(query, "PetListQuery must not be null");
 
@@ -48,7 +48,6 @@ public class PetFacade {
     /**
      * 반려동물 상세 조회
      */
-    @Transactional(readOnly = true)
     public PetResult getPet(PetGetQuery query) {
         Assert.notNull(query, "PetGetQuery must not be null");
         
@@ -62,6 +61,7 @@ public class PetFacade {
     /**
      * 반려동물 삭제
      */
+    @Transactional
     public void deletePet(PetDeleteCommand command) {
         Assert.notNull(command, "PetDeleteCommand must not be null");
         
