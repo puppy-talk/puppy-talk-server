@@ -57,4 +57,13 @@ public interface MessageRepository {
      * 메시지 존재 여부 확인
      */
     boolean existsById(MessageId id);
+    
+    /**
+     * AI 메시지 생성을 위한 최근 메시지 조회
+     * 
+     * @param chatRoomId 채팅방 ID
+     * @param limit 조회할 메시지 개수 (최신 메시지부터)
+     * @return 최신 메시지부터 정렬된 리스트
+     */
+    List<Message> findRecentMessages(ChatRoomId chatRoomId, int limit);
 }

@@ -82,6 +82,22 @@ public class UserDomainService {
     }
     
     /**
+     * 이메일로 사용자를 조회한다.
+     * 
+     * @param email 이메일
+     * @return 사용자
+     * @throws UserNotFoundException 사용자가 존재하지 않는 경우
+     */
+    public User findUserByEmail(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("Email must not be null or empty");
+        }
+        
+        return userRepository.findByEmail(email.trim().toLowerCase())
+            .orElseThrow(() -> UserNotFoundException.byEmail(email));
+    }
+    
+    /**
      * 사용자를 비활성화한다.
      * 
      * @param userId 사용자 ID
@@ -90,6 +106,18 @@ public class UserDomainService {
     public void deactivateUser(UserId userId) {
         User user = findUserById(userId);
         user.deactivate();
+        userRepository.save(user);
+    }
+    
+    /**
+     * 사용자를 활성화한다.
+     * 
+     * @param userId 사용자 ID
+     * @throws UserNotFoundException 사용자가 존재하지 않는 경우
+     */
+    public void activateUser(UserId userId) {
+        User user = findUserById(userId);
+        user.activate();
         userRepository.save(user);
     }
     

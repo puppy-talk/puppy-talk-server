@@ -35,8 +35,8 @@ public class PetDomainService {
             .orElseThrow(() -> new PetNotFoundException(petId));
     }
     
-    public void createPet(UserId ownerId, String petName) {
-        Pet pet = Pet.create(ownerId, petName);
+    public void createPet(UserId ownerId, String petName, String petPersona) {
+        Pet pet = Pet.create(ownerId, petName, petPersona);
         petRepository.save(pet);
     }
     

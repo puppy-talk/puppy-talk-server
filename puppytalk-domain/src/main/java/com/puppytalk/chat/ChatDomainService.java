@@ -184,4 +184,41 @@ public class ChatDomainService {
         
         return message;
     }
+    
+    /**
+     * AI 메시지 생성을 위한 채팅 히스토리 조회
+     * 
+     * @param chatRoomId 채팅방 ID
+     * @param limit 조회할 메시지 개수 (최신순)
+     * @return 최신 메시지부터 정렬된 리스트
+     */
+    public List<Message> findRecentChatHistory(ChatRoomId chatRoomId, int limit) {
+        if (chatRoomId == null) {
+            throw new IllegalArgumentException("ChatRoomId must not be null");
+        }
+        if (limit <= 0) {
+            throw new IllegalArgumentException("Limit must be positive");
+        }
+
+        // 채팅방 존재 확인
+        chatRoomRepository.findById(chatRoomId)
+            .orElseThrow(() -> new ChatRoomNotFoundException(chatRoomId));
+            
+        return messageRepository.findRecentMessages(chatRoomId, limit);
+    }
+    
+    /**
+     * 사용자와 반려동물의 채팅방 조회 (소유권 확인 없이)
+     * AI 메시지 생성 시 시스템에서 사용
+     */
+    public Optional<ChatRoom> findChatRoomByUserAndPet(UserId userId, PetId petId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("UserId must not be null");
+        }
+        if (petId == null) {
+            throw new IllegalArgumentException("PetId must not be null");
+        }
+        
+        return chatRoomRepository.findByUserIdAndPetId(userId, petId);
+    }
 }
