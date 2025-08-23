@@ -2,7 +2,9 @@ package com.puppytalk.activity;
 
 import com.puppytalk.activity.dto.request.ActivityRecordCommand;
 import com.puppytalk.activity.dto.request.ActivityRecordRequest;
+import com.puppytalk.activity.dto.response.ActivityResponse;
 import com.puppytalk.activity.dto.response.ActivityResult;
+import com.puppytalk.activity.dto.response.InactiveUsersResponse;
 import com.puppytalk.activity.dto.response.InactiveUsersResult;
 import com.puppytalk.support.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,7 +42,7 @@ public class ActivityController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "사용자 또는 채팅방을 찾을 수 없음")
     })
     @PostMapping
-    public ResponseEntity<ApiResponse<ActivityResult>> recordActivity(
+    public ResponseEntity<ApiResponse<ActivityResponse>> recordActivity(
         @Parameter(description = "활동 기록 요청 정보", required = true)
         @Valid @RequestBody ActivityRecordRequest request
     ) {
@@ -51,7 +53,9 @@ public class ActivityController {
         );
         
         ActivityResult result = activityFacade.recordActivity(command);
-        return ResponseEntity.ok(ApiResponse.success(result));
+        ActivityResponse response = ActivityResponse.from(result);
+        
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
     
     @Operation(summary = "사용자 최근 활동 조회", description = "사용자의 최근 활동을 조회합니다.")
@@ -62,12 +66,14 @@ public class ActivityController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
     })
     @GetMapping("/users/{userId}/latest")
-    public ResponseEntity<ApiResponse<ActivityResult>> getLatestActivity(
+    public ResponseEntity<ApiResponse<ActivityResponse>> getLatestActivity(
         @Parameter(description = "사용자 ID", required = true, example = "1")
         @PathVariable Long userId
     ) {
         ActivityResult result = activityFacade.getLatestActivity(userId);
-        return ResponseEntity.ok(ApiResponse.success(result));
+        ActivityResponse response = ActivityResponse.from(result);
+        
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
     
     @Operation(summary = "비활성 사용자 목록 조회", description = "지정된 시간 동안 활동이 없는 사용자 목록을 조회합니다.")
@@ -77,12 +83,14 @@ public class ActivityController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
     @GetMapping("/inactive-users")
-    public ResponseEntity<ApiResponse<InactiveUsersResult>> getInactiveUsers(
+    public ResponseEntity<ApiResponse<InactiveUsersResponse>> getInactiveUsers(
         @Parameter(description = "비활성 기준 시간(시간)", example = "2")
         @RequestParam(defaultValue = "2") int hours
     ) {
         InactiveUsersResult result = activityFacade.getInactiveUsers(hours);
-        return ResponseEntity.ok(ApiResponse.success(result));
+        InactiveUsersResponse response = InactiveUsersResponse.from(result);
+        
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
     
     @Operation(summary = "사용자 활성 상태 확인", description = "사용자가 현재 활성 상태인지 확인합니다.")
