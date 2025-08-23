@@ -4,22 +4,23 @@ import com.puppytalk.chat.ChatRoomId;
 import com.puppytalk.user.UserId;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * 사용자 활동 도메인 모델
  * 
  * Backend 관점: 성능 최적화를 위한 불변 설계
  */
-public record UserActivity(
-    ActivityId id,
-    UserId userId,
-    ChatRoomId chatRoomId,
-    ActivityType activityType,
-    LocalDateTime activityAt,
-    LocalDateTime createdAt
-) {
-    
-    public UserActivity {
+public class UserActivity {
+    private final ActivityId id;
+    private final UserId userId;
+    private final ChatRoomId chatRoomId;
+    private final ActivityType activityType;
+    private final LocalDateTime activityAt;
+    private final LocalDateTime createdAt;
+
+    private UserActivity(ActivityId id, UserId userId, ChatRoomId chatRoomId,
+                        ActivityType activityType, LocalDateTime activityAt, LocalDateTime createdAt) {
         if (userId == null) {
             throw new IllegalArgumentException("UserId must not be null");
         }
@@ -33,6 +34,13 @@ public record UserActivity(
             throw new IllegalArgumentException("CreatedAt must not be null");
         }
         // chatRoomId는 LOGIN/LOGOUT 활동에서는 null일 수 있음
+
+        this.id = id;
+        this.userId = userId;
+        this.chatRoomId = chatRoomId;
+        this.activityType = activityType;
+        this.activityAt = activityAt;
+        this.createdAt = createdAt;
     }
     
     /**
@@ -75,6 +83,18 @@ public record UserActivity(
             LocalDateTime.now()
         );
     }
+
+    /**
+     * 기존 사용자 활동 복원용 정적 팩토리 메서드 (Repository용)
+     */
+    public static UserActivity of(ActivityId id, UserId userId, ChatRoomId chatRoomId,
+                                 ActivityType activityType, LocalDateTime activityAt, LocalDateTime createdAt) {
+        if (id == null || !id.isValid()) {
+            throw new IllegalArgumentException("저장된 활동 ID가 필요합니다");
+        }
+
+        return new UserActivity(id, userId, chatRoomId, activityType, activityAt, createdAt);
+    }
     
     /**
      * ID를 포함한 새로운 UserActivity 생성 (Repository에서 사용)
@@ -109,5 +129,35 @@ public record UserActivity(
      */
     public boolean isBefore(LocalDateTime dateTime) {
         return activityAt.isBefore(dateTime);
+    }
+
+    // getter
+    public ActivityId id() { return id; }
+    public UserId userId() { return userId; }
+    public ChatRoomId chatRoomId() { return chatRoomId; }
+    public ActivityType activityType() { return activityType; }
+    public LocalDateTime activityAt() { return activityAt; }
+    public LocalDateTime createdAt() { return createdAt; }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof UserActivity other)) return false;
+        return Objects.equals(id, other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
+    @Override
+    public String toString() {
+        return "UserActivity{" +
+                "id=" + id +
+                ", userId=" + userId +
+                ", activityType=" + activityType +
+                ", activityAt=" + activityAt +
+                '}';
     }
 }

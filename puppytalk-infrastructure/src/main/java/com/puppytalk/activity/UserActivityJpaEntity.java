@@ -63,14 +63,32 @@ public class UserActivityJpaEntity extends BaseEntity {
     }
     
     public UserActivity toDomain() {
-        return new UserActivity(
-            id != null ? ActivityId.of(id) : null,
-            UserId.of(userId),
-            chatRoomId != null ? com.puppytalk.chat.ChatRoomId.of(chatRoomId) : null,
-            activityType,
-            activityAt,
-            getCreatedAt()
-        );
+        if (id != null) {
+            return UserActivity.of(
+                ActivityId.of(id),
+                UserId.of(userId),
+                chatRoomId != null ? com.puppytalk.chat.ChatRoomId.of(chatRoomId) : null,
+                activityType,
+                activityAt,
+                getCreatedAt()
+            );
+        } else {
+            // 새로운 활동 생성 (ID가 없는 경우)
+            if (chatRoomId != null) {
+                return UserActivity.createActivity(
+                    UserId.of(userId),
+                    com.puppytalk.chat.ChatRoomId.of(chatRoomId),
+                    activityType,
+                    activityAt
+                );
+            } else {
+                return UserActivity.createGlobalActivity(
+                    UserId.of(userId),
+                    activityType,
+                    activityAt
+                );
+            }
+        }
     }
     
     public Long getId() {

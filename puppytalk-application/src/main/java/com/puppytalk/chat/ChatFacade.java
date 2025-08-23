@@ -34,7 +34,7 @@ public class ChatFacade {
         UserId userId = UserId.of(command.userId());
         PetId petId = PetId.of(command.petId());
 
-        ChatDomainService.ChatRoomResult result = chatDomainService.
+        ChatRoomResult result = chatDomainService.
             findOrCreateChatRoom(userId, petId);
 
         if (result.isNewlyCreated()) {

@@ -16,6 +16,13 @@ public record NotificationId(Long value) {
     }
     
     /**
+     * ID가 유효한지 확인
+     */
+    public boolean isValid() {
+        return value != null && value > 0;
+    }
+    
+    /**
      * JPA 호환성을 위한 값 접근
      */
     public Long getValue() {

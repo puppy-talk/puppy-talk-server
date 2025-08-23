@@ -49,11 +49,11 @@ public class UserJpaEntity extends BaseEntity {
      */
     public static UserJpaEntity fromDomain(User user) {
         return new UserJpaEntity(
-            user.getId().isStored() ? user.getId().value() : null,
-            user.getUsername(),
-            user.getEmail(),
-            user.getStatus(),
-            user.getCreatedAt(),
+            user.id().isStored() ? user.id().value() : null,
+            user.username(),
+            user.email(),
+            user.status(),
+            user.createdAt(),
             LocalDateTime.now()
         );
     }
@@ -62,7 +62,7 @@ public class UserJpaEntity extends BaseEntity {
      * JPA 엔티티를 도메인 객체로 변환
      */
     public User toDomain() {
-        return User.restore(
+        return User.of(
             UserId.of(this.id),
             this.username,
             this.email,
@@ -79,9 +79,9 @@ public class UserJpaEntity extends BaseEntity {
     
     // Setters for JPA updates
     public void updateFromDomain(User user) {
-        this.username = user.getUsername();
-        this.email = user.getEmail();
-        this.status = user.getStatus();
+        this.username = user.username();
+        this.email = user.email();
+        this.status = user.status();
         this.updatedAt = LocalDateTime.now();
     }
     

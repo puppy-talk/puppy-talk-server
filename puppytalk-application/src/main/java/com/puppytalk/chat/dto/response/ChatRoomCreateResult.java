@@ -23,9 +23,9 @@ public record ChatRoomCreateResult(
      */
     public static ChatRoomCreateResult created(ChatRoom chatRoom) {
         return new ChatRoomCreateResult(
-            chatRoom.getId().getValue(),
-            chatRoom.getUserId().getValue(),
-            chatRoom.getPetId().getValue(),
+            chatRoom.id().getValue(),
+            chatRoom.userId().getValue(),
+            chatRoom.petId().getValue(),
             true
         );
     }
@@ -35,9 +35,9 @@ public record ChatRoomCreateResult(
      */
     public static ChatRoomCreateResult existing(ChatRoom chatRoom) {
         return new ChatRoomCreateResult(
-            chatRoom.getId().getValue(),
-            chatRoom.getUserId().getValue(),
-            chatRoom.getPetId().getValue(),
+            chatRoom.id().getValue(),
+            chatRoom.userId().getValue(),
+            chatRoom.petId().getValue(),
             false
         );
     }

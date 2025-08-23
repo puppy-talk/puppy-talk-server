@@ -59,14 +59,14 @@ public class AiInactivityNotificationService {
                 return Optional.empty();
             }
             
-            ChatRoomId chatRoomId = chatRoom.get().getId();
+            ChatRoomId chatRoomId = chatRoom.get().id();
             
             // 3. 최근 채팅 히스토리 조회 (최대 10개)
             List<Message> chatHistory = chatDomainService.findRecentChatHistory(chatRoomId, 10);
             
             // 4. AI 메시지 생성
             AiMessageGenerationService.AiMessageResult aiResult = 
-                aiMessageGenerationService.generateInactivityMessage(petId, chatHistory, pet.getPersona());
+                aiMessageGenerationService.generateInactivityMessage(petId, chatHistory, pet.persona());
             
             if (aiResult.hasError()) {
                 throw new NotificationException.AiGenerationFailed(

@@ -1,4 +1,6 @@
-package com.puppytalk.chat;
+package com.puppytalk.chat.exception;
+
+import com.puppytalk.chat.MessageId;
 
 /**
  * 메시지를 찾을 수 없을 때 발생하는 예외

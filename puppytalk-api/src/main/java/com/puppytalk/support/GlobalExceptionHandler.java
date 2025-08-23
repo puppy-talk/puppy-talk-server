@@ -1,9 +1,9 @@
 package com.puppytalk.support;
 
 import com.puppytalk.activity.ActivityTrackingException;
-import com.puppytalk.chat.ChatRoomAccessDeniedException;
-import com.puppytalk.chat.ChatRoomNotFoundException;
-import com.puppytalk.chat.MessageNotFoundException;
+import com.puppytalk.chat.exception.ChatRoomAccessDeniedException;
+import com.puppytalk.chat.exception.ChatRoomNotFoundException;
+import com.puppytalk.chat.exception.MessageNotFoundException;
 import com.puppytalk.notification.NotificationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

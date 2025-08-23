@@ -1,4 +1,6 @@
-package com.puppytalk.chat;
+package com.puppytalk.chat.exception;
+
+import com.puppytalk.chat.ChatRoomId;
 
 /**
  * 채팅방을 찾을 수 없을 때 발생하는 예외

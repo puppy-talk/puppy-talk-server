@@ -114,23 +114,45 @@ public class NotificationJpaEntity extends BaseEntity {
     }
     
     public Notification toDomain() {
-        return new Notification(
-            id != null ? NotificationId.of(id) : null,
-            com.puppytalk.user.UserId.of(userId),
-            petId != null ? com.puppytalk.pet.PetId.of(petId) : null,
-            chatRoomId != null ? com.puppytalk.chat.ChatRoomId.of(chatRoomId) : null,
-            type,
-            title,
-            content,
-            status,
-            scheduledAt,
-            sentAt,
-            readAt,
-            getCreatedAt(),
-            getUpdatedAt(),
-            retryCount,
-            failureReason
-        );
+        if (id != null) {
+            return Notification.of(
+                NotificationId.of(id),
+                com.puppytalk.user.UserId.of(userId),
+                petId != null ? com.puppytalk.pet.PetId.of(petId) : null,
+                chatRoomId != null ? com.puppytalk.chat.ChatRoomId.of(chatRoomId) : null,
+                type,
+                title,
+                content,
+                status,
+                scheduledAt,
+                sentAt,
+                readAt,
+                getCreatedAt(),
+                getUpdatedAt(),
+                retryCount,
+                failureReason
+            );
+        } else {
+            // 새로운 알림 생성 (ID가 없는 경우)
+            if (type == NotificationType.INACTIVITY_MESSAGE) {
+                return Notification.createInactivityNotification(
+                    com.puppytalk.user.UserId.of(userId),
+                    petId != null ? com.puppytalk.pet.PetId.of(petId) : null,
+                    chatRoomId != null ? com.puppytalk.chat.ChatRoomId.of(chatRoomId) : null,
+                    title,
+                    content,
+                    scheduledAt
+                );
+            } else if (type == NotificationType.SYSTEM_NOTIFICATION) {
+                return Notification.createSystemNotification(
+                    com.puppytalk.user.UserId.of(userId),
+                    title,
+                    content
+                );
+            } else {
+                throw new IllegalStateException("알 수 없는 알림 타입: " + type);
+            }
+        }
     }
     
     // Getters

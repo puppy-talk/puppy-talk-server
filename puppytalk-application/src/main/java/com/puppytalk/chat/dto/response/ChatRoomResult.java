@@ -16,11 +16,11 @@ public record ChatRoomResult(
     
     public static ChatRoomResult from(ChatRoom chatRoom) {
         return new ChatRoomResult(
-            chatRoom.getId().getValue(),
-            chatRoom.getUserId().getValue(),
-            chatRoom.getPetId().getValue(),
-            chatRoom.getCreatedAt(),
-            chatRoom.getLastMessageAt()
+            chatRoom.id().getValue(),
+            chatRoom.userId().getValue(),
+            chatRoom.petId().getValue(),
+            chatRoom.createdAt(),
+            chatRoom.lastMessageAt()
         );
     }
 }

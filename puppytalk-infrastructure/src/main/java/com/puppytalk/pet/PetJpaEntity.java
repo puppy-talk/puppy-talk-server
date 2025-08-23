@@ -49,12 +49,12 @@ public class PetJpaEntity extends BaseEntity {
     
     public static PetJpaEntity from(Pet pet) {
         return new PetJpaEntity(
-            pet.getId().isStored() ? pet.getId().value() : null,
-            pet.getOwnerId().value(),
-            pet.getName(),
-            pet.getPersona(),
-            pet.getStatus(),
-            pet.getCreatedAt(),
+            pet.id().isStored() ? pet.id().value() : null,
+            pet.ownerId().value(),
+            pet.name(),
+            pet.persona(),
+            pet.status(),
+            pet.createdAt(),
             LocalDateTime.now()
         );
     }
@@ -63,7 +63,7 @@ public class PetJpaEntity extends BaseEntity {
      * JPA 엔티티를 도메인 객체로 변환
      */
     public Pet toDomain() {
-        return Pet.restore(
+        return Pet.of(
             PetId.of(this.id),
             UserId.of(this.ownerId),
             this.name,
@@ -81,9 +81,9 @@ public class PetJpaEntity extends BaseEntity {
     public PetStatus getStatus() { return status; }
     
     public void update(Pet pet) {
-        this.name = pet.getName();
-        this.persona = pet.getPersona();
-        this.status = pet.getStatus();
+        this.name = pet.name();
+        this.persona = pet.persona();
+        this.status = pet.status();
         this.updatedAt = LocalDateTime.now();
     }
     

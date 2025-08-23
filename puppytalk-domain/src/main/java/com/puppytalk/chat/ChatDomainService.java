@@ -1,15 +1,13 @@
 package com.puppytalk.chat;
 
+import com.puppytalk.chat.exception.ChatRoomAccessDeniedException;
+import com.puppytalk.chat.exception.ChatRoomNotFoundException;
+import com.puppytalk.chat.exception.MessageNotFoundException;
 import com.puppytalk.pet.PetId;
 import com.puppytalk.user.UserId;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * 채팅 도메인 서비스
- * 채팅방과 메시지의 핵심 비즈니스 로직을 담당
- * 순수 도메인 로직만 포함 (프레임워크 무관)
- */
 public class ChatDomainService {
     
     private final ChatRoomRepository chatRoomRepository;
@@ -37,52 +35,28 @@ public class ChatDomainService {
         if (petId == null) {
             throw new IllegalArgumentException("PetId must not be null");
         }
+        Optional<ChatRoom> room = chatRoomRepository.findByUserIdAndPetId(userId, petId);
 
-        Optional<ChatRoom> existingRoom = chatRoomRepository.findByUserIdAndPetId(userId, petId);
-        if (existingRoom.isPresent()) {
-            return ChatRoomResult.existing(existingRoom.get());
+        if (room.isPresent()) {
+            return ChatRoomResult.existing(room.get());
         }
         
-        ChatRoom newRoom = ChatRoom.create(userId, petId);
-        ChatRoom savedRoom = chatRoomRepository.save(newRoom);
+        ChatRoom savedRoom = chatRoomRepository.save(
+            ChatRoom.create(userId, petId)
+        );
+
         return ChatRoomResult.created(savedRoom);
-    }
-    
-    /**
-     * 채팅방 생성 결과
-     */
-    public record ChatRoomResult(
-        ChatRoom chatRoom,
-        boolean isNewlyCreated
-    ) {
-        public static ChatRoomResult created(ChatRoom chatRoom) {
-            return new ChatRoomResult(chatRoom, true);
-        }
-        
-        public static ChatRoomResult existing(ChatRoom chatRoom) {
-            return new ChatRoomResult(chatRoom, false);
-        }
     }
     
     /**
      * 채팅방 조회
      */
     public ChatRoom findChatRoom(ChatRoomId chatRoomId, UserId userId) {
-        if (chatRoomId == null) {
-            throw new IllegalArgumentException("ChatRoomId must not be null");
-        }
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId must not be null");
-        }
-
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+        validateChatRoom(chatRoomId, userId);
+        
+        // 이미 검증되었으므로 안전하게 조회
+        return chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new ChatRoomNotFoundException(chatRoomId));
-            
-        if (chatRoom.isOwnedBy(userId)) {
-            return chatRoom;
-
-        }
-        throw new ChatRoomAccessDeniedException("채팅방에 접근할 권한이 없습니다", userId, chatRoomId);
     }
     
     /**
@@ -108,8 +82,8 @@ public class ChatDomainService {
         Message message = Message.of(chatRoomId, content);
         messageRepository.save(message);
         
-        chatRoom.updateLastMessageTime();
-        chatRoomRepository.save(chatRoom);
+        ChatRoom updatedChatRoom = chatRoom.withLastMessageTime();
+        chatRoomRepository.save(updatedChatRoom);
     }
     
     /**
@@ -119,6 +93,7 @@ public class ChatDomainService {
         if (chatRoomId == null) {
             throw new IllegalArgumentException("ChatRoomId must not be null");
         }
+
         if (content == null || content.trim().isEmpty()) {
             throw new IllegalArgumentException("Message content must not be null or empty");
         }
@@ -132,8 +107,8 @@ public class ChatDomainService {
         messageRepository.save(message);
         
         // 채팅방 마지막 메시지 시각 업데이트
-        chatRoom.updateLastMessageTime();
-        chatRoomRepository.save(chatRoom);
+        ChatRoom updatedChatRoom = chatRoom.withLastMessageTime();
+        chatRoomRepository.save(updatedChatRoom);
         
         return message;
     }
@@ -143,7 +118,7 @@ public class ChatDomainService {
      */
     public List<Message> findMessageList(ChatRoomId chatRoomId, UserId userId) {
         // 채팅방 존재 및 소유권 확인
-        findChatRoom(chatRoomId, userId);
+        validateChatRoom(chatRoomId, userId);
         
         return messageRepository.findByChatRoomIdOrderByCreatedAt(chatRoomId);
     }
@@ -163,7 +138,8 @@ public class ChatDomainService {
             throw new IllegalArgumentException("Size must be positive");
         }
 
-        findChatRoom(chatRoomId, userId);
+        // 채팅방 존재 및 소유권 확인
+        validateChatRoom(chatRoomId, userId);
         
         return messageRepository.findByChatRoomId(chatRoomId, cursor, size);
     }
@@ -179,8 +155,7 @@ public class ChatDomainService {
         Message message = messageRepository.findById(messageId)
             .orElseThrow(() -> new MessageNotFoundException(messageId));
             
-        // 메시지가 속한 채팅방의 소유권 확인
-        findChatRoom(message.getChatRoomId(), userId);
+        validateChatRoom(message.chatRoomId(), userId);
         
         return message;
     }
@@ -200,7 +175,6 @@ public class ChatDomainService {
             throw new IllegalArgumentException("Limit must be positive");
         }
 
-        // 채팅방 존재 확인
         chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new ChatRoomNotFoundException(chatRoomId));
             
@@ -220,5 +194,24 @@ public class ChatDomainService {
         }
         
         return chatRoomRepository.findByUserIdAndPetId(userId, petId);
+    }
+
+    /**
+     * 채팅방 존재 여부 및 소유권 확인
+     */
+    public void validateChatRoom(ChatRoomId chatRoomId, UserId userId) {
+        if (chatRoomId == null) {
+            throw new IllegalArgumentException("ChatRoomId must not be null");
+        }
+        if (userId == null) {
+            throw new IllegalArgumentException("UserId must not be null");
+        }
+
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+            .orElseThrow(() -> new ChatRoomNotFoundException(chatRoomId));
+
+        if (chatRoom.isOwnedBy(userId)) return;
+
+        throw new ChatRoomAccessDeniedException("채팅방에 접근할 권한이 없습니다", userId, chatRoomId);
     }
 }

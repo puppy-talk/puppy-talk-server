@@ -105,8 +105,8 @@ public class UserDomainService {
      */
     public void deactivateUser(UserId userId) {
         User user = findUserById(userId);
-        user.deactivate();
-        userRepository.save(user);
+        User deactivatedUser = user.withDeactivatedStatus();
+        userRepository.save(deactivatedUser);
     }
     
     /**
@@ -117,8 +117,8 @@ public class UserDomainService {
      */
     public void activateUser(UserId userId) {
         User user = findUserById(userId);
-        user.activate();
-        userRepository.save(user);
+        User activatedUser = user.withActivatedStatus();
+        userRepository.save(activatedUser);
     }
     
     /**

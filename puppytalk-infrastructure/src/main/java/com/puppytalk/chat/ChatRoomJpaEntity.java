@@ -1,6 +1,8 @@
 package com.puppytalk.chat;
 
 import com.puppytalk.infrastructure.common.BaseEntity;
+import com.puppytalk.pet.PetId;
+import com.puppytalk.user.UserId;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -37,6 +39,19 @@ public class ChatRoomJpaEntity extends BaseEntity {
         this.userId = userId;
         this.petId = petId;
         this.lastMessageAt = lastMessageAt;
+    }
+    
+    /**
+     * JPA Entity를 Domain Model로 변환하는 정적 팩토리 메서드
+     */
+    public static ChatRoom toModel(ChatRoomJpaEntity entity) {
+        return ChatRoom.of(
+            ChatRoomId.from(entity.getId()),
+            UserId.from(entity.getUserId()),
+            PetId.from(entity.getPetId()),
+            entity.getCreatedAt(),
+            entity.getLastMessageAt()
+        );
     }
     
     // Getters and Setters

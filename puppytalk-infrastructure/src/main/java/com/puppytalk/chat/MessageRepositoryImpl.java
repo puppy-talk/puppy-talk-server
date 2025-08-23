@@ -24,7 +24,7 @@ public class MessageRepositoryImpl implements MessageRepository {
     
     @Override
     public Optional<Message> findById(MessageId id) {
-        if (id == null || !id.isStored()) {
+        if (id == null || !id.isValid()) {
             return Optional.empty();
         }
         
@@ -45,7 +45,7 @@ public class MessageRepositoryImpl implements MessageRepository {
     @Override
     @Deprecated
     public List<Message> findByChatRoomIdOrderByCreatedAtDesc(ChatRoomId chatRoomId, int limit) {
-        if (chatRoomId == null || !chatRoomId.isStored() || limit <= 0) {
+        if (chatRoomId == null || !chatRoomId.isValid() || limit <= 0) {
             return List.of();
         }
         
@@ -58,7 +58,7 @@ public class MessageRepositoryImpl implements MessageRepository {
     @Override
     public List<Message> findByChatRoomId(ChatRoomId chatRoomId, MessageId cursor, int size) {
         // 도메인 서비스에서 이미 검증된 파라미터로 방어적 검사 최소화
-        Long cursorValue = (cursor != null && cursor.isStored()) ? cursor.getValue() : null;
+        Long cursorValue = (cursor != null && cursor.isValid()) ? cursor.getValue() : null;
         
         return jpaRepository.findByChatRoomIdWithCursor(chatRoomId.getValue(), cursorValue, size)
                 .stream()
@@ -76,7 +76,7 @@ public class MessageRepositoryImpl implements MessageRepository {
     
     @Override
     public long countByChatRoomId(ChatRoomId chatRoomId) {
-        if (chatRoomId == null || !chatRoomId.isStored()) {
+        if (chatRoomId == null || !chatRoomId.isValid()) {
             return 0;
         }
         
@@ -85,7 +85,7 @@ public class MessageRepositoryImpl implements MessageRepository {
     
     @Override
     public long countByChatRoomIdAndType(ChatRoomId chatRoomId, MessageType type) {
-        if (chatRoomId == null || !chatRoomId.isStored() || type == null) {
+        if (chatRoomId == null || !chatRoomId.isValid() || type == null) {
             return 0;
         }
         
@@ -94,7 +94,7 @@ public class MessageRepositoryImpl implements MessageRepository {
     
     @Override
     public boolean existsById(MessageId id) {
-        if (id == null || !id.isStored()) {
+        if (id == null || !id.isValid()) {
             return false;
         }
         
@@ -103,7 +103,7 @@ public class MessageRepositoryImpl implements MessageRepository {
     
     @Override
     public List<Message> findRecentMessages(ChatRoomId chatRoomId, int limit) {
-        if (chatRoomId == null || !chatRoomId.isStored() || limit <= 0) {
+        if (chatRoomId == null || !chatRoomId.isValid() || limit <= 0) {
             return List.of();
         }
         
@@ -115,14 +115,14 @@ public class MessageRepositoryImpl implements MessageRepository {
     
     private MessageJpaEntity toJpaEntity(Message message) {
         MessageJpaEntity entity = new MessageJpaEntity(
-            message.getChatRoomId().getValue(),
-            message.getType(),
-            message.getContent()
+            message.chatRoomId().getValue(),
+            message.type(),
+            message.content()
         );
         
         // ID가 있는 경우 설정 (업데이트)
-        if (message.getId().isStored()) {
-            entity.setId(message.getId().getValue());
+        if (message.id().isValid()) {
+            entity.setId(message.id().getValue());
         }
         
         return entity;

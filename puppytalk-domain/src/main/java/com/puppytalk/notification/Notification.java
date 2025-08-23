@@ -5,31 +5,34 @@ import com.puppytalk.pet.PetId;
 import com.puppytalk.user.UserId;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * 알림 도메인 모델
  * 
  * Backend 관점: 메시지 전달 보장과 추적 가능성 중심의 설계
  */
-public record Notification(
-    NotificationId id,
-    UserId userId,
-    PetId petId,
-    ChatRoomId chatRoomId,
-    NotificationType type,
-    String title,
-    String content,
-    NotificationStatus status,
-    LocalDateTime scheduledAt,
-    LocalDateTime sentAt,
-    LocalDateTime readAt,
-    LocalDateTime createdAt,
-    LocalDateTime updatedAt,
-    int retryCount,
-    String failureReason
-) {
-    
-    public Notification {
+public class Notification {
+    private final NotificationId id;
+    private final UserId userId;
+    private final PetId petId;
+    private final ChatRoomId chatRoomId;
+    private final NotificationType type;
+    private final String title;
+    private final String content;
+    private final NotificationStatus status;
+    private final LocalDateTime scheduledAt;
+    private final LocalDateTime sentAt;
+    private final LocalDateTime readAt;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
+    private final int retryCount;
+    private final String failureReason;
+
+    private Notification(NotificationId id, UserId userId, PetId petId, ChatRoomId chatRoomId,
+                        NotificationType type, String title, String content, NotificationStatus status,
+                        LocalDateTime scheduledAt, LocalDateTime sentAt, LocalDateTime readAt,
+                        LocalDateTime createdAt, LocalDateTime updatedAt, int retryCount, String failureReason) {
         if (userId == null) {
             throw new IllegalArgumentException("UserId must not be null");
         }
@@ -51,6 +54,22 @@ public record Notification(
         if (retryCount < 0) {
             throw new IllegalArgumentException("RetryCount must not be negative");
         }
+
+        this.id = id;
+        this.userId = userId;
+        this.petId = petId;
+        this.chatRoomId = chatRoomId;
+        this.type = type;
+        this.title = title;
+        this.content = content;
+        this.status = status;
+        this.scheduledAt = scheduledAt;
+        this.sentAt = sentAt;
+        this.readAt = readAt;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.retryCount = retryCount;
+        this.failureReason = failureReason;
     }
     
     /**
@@ -112,6 +131,21 @@ public record Notification(
             0,
             null
         );
+    }
+
+    /**
+     * 기존 알림 복원용 정적 팩토리 메서드 (Repository용)
+     */
+    public static Notification of(NotificationId id, UserId userId, PetId petId, ChatRoomId chatRoomId,
+                                 NotificationType type, String title, String content, NotificationStatus status,
+                                 LocalDateTime scheduledAt, LocalDateTime sentAt, LocalDateTime readAt,
+                                 LocalDateTime createdAt, LocalDateTime updatedAt, int retryCount, String failureReason) {
+        if (id == null || !id.isValid()) {
+            throw new IllegalArgumentException("저장된 알림 ID가 필요합니다");
+        }
+
+        return new Notification(id, userId, petId, chatRoomId, type, title, content, status,
+                              scheduledAt, sentAt, readAt, createdAt, updatedAt, retryCount, failureReason);
     }
     
     /**
@@ -215,5 +249,44 @@ public record Notification(
     public boolean isExpired() {
         LocalDateTime expiryTime = scheduledAt.plusHours(24);
         return LocalDateTime.now().isAfter(expiryTime);
+    }
+
+    // getter
+    public NotificationId id() { return id; }
+    public UserId userId() { return userId; }
+    public PetId petId() { return petId; }
+    public ChatRoomId chatRoomId() { return chatRoomId; }
+    public NotificationType type() { return type; }
+    public String title() { return title; }
+    public String content() { return content; }
+    public NotificationStatus status() { return status; }
+    public LocalDateTime scheduledAt() { return scheduledAt; }
+    public LocalDateTime sentAt() { return sentAt; }
+    public LocalDateTime readAt() { return readAt; }
+    public LocalDateTime createdAt() { return createdAt; }
+    public LocalDateTime updatedAt() { return updatedAt; }
+    public int retryCount() { return retryCount; }
+    public String failureReason() { return failureReason; }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Notification other)) return false;
+        return Objects.equals(id, other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Notification{" +
+                "id=" + id +
+                ", type=" + type +
+                ", status=" + status +
+                ", title='" + title + '\'' +
+                '}';
     }
 }

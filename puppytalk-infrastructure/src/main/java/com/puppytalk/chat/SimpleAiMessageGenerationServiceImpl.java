@@ -78,7 +78,7 @@ public class SimpleAiMessageGenerationServiceImpl implements AiMessageGeneration
         // 채팅 히스토리가 있으면 참고하여 개인화
         if (chatHistory != null && !chatHistory.isEmpty()) {
             Message lastMessage = chatHistory.get(0); // 최신 메시지
-            String timeInfo = formatTimeAgo(lastMessage.getCreatedAt());
+            String timeInfo = formatTimeAgo(lastMessage.createdAt());
             content.append(" ").append(timeInfo).append(" 이후로 소식이 없으셨네요!");
         }
         

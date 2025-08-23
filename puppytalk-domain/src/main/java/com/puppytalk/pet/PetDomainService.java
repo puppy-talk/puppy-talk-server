@@ -56,7 +56,7 @@ public class PetDomainService {
     
     public void deletePet(PetId petId, UserId ownerId) {
         Pet pet = findPet(petId, ownerId);
-        pet.delete();
-        petRepository.save(pet);
+        Pet deletedPet = pet.withDeletedStatus();
+        petRepository.save(deletedPet);
     }
 }

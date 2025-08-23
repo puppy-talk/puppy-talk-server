@@ -22,10 +22,10 @@ public class PetRepositoryImpl implements PetRepository {
     @Override
     @Transactional
     public void save(Pet pet) {
-        if (pet.getId().isStored()) {
+        if (pet.id().isStored()) {
             // 기존 반려동물 업데이트
-            PetJpaEntity existingEntity = petJpaRepository.findById(pet.getId().value())
-                .orElseThrow(() -> new IllegalStateException("반려동물을 찾을 수 없습니다: " + pet.getId().value()));
+            PetJpaEntity existingEntity = petJpaRepository.findById(pet.id().value())
+                .orElseThrow(() -> new IllegalStateException("반려동물을 찾을 수 없습니다: " + pet.id().value()));
             
             existingEntity.update(pet);
             petJpaRepository.save(existingEntity);

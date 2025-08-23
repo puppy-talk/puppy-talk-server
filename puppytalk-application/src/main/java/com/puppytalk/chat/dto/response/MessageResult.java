@@ -17,11 +17,11 @@ public record MessageResult(
     
     public static MessageResult from(Message message) {
         return new MessageResult(
-            message.getId().getValue(),
-            message.getChatRoomId().getValue(),
-            message.getType(),
-            message.getContent(),
-            message.getCreatedAt()
+            message.id().getValue(),
+            message.chatRoomId().getValue(),
+            message.type(),
+            message.content(),
+            message.createdAt()
         );
     }
 }

@@ -13,9 +13,6 @@ public class MessageId {
         this.value = value;
     }
     
-    /**
-     * 메시지 ID 생성 정적 팩토리 메서드
-     */
     public static MessageId of(Long value) {
         if (value == null || value <= 0) {
             throw new IllegalArgumentException("메시지 ID는 양수여야 합니다");
@@ -23,24 +20,11 @@ public class MessageId {
         return new MessageId(value);
     }
     
-    /**
-     * 신규 메시지용 임시 ID 생성
-     */
-    public static MessageId newMessage() {
-        return new MessageId(null);
-    }
-    
-    /**
-     * 기존 메시지 ID 복원 (Repository용)
-     */
     public static MessageId from(Long value) {
         return new MessageId(value);
     }
     
-    /**
-     * 저장된 ID인지 확인
-     */
-    public boolean isStored() {
+    public boolean isValid() {
         return value != null && value > 0;
     }
     
