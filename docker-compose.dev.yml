@@ -7,17 +7,22 @@ services:
     container_name: puppytalk-mysql-dev
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: puppytalk123
-      MYSQL_DATABASE: puppytalk_dev
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: puppytalk
       MYSQL_USER: puppytalk
       MYSQL_PASSWORD: puppytalk123
     ports:
       - "3306:3306"
     volumes:
       - mysql_dev_data:/var/lib/mysql
-      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+      - ./docker/mysql/conf.d:/etc/mysql/conf.d:ro
     networks:
       - puppytalk-dev-network
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-time-zone='+09:00'
+      --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO
 
   # PuppyTalk Development Application
   app:
@@ -35,7 +40,7 @@ services:
       # Database Configuration
       DB_HOST: mysql
       DB_PORT: 3306
-      DB_NAME: puppytalk_dev
+      DB_NAME: puppytalk
       DB_USERNAME: puppytalk
       DB_PASSWORD: puppytalk123
       

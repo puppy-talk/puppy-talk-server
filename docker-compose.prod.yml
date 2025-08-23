@@ -13,8 +13,7 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - mysql_prod_data:/var/lib/mysql
-      - ./docker/mysql/init:/docker-entrypoint-initdb.d
-      - ./docker/mysql/conf:/etc/mysql/conf.d
+      - ./docker/mysql/conf.d:/etc/mysql/conf.d
     networks:
       - puppytalk-prod-network
     deploy:
@@ -33,7 +32,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile
     container_name: puppytalk-app-prod
     restart: always
     depends_on:
@@ -41,7 +40,7 @@ services:
         condition: service_healthy
     environment:
       # Spring Profile for Production
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: docker
       
       # Database Configuration
       DB_HOST: mysql
