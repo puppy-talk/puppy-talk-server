@@ -1,8 +1,5 @@
 package com.puppytalk.support;
 
-/**
- * API 성공 응답 메시지 상수
- */
 public enum ApiSuccessMessage {
     
     // Pet

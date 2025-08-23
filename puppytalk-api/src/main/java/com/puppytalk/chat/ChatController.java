@@ -63,8 +63,8 @@ public class ChatController {
 
         ChatRoomCreateResponse response = chatFacade.createOrFindChatRoom(command);
 
-        HttpStatus status = response.isCreated() ? HttpStatus.CREATED : HttpStatus.OK;
-        String message = response.isCreated() ?
+        HttpStatus status = response.isNewlyCreated() ? HttpStatus.CREATED : HttpStatus.OK;
+        String message = response.isNewlyCreated() ?
             ApiSuccessMessage.CHAT_ROOM_CREATE_SUCCESS.getMessage() :
             ApiSuccessMessage.CHAT_ROOM_FIND_SUCCESS.getMessage();
 
