@@ -1,5 +1,8 @@
 package com.puppytalk.support;
 
+/**
+ * API 성공 응답 메시지 상수
+ */
 public enum ApiSuccessMessage {
     
     // Pet
@@ -14,6 +17,12 @@ public enum ApiSuccessMessage {
     CHAT_ROOM_FIND_SUCCESS("기존 채팅방을 조회했습니다"),
     CHAT_ROOM_LIST_SUCCESS("채팅방 목록을 조회했습니다"),
     CHAT_MESSAGE_LIST_SUCCESS("채팅 메시지 목록을 조회했습니다"),
+    
+    // Notification
+    NOTIFICATION_CREATE_SUCCESS("알림이 생성되었습니다"),
+    NOTIFICATION_STATUS_UPDATE_SUCCESS("알림 상태가 업데이트되었습니다"),
+    NOTIFICATION_LIST_SUCCESS("알림 목록을 조회했습니다"),
+    NOTIFICATION_CLEANUP_SUCCESS("알림 정리가 완료되었습니다"),
     
     // Common
     OPERATION_SUCCESS("작업이 완료되었습니다");

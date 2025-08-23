@@ -18,6 +18,13 @@ public record NotificationStatusUpdateCommand(
         }
     }
     
+    /**
+     * 기본 정적 팩토리 메서드
+     */
+    public static NotificationStatusUpdateCommand of(Long notificationId, String status, String failureReason) {
+        return new NotificationStatusUpdateCommand(notificationId, status, failureReason);
+    }
+    
     public static NotificationStatusUpdateCommand sent(Long notificationId) {
         return new NotificationStatusUpdateCommand(notificationId, "SENT", null);
     }
