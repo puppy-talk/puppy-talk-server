@@ -112,6 +112,19 @@ public class MessageRepositoryImpl implements MessageRepository {
                 .map(this::toDomainEntity)
                 .toList();
     }
+
+    @Override
+    public List<Message> findByChatRoomIdAndCreatedAtAfter(ChatRoomId chatRoomId, java.time.LocalDateTime since) {
+        if (chatRoomId == null || !chatRoomId.isValid() || since == null) {
+            return List.of();
+        }
+        
+        return jpaRepository.findByChatRoomIdAndCreatedAtAfter(chatRoomId.getValue(), since)
+                .stream()
+                .map(this::toDomainEntity)
+                .toList();
+    }
+
     
     private MessageJpaEntity toJpaEntity(Message message) {
         MessageJpaEntity entity = new MessageJpaEntity(

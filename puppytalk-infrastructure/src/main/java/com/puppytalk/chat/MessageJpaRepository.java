@@ -56,4 +56,11 @@ public interface MessageJpaRepository extends JpaRepository<MessageJpaEntity, Lo
     @Query("SELECT m FROM MessageJpaEntity m WHERE m.chatRoomId = :chatRoomId ORDER BY m.createdAt DESC LIMIT :limit")
     List<MessageJpaEntity> findByChatRoomIdOrderByCreatedAtDesc(@Param("chatRoomId") Long chatRoomId, 
                                                                @Param("limit") int limit);
+    
+    /**
+     * 특정 시간 이후의 새로운 메시지 조회 (폴링용)
+     */
+    @Query("SELECT m FROM MessageJpaEntity m WHERE m.chatRoomId = :chatRoomId AND m.createdAt > :since ORDER BY m.createdAt ASC")
+    List<MessageJpaEntity> findByChatRoomIdAndCreatedAtAfter(@Param("chatRoomId") Long chatRoomId,
+                                                           @Param("since") java.time.LocalDateTime since);
 }

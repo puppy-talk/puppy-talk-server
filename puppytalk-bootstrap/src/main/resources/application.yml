@@ -40,6 +40,8 @@ logging:
     com.puppytalk: DEBUG
     org.springframework.web: DEBUG
 
+
+
 ---
 spring:
   config:

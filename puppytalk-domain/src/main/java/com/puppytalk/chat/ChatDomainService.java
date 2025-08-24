@@ -8,6 +8,25 @@ import com.puppytalk.user.UserId;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * 채팅 도메인 서비스
+ * <p>
+ * 채팅방과 메시지에 대한 복잡한 비즈니스 로직을 캡슐화합니다.
+ * 여러 도메인 객체와 리포지토리를 조합하여 채팅 기능을 구현합니다.
+ * <p>
+ * 주요 책임:
+ * - 채팅방 생성 및 조회 로직
+ * - 메시지 전송 및 조회 로직  
+ * - 채팅방 소유권 검증
+ * - 채팅 히스토리 관리
+ * - 폴링을 위한 새 메시지 조회
+ * <p>
+ * 도메인 서비스 패턴을 적용하여 도메인 로직이 엔티티나 값 객체에
+ * 적합하지 않은 경우 별도 서비스로 분리했습니다.
+ * 
+ * @author PuppyTalk Team
+ * @since 1.0
+ */
 public class ChatDomainService {
     
     private final ChatRoomRepository chatRoomRepository;
@@ -22,11 +41,19 @@ public class ChatDomainService {
     }
     
     /**
-     * 채팅방을 찾거나 새로 생성하고 결과 반환
+     * 채팅방을 찾거나 새로 생성합니다.
+     * <p>
+     * 사용자와 반려동물 간의 채팅방이 이미 존재하면 기존 채팅방을 반환하고,
+     * 존재하지 않으면 새로운 채팅방을 생성합니다.
+     * <p>
+     * 비즈니스 규칙:
+     * - 사용자와 반려동물은 1:1 관계의 채팅방만 가질 수 있습니다
+     * - 채팅방 생성 시 현재 시각을 생성 시각과 마지막 메시지 시각으로 설정합니다
      * 
-     * @param userId 사용자 ID
-     * @param petId 반려동물 ID
-     * @return 채팅방과 생성 여부 정보
+     * @param userId 채팅방을 요청하는 사용자의 ID (null이면 IllegalArgumentException)
+     * @param petId 채팅 대상 반려동물의 ID (null이면 IllegalArgumentException)
+     * @return ChatRoomResult 채팅방과 생성 여부 정보 (isNewlyCreated로 구분)
+     * @throws IllegalArgumentException userId 또는 petId가 null인 경우
      */
     public ChatRoomResult findOrCreateChatRoom(UserId userId, PetId petId) {
         if (userId == null) {
@@ -194,6 +221,20 @@ public class ChatDomainService {
         }
         
         return chatRoomRepository.findByUserIdAndPetId(userId, petId);
+    }
+    
+    /**
+     * 특정 시간 이후의 새로운 메시지 조회
+     */
+    public List<Message> findNewMessages(ChatRoomId chatRoomId, UserId userId, java.time.LocalDateTime since) {
+        if (since == null) {
+            throw new IllegalArgumentException("Since time must not be null");
+        }
+        
+        // 채팅방 존재 및 소유권 확인
+        validateChatRoom(chatRoomId, userId);
+        
+        return messageRepository.findByChatRoomIdAndCreatedAtAfter(chatRoomId, since);
     }
 
     /**

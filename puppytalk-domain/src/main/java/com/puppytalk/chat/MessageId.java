@@ -20,6 +20,10 @@ public class MessageId {
         return new MessageId(value);
     }
     
+    public static MessageId create() {
+        return new MessageId(null);
+    }
+    
     public static MessageId from(Long value) {
         return new MessageId(value);
     }

@@ -42,7 +42,7 @@ public class User {
 
     public static User create(String username, String email) {
         return new User(
-            null,
+            UserId.create(),
             username.trim(),
             email.trim().toLowerCase(),
             LocalDateTime.now(),

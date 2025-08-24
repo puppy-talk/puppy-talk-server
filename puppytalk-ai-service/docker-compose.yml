@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  puppytalk-ai-service:
+    build: .
+    container_name: puppytalk-ai-service
+    ports:
+      - "8001:8001"
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - GROK_API_KEY=${GROK_API_KEY}
+      - SECRET_KEY=${SECRET_KEY}
+      - JAVA_SERVICE_URL=http://host.docker.internal:8080
+    env_file:
+      - .env
+    volumes:
+      - ./app:/app/app:ro  # Read-only mount for development
+    networks:
+      - puppytalk-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8001/api/v1/health/liveness')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - puppytalk-main-service
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  puppytalk-main-service:
+    # Placeholder for the main Java service
+    # This would be replaced with actual Java service configuration
+    image: openjdk:17-jdk-slim
+    container_name: puppytalk-main-service
+    ports:
+      - "8080:8080"
+    command: ["java", "-version"]  # Placeholder command
+    networks:
+      - puppytalk-network
+
+networks:
+  puppytalk-network:
+    driver: bridge

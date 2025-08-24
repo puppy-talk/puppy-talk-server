@@ -6,12 +6,21 @@ package com.puppytalk.activity;
 public record ActivityId(Long value) {
     
     public ActivityId {
-        if (value == null || value <= 0) {
-            throw new IllegalArgumentException("ActivityId must be positive");
-        }
+        // 생성자 검증은 of() 메서드에서 수행
     }
     
     public static ActivityId of(Long value) {
+        if (value == null || value <= 0) {
+            throw new IllegalArgumentException("ActivityId must be positive");
+        }
+        return new ActivityId(value);
+    }
+    
+    public static ActivityId create() {
+        return new ActivityId(null);
+    }
+    
+    public static ActivityId from(Long value) {
         return new ActivityId(value);
     }
     

@@ -17,6 +17,10 @@ public class ChatRoomId {
         return new ChatRoomId(value);
     }
     
+    public static ChatRoomId create() {
+        return new ChatRoomId(null);
+    }
+    
     public static ChatRoomId from(Long value) {
         return new ChatRoomId(value);
     }

@@ -6,12 +6,21 @@ package com.puppytalk.notification;
 public record NotificationId(Long value) {
     
     public NotificationId {
-        if (value == null || value <= 0) {
-            throw new IllegalArgumentException("NotificationId must be positive");
-        }
+        // 생성자 검증은 of() 메서드에서 수행
     }
     
     public static NotificationId of(Long value) {
+        if (value == null || value <= 0) {
+            throw new IllegalArgumentException("NotificationId must be positive");
+        }
+        return new NotificationId(value);
+    }
+    
+    public static NotificationId create() {
+        return new NotificationId(null);
+    }
+    
+    public static NotificationId from(Long value) {
         return new NotificationId(value);
     }
     

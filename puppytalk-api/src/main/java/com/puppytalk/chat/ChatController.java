@@ -6,12 +6,15 @@ import com.puppytalk.chat.dto.request.ChatRoomListQuery;
 import com.puppytalk.chat.dto.request.MessageListQuery;
 import com.puppytalk.chat.dto.request.MessageSendCommand;
 import com.puppytalk.chat.dto.request.MessageSendRequest;
+import com.puppytalk.chat.dto.request.NewMessageQuery;
 import com.puppytalk.chat.dto.response.ChatRoomCreateResponse;
 import com.puppytalk.chat.dto.response.ChatRoomListResult;
 import com.puppytalk.chat.dto.response.ChatRoomResponse;
 import com.puppytalk.chat.dto.response.ChatRoomsResponse;
 import com.puppytalk.chat.dto.response.MessageListResult;
 import com.puppytalk.chat.dto.response.MessagesResponse;
+import com.puppytalk.chat.dto.response.NewMessageResult;
+import com.puppytalk.chat.dto.response.NewMessagesResponse;
 import com.puppytalk.support.ApiResponse;
 import com.puppytalk.support.ApiSuccessMessage;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,6 +25,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -32,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import java.time.LocalDateTime;
 
 @Tag(name = "Chat", description = "채팅 관리 API")
 @RestController
@@ -149,6 +154,34 @@ public class ChatController {
             ApiResponse.success(
                 MessagesResponse.from(result),
                 ApiSuccessMessage.CHAT_MESSAGE_LIST_SUCCESS.getMessage())
+        );
+    }
+    
+    @Operation(summary = "새 메시지 조회", description = "특정 시간 이후의 새로운 메시지를 조회합니다 (폴링용).")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "새 메시지 조회 성공"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "접근 권한 없음"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "채팅방을 찾을 수 없음")
+    })
+    @GetMapping("/rooms/{chatRoomId}/messages/new")
+    public ResponseEntity<ApiResponse<NewMessagesResponse>> getNewMessages(
+        @Parameter(description = "채팅방 ID", required = true, example = "1")
+        @PathVariable @Positive(message = "채팅방 ID는 양수여야 합니다") Long chatRoomId,
+        @Parameter(description = "사용자 ID", required = true, example = "1")
+        @RequestParam @Positive(message = "사용자 ID는 양수여야 합니다") Long userId,
+        @Parameter(description = "기준 시간 (이 시간 이후의 메시지 조회)", required = true, 
+                  example = "2023-12-01T15:30:00")
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime since
+    ) {
+        NewMessageQuery query = NewMessageQuery.of(chatRoomId, userId, since);
+        NewMessageResult result = chatFacade.getNewMessages(query);
+        
+        return ResponseEntity.ok(
+            ApiResponse.success(
+                NewMessagesResponse.from(result),
+                result.hasNewMessages() ? "새 메시지가 있습니다" : "새 메시지가 없습니다"
+            )
         );
     }
 }

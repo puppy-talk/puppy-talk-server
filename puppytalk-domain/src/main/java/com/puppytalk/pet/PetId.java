@@ -13,8 +13,12 @@ public record PetId(Long value) {
         return new PetId(value);
     }
     
-    public static PetId from(Long petId) {
-        return new PetId(petId);
+    public static PetId create() {
+        return new PetId(null);
+    }
+    
+    public static PetId from(Long value) {
+        return new PetId(value);
     }
 
     public boolean isValid() {

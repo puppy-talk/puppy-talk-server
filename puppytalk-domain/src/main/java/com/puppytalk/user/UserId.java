@@ -16,12 +16,12 @@ public record UserId(Long value) {
         return new UserId(value);
     }
     
-    public static UserId newUser() {
+    public static UserId create() {
         return new UserId(null);
     }
-
-    public static UserId from(Long userId) {
-        return new UserId(userId);
+    
+    public static UserId from(Long value) {
+        return new UserId(value);
     }
 
     public boolean isStored() {

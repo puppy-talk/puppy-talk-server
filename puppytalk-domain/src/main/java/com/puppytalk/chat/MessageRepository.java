@@ -66,4 +66,15 @@ public interface MessageRepository {
      * @return 최신 메시지부터 정렬된 리스트
      */
     List<Message> findRecentMessages(ChatRoomId chatRoomId, int limit);
+    
+    /**
+     * 특정 시간 이후의 새로운 메시지 조회 (폴링용)
+     * 
+     * @param chatRoomId 채팅방 ID
+     * @param since 기준 시간
+     * @return 기준 시간 이후에 생성된 메시지들 (생성 시간 오름차순)
+     */
+    List<Message> findByChatRoomIdAndCreatedAtAfter(ChatRoomId chatRoomId, java.time.LocalDateTime since);
+
+
 }

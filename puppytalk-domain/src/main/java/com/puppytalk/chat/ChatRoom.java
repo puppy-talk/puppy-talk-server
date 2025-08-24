@@ -42,7 +42,7 @@ public class ChatRoom {
     public static ChatRoom create(UserId userId, PetId petId) {
         LocalDateTime now = LocalDateTime.now();
         return new ChatRoom(
-            null,
+            ChatRoomId.create(),
             userId,
             petId,
             now,
