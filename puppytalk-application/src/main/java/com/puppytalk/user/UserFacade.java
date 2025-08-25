@@ -30,10 +30,12 @@ public class UserFacade {
         Assert.notNull(command, "UserCreateCommand must not be null");
         Assert.hasText(command.username(), "Username must not be null or empty");
         Assert.hasText(command.email(), "Email must not be null or empty");
+        Assert.hasText(command.password(), "Password must not be null or empty");
         
         UserId userId = userDomainService.registerUser(
             command.username(), 
-            command.email()
+            command.email(),
+            command.password()
         );
         
         // 생성된 사용자 정보를 조회하여 완전한 결과 반환

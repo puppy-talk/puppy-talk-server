@@ -5,9 +5,10 @@ package com.puppytalk.user.dto.request;
  */
 public record UserCreateCommand(
     String username,
-    String email
+    String email,
+    String password
 ) {
-    public static UserCreateCommand of(String username, String email) {
-        return new UserCreateCommand(username, email);
+    public static UserCreateCommand of(String username, String email, String password) {
+        return new UserCreateCommand(username, email, password);
     }
 }

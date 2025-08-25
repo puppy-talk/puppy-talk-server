@@ -22,21 +22,25 @@ public class UserDomainService {
      * 
      * @param username 사용자명
      * @param email 이메일
+     * @param password 비밀번호
      * @return 저장된 사용자 ID
      * @throws DuplicateUserException 사용자명 또는 이메일이 중복된 경우
      */
-    public UserId registerUser(String username, String email) {
+    public UserId registerUser(String username, String email, String password) {
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("사용자명은 필수입니다");
         }
         if (email == null || email.trim().isEmpty()) {
             throw new IllegalArgumentException("이메일은 필수입니다");
         }
+        if (password == null || password.trim().isEmpty()) {
+            throw new IllegalArgumentException("비밀번호는 필수입니다");
+        }
         
         validateUniqueUsername(username.trim());
         validateUniqueEmail(email.trim());
         
-        User user = User.create(username, email);
+        User user = User.create(username, email, password);
         return userRepository.save(user);
     }
     

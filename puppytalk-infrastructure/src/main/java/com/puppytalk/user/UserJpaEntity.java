@@ -24,6 +24,9 @@ public class UserJpaEntity extends BaseEntity {
     @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
     
+    @Column(name = "password", nullable = false, length = 500)
+    private String password;
+    
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
     
@@ -31,11 +34,12 @@ public class UserJpaEntity extends BaseEntity {
         // JPA 전용 기본 생성자
     }
     
-    private UserJpaEntity(Long id, String username, String email, boolean isDeleted,
+    private UserJpaEntity(Long id, String username, String email, String password, boolean isDeleted,
                          LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.username = username;
         this.email = email;
+        this.password = password;
         this.isDeleted = isDeleted;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -49,6 +53,7 @@ public class UserJpaEntity extends BaseEntity {
             user.id() != null ? user.id().value() : null,
             user.username(),
             user.email(),
+            user.password(),
             user.isDeleted(),
             user.createdAt(),
             LocalDateTime.now()
@@ -63,6 +68,7 @@ public class UserJpaEntity extends BaseEntity {
             UserId.of(this.id),
             this.username,
             this.email,
+            this.password,
             this.createdAt,
             this.isDeleted
         );
@@ -72,12 +78,14 @@ public class UserJpaEntity extends BaseEntity {
     public Long getId() { return id; }
     public String getUsername() { return username; }
     public String getEmail() { return email; }
+    public String getPassword() { return password; }
     public boolean isDeleted() { return isDeleted; }
     
     // Setters for JPA updates
     public void updateFromDomain(User user) {
         this.username = user.username();
         this.email = user.email();
+        this.password = user.password();
         this.isDeleted = user.isDeleted();
         this.updatedAt = LocalDateTime.now();
     }

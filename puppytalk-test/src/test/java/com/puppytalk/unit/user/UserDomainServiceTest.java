@@ -58,7 +58,8 @@ class UserDomainServiceTest {
         assertNotNull(savedUser);
         assertEquals(username.trim(), savedUser.username());
         assertEquals(email.trim().toLowerCase(), savedUser.email());
-        assertEquals(password.trim(), savedUser.password());
+        assertTrue(savedUser.checkPassword(password.trim()));
+        assertNotEquals(password.trim(), savedUser.password());
     }
     
     @DisplayName("사용자 등록 - null 사용자명으로 실패")
