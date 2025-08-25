@@ -9,7 +9,11 @@ public class DuplicateUserException extends RuntimeException {
         super("이미 존재하는 사용자명입니다: " + username);
     }
     
+    private DuplicateUserException(String message, boolean isEmail) {
+        super(message);
+    }
+    
     public static DuplicateUserException byEmail(String email) {
-        return new DuplicateUserException("이미 존재하는 이메일입니다: " + email);
+        return new DuplicateUserException("이미 존재하는 이메일입니다: " + email, true);
     }
 }

@@ -2,6 +2,7 @@ package com.puppytalk.user;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * 사용자 엔티티
@@ -9,6 +10,14 @@ import java.util.Objects;
  * 시스템에 가입한 사용자를 나타내는 도메인 엔티티입니다.
  */
 public class User {
+    
+    public static final int MIN_USERNAME_LENGTH = 3;
+    public static final int MAX_USERNAME_LENGTH = 20;
+    public static final int MAX_EMAIL_LENGTH = 100;
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(
+        "^[A-Za-z0-9+_.-]+@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})$"
+    );
+    
     private final UserId id;
     private final String username;
     private final String email;
@@ -20,8 +29,10 @@ public class User {
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("사용자명은 필수입니다");
         }
-        if (username.trim().length() < 2 || username.trim().length() > 30) {
-            throw new IllegalArgumentException("사용자명은 2-30자 사이여야 합니다");
+        if (username.trim().length() < MIN_USERNAME_LENGTH || username.trim().length() > MAX_USERNAME_LENGTH) {
+            throw new IllegalArgumentException(
+                String.format("사용자명은 %d-%d자 사이여야 합니다", MIN_USERNAME_LENGTH, MAX_USERNAME_LENGTH)
+            );
         }
         if (email == null || email.trim().isEmpty()) {
             throw new IllegalArgumentException("이메일은 필수입니다");
@@ -60,39 +71,31 @@ public class User {
     }
 
     private static boolean isValidEmail(String email) {
-        return email != null && 
-               email.contains("@") && 
-               email.contains(".") && 
-               email.length() > 5 &&
-               email.length() <= 100;
+        if (email == null || email.trim().isEmpty()) {
+            return false;
+        }
+        
+        String trimmedEmail = email.trim();
+        
+        if (trimmedEmail.length() > MAX_EMAIL_LENGTH) {
+            return false;
+        }
+        
+        return EMAIL_PATTERN.matcher(trimmedEmail).matches();
     }
 
     /**
-     * 사용자 삭제 (소프트 삭제)
+     * 사용자 삭제
      */
     public User withDeletedStatus() {
         return new User(id, username, email, createdAt, true);
     }
 
     /**
-     * 사용자 복구 (삭제 취소)
+     * 사용자 복구
      */
     public User withRestoredStatus() {
         return new User(id, username, email, createdAt, false);
-    }
-
-    /**
-     * 사용자가 삭제되었는지 확인
-     */
-    public boolean isDeleted() {
-        return isDeleted;
-    }
-
-    /**
-     * 사용자가 활성 상태인지 확인 (삭제되지 않은 상태)
-     */
-    public boolean isActive() {
-        return !isDeleted;
     }
 
     // getter
@@ -100,6 +103,7 @@ public class User {
     public String username() { return username; }
     public String email() { return email; }
     public LocalDateTime createdAt() { return createdAt; }
+    public boolean isDeleted() { return isDeleted; }
 
     @Override
     public boolean equals(Object obj) {
