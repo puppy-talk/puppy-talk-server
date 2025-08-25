@@ -43,14 +43,15 @@ public class UserController {
     ) {
         UserCreateCommand command = UserCreateCommand.of(
             request.username(),
-            request.email()
+            request.email(),
+            request.password()
         );
         
         UserCreateResult result = userFacade.createUser(command);
         UserResponse response = UserResponse.from(result.userResult());
         
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.success(response, ApiSuccessMessage.USER_CREATE_SUCCESS.getMessage()));
+            .body(ApiResponse.success(response, ApiSuccessMessage.USER_CREATE_SUCCESS));
     }
     
     @Operation(summary = "사용자 조회", description = "사용자 ID로 사용자 정보를 조회합니다.")
@@ -63,6 +64,6 @@ public class UserController {
         UserResult result = userFacade.getUser(query);
         UserResponse response = UserResponse.from(result);
         
-        return ResponseEntity.ok(ApiResponse.success(response, ApiSuccessMessage.USER_GET_SUCCESS.getMessage()));
+        return ResponseEntity.ok(ApiResponse.success(response, ApiSuccessMessage.USER_GET_SUCCESS));
     }
 }

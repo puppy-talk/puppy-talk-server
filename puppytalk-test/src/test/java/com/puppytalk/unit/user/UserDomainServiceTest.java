@@ -36,6 +36,7 @@ class UserDomainServiceTest {
         // given
         String username = "testuser";
         String email = "test@example.com";
+        String password = "password123";
         UserId expectedUserId = UserId.of(1L);
         
         mockRepository.setSaveResult(expectedUserId);
@@ -43,7 +44,7 @@ class UserDomainServiceTest {
         mockRepository.setExistsByEmailResult(false);
         
         // when
-        UserId result = userDomainService.registerUser(username, email);
+        UserId result = userDomainService.registerUser(username, email, password);
         
         // then
         assertEquals(expectedUserId, result);
@@ -57,6 +58,7 @@ class UserDomainServiceTest {
         assertNotNull(savedUser);
         assertEquals(username.trim(), savedUser.username());
         assertEquals(email.trim().toLowerCase(), savedUser.email());
+        assertEquals(password.trim(), savedUser.password());
     }
     
     @DisplayName("사용자 등록 - null 사용자명으로 실패")
@@ -65,11 +67,12 @@ class UserDomainServiceTest {
         // given
         String username = null;
         String email = "test@example.com";
+        String password = "password123";
         
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> userDomainService.registerUser(username, email)
+            () -> userDomainService.registerUser(username, email, password)
         );
         
         assertEquals("사용자명은 필수입니다", exception.getMessage());
@@ -83,11 +86,12 @@ class UserDomainServiceTest {
         // given
         String username = "   ";
         String email = "test@example.com";
+        String password = "password123";
         
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> userDomainService.registerUser(username, email)
+            () -> userDomainService.registerUser(username, email, password)
         );
         
         assertEquals("사용자명은 필수입니다", exception.getMessage());
@@ -100,11 +104,12 @@ class UserDomainServiceTest {
         // given
         String username = "testuser";
         String email = null;
+        String password = "password123";
         
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> userDomainService.registerUser(username, email)
+            () -> userDomainService.registerUser(username, email, password)
         );
         
         assertEquals("이메일은 필수입니다", exception.getMessage());
@@ -117,13 +122,14 @@ class UserDomainServiceTest {
         // given
         String username = "testuser";
         String email = "test@example.com";
+        String password = "password123";
         
         mockRepository.setExistsByUsernameResult(true);
         
         // when & then
         DuplicateUserException exception = assertThrows(
             DuplicateUserException.class,
-            () -> userDomainService.registerUser(username, email)
+            () -> userDomainService.registerUser(username, email, password)
         );
         
         assertEquals("이미 존재하는 사용자명입니다: testuser", exception.getMessage());
@@ -137,6 +143,7 @@ class UserDomainServiceTest {
         // given
         String username = "testuser";
         String email = "test@example.com";
+        String password = "password123";
         
         mockRepository.setExistsByUsernameResult(false);
         mockRepository.setExistsByEmailResult(true);
@@ -144,11 +151,47 @@ class UserDomainServiceTest {
         // when & then
         DuplicateUserException exception = assertThrows(
             DuplicateUserException.class,
-            () -> userDomainService.registerUser(username, email)
+            () -> userDomainService.registerUser(username, email, password)
         );
         
         assertEquals("이미 존재하는 이메일입니다: test@example.com", exception.getMessage());
         assertTrue(mockRepository.isExistsByEmailCalled());
+        assertFalse(mockRepository.isSaveCalled());
+    }
+    
+    @DisplayName("사용자 등록 - null 비밀번호로 실패")
+    @Test
+    void registerUser_NullPassword_ThrowsException() {
+        // given
+        String username = "testuser";
+        String email = "test@example.com";
+        String password = null;
+        
+        // when & then
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> userDomainService.registerUser(username, email, password)
+        );
+        
+        assertEquals("비밀번호는 필수입니다", exception.getMessage());
+        assertFalse(mockRepository.isSaveCalled());
+    }
+    
+    @DisplayName("사용자 등록 - 빈 비밀번호로 실패")
+    @Test
+    void registerUser_EmptyPassword_ThrowsException() {
+        // given
+        String username = "testuser";
+        String email = "test@example.com";
+        String password = "   ";
+        
+        // when & then
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> userDomainService.registerUser(username, email, password)
+        );
+        
+        assertEquals("비밀번호는 필수입니다", exception.getMessage());
         assertFalse(mockRepository.isSaveCalled());
     }
     
@@ -161,6 +204,7 @@ class UserDomainServiceTest {
             userId,
             "testuser",
             "test@example.com",
+            "password123",
             LocalDateTime.now(),
             false
         );
@@ -218,6 +262,7 @@ class UserDomainServiceTest {
             UserId.of(1L),
             username,
             "test@example.com",
+            "password123",
             LocalDateTime.now(),
             false
         );
@@ -271,8 +316,8 @@ class UserDomainServiceTest {
     void findActiveUsers_Success() {
         // given
         List<User> expectedUsers = Arrays.asList(
-            User.of(UserId.of(1L), "user1", "user1@example.com", LocalDateTime.now(), false),
-            User.of(UserId.of(2L), "user2", "user2@example.com", LocalDateTime.now(), false)
+            User.of(UserId.of(1L), "user1", "user1@example.com", "password1", LocalDateTime.now(), false),
+            User.of(UserId.of(2L), "user2", "user2@example.com", "password2", LocalDateTime.now(), false)
         );
         
         mockRepository.setFindActiveUsersResult(expectedUsers);
@@ -294,6 +339,7 @@ class UserDomainServiceTest {
             UserId.of(1L),
             "testuser",
             "test@example.com",
+            "password123",
             LocalDateTime.now(),
             false
         );
@@ -314,7 +360,7 @@ class UserDomainServiceTest {
     void deleteUser_Success() {
         // given
         UserId userId = UserId.of(1L);
-        User user = User.of(userId, "testuser", "test@example.com", LocalDateTime.now(), false);
+        User user = User.of(userId, "testuser", "test@example.com", "password123", LocalDateTime.now(), false);
         
         mockRepository.setFindByIdResult(Optional.of(user));
         mockRepository.setSaveResult(userId);
@@ -332,6 +378,7 @@ class UserDomainServiceTest {
         assertEquals(user.id(), savedUser.id());
         assertEquals(user.username(), savedUser.username());
         assertEquals(user.email(), savedUser.email());
+        assertEquals(user.password(), savedUser.password());
     }
     
     @DisplayName("사용자 복구 - 성공")
@@ -339,7 +386,7 @@ class UserDomainServiceTest {
     void restoreUser_Success() {
         // given
         UserId userId = UserId.of(1L);
-        User deletedUser = User.of(userId, "testuser", "test@example.com", LocalDateTime.now(), true);
+        User deletedUser = User.of(userId, "testuser", "test@example.com", "password123", LocalDateTime.now(), true);
         
         mockRepository.setFindByIdResult(Optional.of(deletedUser));
         mockRepository.setSaveResult(userId);
@@ -357,6 +404,7 @@ class UserDomainServiceTest {
         assertEquals(deletedUser.id(), savedUser.id());
         assertEquals(deletedUser.username(), savedUser.username());
         assertEquals(deletedUser.email(), savedUser.email());
+        assertEquals(deletedUser.password(), savedUser.password());
     }
     
     @DisplayName("생성자 - null 레포지토리로 실패")

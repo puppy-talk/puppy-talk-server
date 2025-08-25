@@ -69,14 +69,16 @@ public class ChatController {
         ChatRoomCreateResponse response = chatFacade.createOrFindChatRoom(command);
 
         HttpStatus status = response.isNewlyCreated() ? HttpStatus.CREATED : HttpStatus.OK;
-        String message = response.isNewlyCreated() ?
-            ApiSuccessMessage.CHAT_ROOM_CREATE_SUCCESS.getMessage() :
-            ApiSuccessMessage.CHAT_ROOM_FIND_SUCCESS.getMessage();
 
         ChatRoomResponse chatRoomResponse = ChatRoomResponse.from(response.chatRoom());
 
         return ResponseEntity.status(status)
-            .body(ApiResponse.success(chatRoomResponse, message));
+            .body(ApiResponse.success(chatRoomResponse,
+                response.isNewlyCreated() ?
+                    ApiSuccessMessage.CHAT_ROOM_CREATE_SUCCESS :
+                    ApiSuccessMessage.CHAT_ROOM_FIND_SUCCESS
+                )
+            );
     }
 
     @Operation(summary = "채팅방 목록 조회", description = "사용자의 모든 채팅방 목록을 조회합니다.")
@@ -95,7 +97,7 @@ public class ChatController {
         return ResponseEntity.ok(
             ApiResponse.success(
                 ChatRoomsResponse.from(result),
-                ApiSuccessMessage.CHAT_ROOM_LIST_SUCCESS.getMessage()
+                ApiSuccessMessage.CHAT_ROOM_LIST_SUCCESS
             )
         );
     }
@@ -125,7 +127,7 @@ public class ChatController {
         chatFacade.sendUserMessage(command);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.success(ApiSuccessMessage.CHAT_MESSAGE_SEND_SUCCESS.getMessage()));
+            .body(ApiResponse.success(ApiSuccessMessage.CHAT_MESSAGE_SEND_SUCCESS));
     }
 
     @Operation(summary = "메시지 목록 조회", description = "메시지 목록을 커서 기반 페이징으로 조회합니다. ")
@@ -153,11 +155,11 @@ public class ChatController {
         return ResponseEntity.ok(
             ApiResponse.success(
                 MessagesResponse.from(result),
-                ApiSuccessMessage.CHAT_MESSAGE_LIST_SUCCESS.getMessage())
+                ApiSuccessMessage.MESSAGE_LIST_SUCCESS)
         );
     }
     
-    @Operation(summary = "새 메시지 조회", description = "특정 시간 이후의 새로운 메시지를 조회합니다 (폴링용).")
+    @Operation(summary = "새 메시지 조회", description = "특정 시간 이후의 새로운 메시지를 조회합니다.")
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "새 메시지 조회 성공"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
@@ -168,19 +170,22 @@ public class ChatController {
     public ResponseEntity<ApiResponse<NewMessagesResponse>> getNewMessages(
         @Parameter(description = "채팅방 ID", required = true, example = "1")
         @PathVariable @Positive(message = "채팅방 ID는 양수여야 합니다") Long chatRoomId,
+
         @Parameter(description = "사용자 ID", required = true, example = "1")
         @RequestParam @Positive(message = "사용자 ID는 양수여야 합니다") Long userId,
-        @Parameter(description = "기준 시간 (이 시간 이후의 메시지 조회)", required = true, 
+
+        @Parameter(description = "기준 시간 (이 시간 이후의 메시지 조회)", required = true,
                   example = "2023-12-01T15:30:00")
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime since
     ) {
         NewMessageQuery query = NewMessageQuery.of(chatRoomId, userId, since);
         NewMessageResult result = chatFacade.getNewMessages(query);
-        
+
         return ResponseEntity.ok(
             ApiResponse.success(
                 NewMessagesResponse.from(result),
-                result.hasNewMessages() ? "새 메시지가 있습니다" : "새 메시지가 없습니다"
+                result.hasNewMessages() ? ApiSuccessMessage.NEW_MESSAGE_FOUND_SUCCESS :
+                    ApiSuccessMessage.NO_NEW_MESSAGE_FOUND_SUCCESS
             )
         );
     }

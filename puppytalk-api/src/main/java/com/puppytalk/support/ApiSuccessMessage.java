@@ -20,8 +20,13 @@ public enum ApiSuccessMessage {
     CHAT_ROOM_CREATE_SUCCESS("채팅방이 생성되었습니다"),
     CHAT_ROOM_FIND_SUCCESS("기존 채팅방을 조회했습니다"),
     CHAT_ROOM_LIST_SUCCESS("채팅방 목록을 조회했습니다"),
-    CHAT_MESSAGE_LIST_SUCCESS("채팅 메시지 목록을 조회했습니다"),
-    
+
+    // Message,
+    MESSAGE_LIST_SUCCESS("메시지 목록을 조회했습니다"),
+    MESSAGE_FOUND_SUCCESS("메시지를 조회했습니다"),
+    NEW_MESSAGE_FOUND_SUCCESS("새로운 메시지가 있습니다."),
+    NO_NEW_MESSAGE_FOUND_SUCCESS("새로운 메시지가 없습니다."),
+
     // Notification
     NOTIFICATION_CREATE_SUCCESS("알림이 생성되었습니다"),
     NOTIFICATION_STATUS_UPDATE_SUCCESS("알림 상태가 업데이트되었습니다"),

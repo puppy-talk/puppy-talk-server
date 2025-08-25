@@ -59,7 +59,7 @@ public class PetController {
         petFacade.createPet(command);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.success(ApiSuccessMessage.PET_CREATE_SUCCESS.getMessage()));
+            .body(ApiResponse.success(ApiSuccessMessage.PET_CREATE_SUCCESS));
     }
 
     @Operation(summary = "반려동물 목록 조회", description = "사용자의 모든 반려동물 목록을 조회합니다.")
@@ -78,7 +78,7 @@ public class PetController {
         return ResponseEntity.ok(
             ApiResponse.success(
                 PetsResponse.from(result),
-                ApiSuccessMessage.PET_LIST_SUCCESS.getMessage())
+                ApiSuccessMessage.PET_LIST_SUCCESS)
         );
     }
 
@@ -103,7 +103,7 @@ public class PetController {
         PetResponse response = PetResponse.from(petResult);
 
         return ResponseEntity.ok(
-            ApiResponse.success(response, ApiSuccessMessage.PET_DETAIL_SUCCESS.getMessage()));
+            ApiResponse.success(response, ApiSuccessMessage.PET_DETAIL_SUCCESS));
     }
 
 
@@ -126,6 +126,7 @@ public class PetController {
         petFacade.deletePet(command);
 
         return ResponseEntity.ok(
-            ApiResponse.success(ApiSuccessMessage.PET_DELETE_SUCCESS.getMessage()));
+            ApiResponse.success(ApiSuccessMessage.PET_DELETE_SUCCESS)
+        );
     }
 }

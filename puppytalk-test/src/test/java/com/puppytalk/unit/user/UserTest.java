@@ -19,15 +19,17 @@ class UserTest {
         // given
         String username = "testuser";
         String email = "test@example.com";
+        String password = "password123";
         
         // when
-        User user = User.create(username, email);
+        User user = User.create(username, email, password);
         
         // then
         assertNotNull(user);
         assertNotNull(user.id());
         assertEquals(username, user.username());
         assertEquals(email.toLowerCase(), user.email());
+        assertEquals(password.trim(), user.password());
         assertNotNull(user.createdAt());
         assertTrue(user.createdAt().isBefore(LocalDateTime.now().plusSeconds(1)));
     }
@@ -38,11 +40,12 @@ class UserTest {
         // given
         String username = null;
         String email = "test@example.com";
+        String password = "password123";
         
         // when & then
         NullPointerException exception = assertThrows(
             NullPointerException.class,
-            () -> User.create(username, email)
+            () -> User.create(username, email, password)
         );
         
         assertTrue(exception.getMessage().contains("username"));
@@ -54,11 +57,12 @@ class UserTest {
         // given
         String username = "";
         String email = "test@example.com";
+        String password = "password123";
         
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> User.create(username, email)
+            () -> User.create(username, email, password)
         );
         
         assertEquals("사용자명은 필수입니다", exception.getMessage());
@@ -70,11 +74,12 @@ class UserTest {
         // given
         String username = "   ";
         String email = "test@example.com";
+        String password = "password123";
         
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> User.create(username, email)
+            () -> User.create(username, email, password)
         );
         
         assertEquals("사용자명은 필수입니다", exception.getMessage());
@@ -86,11 +91,12 @@ class UserTest {
         // given
         String username = "ab"; // 2자 (최소 3자 필요)
         String email = "test@example.com";
+        String password = "password123";
         
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> User.create(username, email)
+            () -> User.create(username, email, password)
         );
         
         assertEquals("사용자명은 3-20자 사이여야 합니다", exception.getMessage());
@@ -102,11 +108,12 @@ class UserTest {
         // given
         String username = "a".repeat(21); // 21자 (최대 20자)
         String email = "test@example.com";
+        String password = "password123";
         
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> User.create(username, email)
+            () -> User.create(username, email, password)
         );
         
         assertEquals("사용자명은 3-20자 사이여야 합니다", exception.getMessage());
@@ -118,11 +125,12 @@ class UserTest {
         // given
         String username = "testuser";
         String email = null;
+        String password = "password123";
         
         // when & then
         NullPointerException exception = assertThrows(
             NullPointerException.class,
-            () -> User.create(username, email)
+            () -> User.create(username, email, password)
         );
         
         assertTrue(exception.getMessage().contains("email"));
@@ -134,11 +142,12 @@ class UserTest {
         // given
         String username = "testuser";
         String email = "";
+        String password = "password123";
         
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> User.create(username, email)
+            () -> User.create(username, email, password)
         );
         
         assertEquals("이메일은 필수입니다", exception.getMessage());
@@ -150,11 +159,12 @@ class UserTest {
         // given
         String username = "testuser";
         String email = "invalid-email";
+        String password = "password123";
         
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> User.create(username, email)
+            () -> User.create(username, email, password)
         );
         
         assertEquals("올바른 이메일 형식이 아닙니다", exception.getMessage());
@@ -166,11 +176,12 @@ class UserTest {
         // given
         String username = "testuser";
         String email = "a".repeat(90) + "@example.com"; // 100자 초과
+        String password = "password123";
         
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> User.create(username, email)
+            () -> User.create(username, email, password)
         );
         
         assertEquals("올바른 이메일 형식이 아닙니다", exception.getMessage());
@@ -182,9 +193,10 @@ class UserTest {
         // given
         String username = "testuser";
         String email = "Test@EXAMPLE.COM";
+        String password = "password123";
         
         // when
-        User user = User.create(username, email);
+        User user = User.create(username, email, password);
         
         // then
         assertEquals("test@example.com", user.email());
@@ -196,12 +208,162 @@ class UserTest {
         // given
         String username = "  testuser  ";
         String email = "test@example.com";
+        String password = "password123";
         
         // when
-        User user = User.create(username, email);
+        User user = User.create(username, email, password);
         
         // then
         assertEquals("testuser", user.username());
+    }
+    
+    @DisplayName("사용자 생성 - null 비밀번호로 실패")
+    @Test
+    void create_NullPassword_ThrowsException() {
+        // given
+        String username = "testuser";
+        String email = "test@example.com";
+        String password = null;
+        
+        // when & then
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> User.create(username, email, password)
+        );
+        
+        assertEquals("비밀번호는 필수입니다", exception.getMessage());
+    }
+    
+    @DisplayName("사용자 생성 - 빈 비밀번호로 실패")
+    @Test
+    void create_EmptyPassword_ThrowsException() {
+        // given
+        String username = "testuser";
+        String email = "test@example.com";
+        String password = "";
+        
+        // when & then
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> User.create(username, email, password)
+        );
+        
+        assertEquals("비밀번호는 필수입니다", exception.getMessage());
+    }
+    
+    @DisplayName("사용자 생성 - 공백만 있는 비밀번호로 실패")
+    @Test
+    void create_BlankPassword_ThrowsException() {
+        // given
+        String username = "testuser";
+        String email = "test@example.com";
+        String password = "   ";
+        
+        // when & then
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> User.create(username, email, password)
+        );
+        
+        assertEquals("비밀번호는 필수입니다", exception.getMessage());
+    }
+    
+    @DisplayName("사용자 생성 - 너무 짧은 비밀번호로 실패")
+    @Test
+    void create_TooShortPassword_ThrowsException() {
+        // given
+        String username = "testuser";
+        String email = "test@example.com";
+        String password = "1234567"; // 7자 (최소 8자 필요)
+        
+        // when & then
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> User.create(username, email, password)
+        );
+        
+        assertEquals("비밀번호는 8-100자 사이여야 합니다", exception.getMessage());
+    }
+    
+    @DisplayName("사용자 생성 - 너무 긴 비밀번호로 실패")
+    @Test
+    void create_TooLongPassword_ThrowsException() {
+        // given
+        String username = "testuser";
+        String email = "test@example.com";
+        String password = "a".repeat(101); // 101자 (최대 100자)
+        
+        // when & then
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> User.create(username, email, password)
+        );
+        
+        assertEquals("비밀번호는 8-100자 사이여야 합니다", exception.getMessage());
+    }
+    
+    @DisplayName("사용자 생성 - 비밀번호 공백 제거")
+    @Test
+    void create_PasswordTrimsWhitespace() {
+        // given
+        String username = "testuser";
+        String email = "test@example.com";
+        String password = "  password123  ";
+        
+        // when
+        User user = User.create(username, email, password);
+        
+        // then
+        assertEquals("password123", user.password());
+    }
+    
+    @DisplayName("비밀번호 검증 - 일치하는 경우")
+    @Test
+    void isPasswordMatch_CorrectPassword_ReturnsTrue() {
+        // given
+        User user = User.create("testuser", "test@example.com", "password123");
+        
+        // when & then
+        assertTrue(user.isPasswordMatch("password123"));
+    }
+    
+    @DisplayName("비밀번호 검증 - 일치하지 않는 경우")
+    @Test
+    void isPasswordMatch_WrongPassword_ReturnsFalse() {
+        // given
+        User user = User.create("testuser", "test@example.com", "password123");
+        
+        // when & then
+        assertFalse(user.isPasswordMatch("wrongpassword"));
+    }
+    
+    @DisplayName("비밀번호 검증 - null 비밀번호")
+    @Test
+    void isPasswordMatch_NullPassword_ReturnsFalse() {
+        // given
+        User user = User.create("testuser", "test@example.com", "password123");
+        
+        // when & then
+        assertFalse(user.isPasswordMatch(null));
+    }
+    
+    @DisplayName("비밀번호 변경 - 성공")
+    @Test
+    void withPassword_Success() {
+        // given
+        User user = User.create("testuser", "test@example.com", "password123");
+        String newPassword = "newpassword456";
+        
+        // when
+        User updatedUser = user.withPassword(newPassword);
+        
+        // then
+        assertNotNull(updatedUser);
+        assertEquals(user.id(), updatedUser.id());
+        assertEquals(user.username(), updatedUser.username());
+        assertEquals(user.email(), updatedUser.email());
+        assertEquals(newPassword.trim(), updatedUser.password());
+        assertEquals(user.createdAt(), updatedUser.createdAt());
     }
     
     @DisplayName("저장된 사용자 객체 생성 - 성공")
@@ -211,17 +373,19 @@ class UserTest {
         UserId id = UserId.of(1L);
         String username = "testuser";
         String email = "test@example.com";
+        String password = "password123";
         LocalDateTime createdAt = LocalDateTime.now();
         boolean isDeleted = false;
         
         // when
-        User user = User.of(id, username, email, createdAt, isDeleted);
+        User user = User.of(id, username, email, password, createdAt, isDeleted);
         
         // then
         assertNotNull(user);
         assertEquals(id, user.id());
         assertEquals(username, user.username());
         assertEquals(email, user.email());
+        assertEquals(password, user.password());
         assertEquals(createdAt, user.createdAt());
     }
     
@@ -232,13 +396,14 @@ class UserTest {
         UserId id = null;
         String username = "testuser";
         String email = "test@example.com";
+        String password = "password123";
         LocalDateTime createdAt = LocalDateTime.now();
         boolean isDeleted = false;
         
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> User.of(id, username, email, createdAt, isDeleted)
+            () -> User.of(id, username, email, password, createdAt, isDeleted)
         );
         
         assertEquals("저장된 사용자 ID가 필요합니다", exception.getMessage());
@@ -251,13 +416,14 @@ class UserTest {
         UserId id = UserId.create(); // 저장되지 않은 ID
         String username = "testuser";
         String email = "test@example.com";
+        String password = "password123";
         LocalDateTime createdAt = LocalDateTime.now();
         boolean isDeleted = false;
         
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> User.of(id, username, email, createdAt, isDeleted)
+            () -> User.of(id, username, email, password, createdAt, isDeleted)
         );
         
         assertEquals("저장된 사용자 ID가 필요합니다", exception.getMessage());
@@ -267,7 +433,7 @@ class UserTest {
     @Test
     void withDeletedStatus_Success() {
         // given
-        User user = User.create("testuser", "test@example.com");
+        User user = User.create("testuser", "test@example.com", "password123");
         
         // when
         User deletedUser = user.withDeletedStatus();
@@ -277,6 +443,7 @@ class UserTest {
         assertEquals(user.id(), deletedUser.id());
         assertEquals(user.username(), deletedUser.username());
         assertEquals(user.email(), deletedUser.email());
+        assertEquals(user.password(), deletedUser.password());
         assertEquals(user.createdAt(), deletedUser.createdAt());
         // isDeleted는 private이므로 직접 검증할 수 없음
     }
@@ -285,7 +452,7 @@ class UserTest {
     @Test
     void withRestoredStatus_Success() {
         // given
-        User user = User.create("testuser", "test@example.com");
+        User user = User.create("testuser", "test@example.com", "password123");
         User deletedUser = user.withDeletedStatus();
         
         // when
@@ -296,6 +463,7 @@ class UserTest {
         assertEquals(user.id(), restoredUser.id());
         assertEquals(user.username(), restoredUser.username());
         assertEquals(user.email(), restoredUser.email());
+        assertEquals(user.password(), restoredUser.password());
         assertEquals(user.createdAt(), restoredUser.createdAt());
     }
     
@@ -304,8 +472,8 @@ class UserTest {
     void equals_SameId_ReturnsTrue() {
         // given
         UserId id = UserId.of(1L);
-        User user1 = User.of(id, "user1", "user1@example.com", LocalDateTime.now(), false);
-        User user2 = User.of(id, "user2", "user2@example.com", LocalDateTime.now(), false);
+        User user1 = User.of(id, "user1", "user1@example.com", "password1", LocalDateTime.now(), false);
+        User user2 = User.of(id, "user2", "user2@example.com", "password2", LocalDateTime.now(), false);
         
         // when & then
         assertEquals(user1, user2);
@@ -315,8 +483,8 @@ class UserTest {
     @Test
     void equals_DifferentId_ReturnsFalse() {
         // given
-        User user1 = User.of(UserId.of(1L), "user1", "user1@example.com", LocalDateTime.now(), false);
-        User user2 = User.of(UserId.of(2L), "user2", "user2@example.com", LocalDateTime.now(), false);
+        User user1 = User.of(UserId.of(1L), "user1", "user1@example.com", "password1", LocalDateTime.now(), false);
+        User user2 = User.of(UserId.of(2L), "user2", "user2@example.com", "password2", LocalDateTime.now(), false);
         
         // when & then
         assertNotEquals(user1, user2);
@@ -327,8 +495,8 @@ class UserTest {
     void hashCode_SameId_ReturnsSameHashCode() {
         // given
         UserId id = UserId.of(1L);
-        User user1 = User.of(id, "user1", "user1@example.com", LocalDateTime.now(), false);
-        User user2 = User.of(id, "user2", "user2@example.com", LocalDateTime.now(), false);
+        User user1 = User.of(id, "user1", "user1@example.com", "password1", LocalDateTime.now(), false);
+        User user2 = User.of(id, "user2", "user2@example.com", "password2", LocalDateTime.now(), false);
         
         // when & then
         assertEquals(user1.hashCode(), user2.hashCode());
