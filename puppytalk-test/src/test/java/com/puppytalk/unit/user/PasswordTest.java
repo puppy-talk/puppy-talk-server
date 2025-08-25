@@ -208,7 +208,7 @@ class PasswordTest {
         String result = password.toString();
 
         // then
-        assertEquals("Password{***}", result);
+        assertEquals("Password{algorithm=SHA-256, value=***}", result);
         assertFalse(result.contains("secretPassword123!"));
         assertFalse(result.contains(password.value()));
     }
