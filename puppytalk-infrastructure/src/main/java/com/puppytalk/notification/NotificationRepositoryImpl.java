@@ -25,17 +25,9 @@ public class NotificationRepositoryImpl implements NotificationRepository {
     
     @Override
     public NotificationId save(Notification notification) {
-        try {
-            NotificationJpaEntity entity = NotificationJpaEntity.fromDomain(notification);
-            NotificationJpaEntity saved = jpaRepository.save(entity);
-            return NotificationId.from(saved.getId());
-        } catch (Exception e) {
-            throw NotificationException.creationFailed(
-                notification.userId(),
-                notification.type(),
-                "Failed to save notification: " + e.getMessage()
-            );
-        }
+        NotificationJpaEntity entity = NotificationJpaEntity.fromDomain(notification);
+        NotificationJpaEntity saved = jpaRepository.save(entity);
+        return NotificationId.from(saved.getId());
     }
     
     @Override
@@ -95,73 +87,44 @@ public class NotificationRepositoryImpl implements NotificationRepository {
     
     @Override
     public void updateStatus(NotificationId id, NotificationStatus status) {
-        try {
-            Optional<NotificationJpaEntity> entity = jpaRepository.findById(id.getValue());
-            if (entity.isPresent()) {
-                NotificationJpaEntity notification = entity.get();
-                notification.updateStatus(status);
-                jpaRepository.save(notification);
-            } else {
-                throw NotificationException.notificationNotFound(id);
-            }
-        } catch (Exception e) {
-            throw NotificationException.sendingFailed(id, "Failed to update status", e);
+        Optional<NotificationJpaEntity> entity = jpaRepository.findById(id.getValue());
+        if (entity.isPresent()) {
+            NotificationJpaEntity notification = entity.get();
+            notification.updateStatus(status);
+            jpaRepository.save(notification);
+        } else {
+            throw new NotificationException("알림을 찾을 수 없습니다: " + id.getValue());
         }
     }
     
     @Override
     public void updateStatusBatch(List<NotificationId> ids, NotificationStatus status) {
-        try {
-            List<Long> longIds = ids.stream()
-                .map(NotificationId::getValue)
-                .toList();
-            jpaRepository.updateStatusBatch(longIds, status);
-        } catch (Exception e) {
-            throw NotificationException.batchProcessingFailed(
-                "Failed to update status for batch", e
-            );
-        }
+        List<Long> longIds = ids.stream()
+            .map(NotificationId::getValue)
+            .toList();
+        jpaRepository.updateStatusBatch(longIds, status);
     }
     
     @Override
     public int deleteExpiredNotifications(LocalDateTime cutoffDate) {
-        try {
-            return jpaRepository.deleteExpiredNotifications(cutoffDate);
-        } catch (Exception e) {
-            throw NotificationException.batchProcessingFailed(
-                "Failed to delete expired notifications", e
-            );
-        }
+        return jpaRepository.deleteExpiredNotifications(cutoffDate);
     }
     
     @Override
     public int deleteCompletedNotificationsOlderThan(LocalDateTime cutoffDate) {
-        try {
-            return jpaRepository.deleteCompletedNotificationsOlderThan(cutoffDate);
-        } catch (Exception e) {
-            throw NotificationException.batchProcessingFailed(
-                "Failed to delete old notifications", e
-            );
-        }
+        return jpaRepository.deleteCompletedNotificationsOlderThan(cutoffDate);
     }
     
     @Override
     public NotificationStats getNotificationStats(LocalDateTime startDate, LocalDateTime endDate) {
-        try {
-            long totalCount = jpaRepository.countNotificationsByDateRange(startDate, endDate);
-            long sentCount = jpaRepository.countSentNotificationsByDateRange(startDate, endDate);
-            long failedCount = jpaRepository.countFailedNotificationsByDateRange(startDate, endDate);
-            long pendingCount = jpaRepository.countPendingNotificationsByDateRange(startDate, endDate);
-            
-            double successRate = totalCount > 0 ? (double) sentCount / totalCount * 100 : 0.0;
-            
-            return new NotificationStats(totalCount, sentCount, failedCount, pendingCount, successRate);
-            
-        } catch (Exception e) {
-            throw NotificationException.schedulingFailed(
-                "Failed to get notification statistics: " + e.getMessage()
-            );
-        }
+        long totalCount = jpaRepository.countNotificationsByDateRange(startDate, endDate);
+        long sentCount = jpaRepository.countSentNotificationsByDateRange(startDate, endDate);
+        long failedCount = jpaRepository.countFailedNotificationsByDateRange(startDate, endDate);
+        long pendingCount = jpaRepository.countPendingNotificationsByDateRange(startDate, endDate);
+        
+        double successRate = totalCount > 0 ? (double) sentCount / totalCount * 100 : 0.0;
+        
+        return new NotificationStats(totalCount, sentCount, failedCount, pendingCount, successRate);
     }
     
     @Override

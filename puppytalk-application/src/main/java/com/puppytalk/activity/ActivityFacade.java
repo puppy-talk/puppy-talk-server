@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.util.List;
+
 @Service
 @Transactional(readOnly = true)
 public class ActivityFacade {
@@ -41,15 +43,14 @@ public class ActivityFacade {
     }
     
     /**
-     * 사용자 최근 활동 조회
+     * 사용자의 비활성 상태 확인 (2시간 기준)
      */
-    public ActivityResult getLatestActivity(Long userId) {
+    public boolean isUserInactive(Long userId) {
         Assert.notNull(userId, "UserId must not be null");
         
         UserId userIdObj = UserId.from(userId);
+        List<UserId> inactiveUsers = activityDomainService.findInactiveUsers(2);
         
-        return activityDomainService.getLatestActivity(userIdObj)
-            .map(ActivityResult::from)
-            .orElse(ActivityResult.notFound());
+        return inactiveUsers.contains(userIdObj);
     }
 }

@@ -80,12 +80,12 @@ class PetTest {
         String persona = "활발하고 친근한 강아지";
         
         // when & then
-        NullPointerException exception = assertThrows(
-            NullPointerException.class,
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
             () -> Pet.create(ownerId, name, persona)
         );
         
-        assertTrue(exception.getMessage().contains("name"));
+        assertEquals("반려동물 이름은 필수입니다", exception.getMessage());
     }
     
     @DisplayName("반려동물 생성 - 빈 이름으로 실패")
@@ -131,12 +131,12 @@ class PetTest {
         String persona = null;
         
         // when & then
-        NullPointerException exception = assertThrows(
-            NullPointerException.class,
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
             () -> Pet.create(ownerId, name, persona)
         );
         
-        assertTrue(exception.getMessage().contains("persona"));
+        assertEquals("반려동물 페르소나는 필수입니다", exception.getMessage());
     }
     
     @DisplayName("반려동물 생성 - 빈 페르소나로 실패")

@@ -1,6 +1,8 @@
-package com.puppytalk.notification;
+package com.puppytalk.scheduler;
 
+import com.puppytalk.notification.NotificationFacade;
 import com.puppytalk.notification.dto.request.NotificationCreateCommand;
+import com.puppytalk.notification.dto.request.NotificationStatusUpdateCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -8,16 +10,14 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-/**
- * 알림 스케줄러
- * 
- * Backend 관점: 안정적이고 확장 가능한 배치 작업
- */
 @Component
 public class NotificationScheduler {
     
     private static final Logger log = LoggerFactory.getLogger(NotificationScheduler.class);
-    
+    private static final int INTERVAL_30_MINUTES = 1800000;
+    private static final int INTERVAL_15_MINUTES = 900000;
+    private static final int INTERVAL_5_MINUTES = 300000;
+
     private final NotificationFacade notificationFacade;
     
     public NotificationScheduler(NotificationFacade notificationFacade) {
@@ -26,13 +26,11 @@ public class NotificationScheduler {
     
     /**
      * 비활성 사용자 감지 및 알림 생성 (30분마다)
-     * 
-     * Backend 최적화: 부하 분산과 에러 처리
      */
-    @Scheduled(fixedRate = 1800000) // 30분 = 30 * 60 * 1000ms
+    @Scheduled(fixedRate = INTERVAL_30_MINUTES)
     public void detectInactiveUsersAndCreateNotifications() {
         log.info("Starting inactive user detection and notification creation");
-        
+
         try {
             List<Long> inactiveUserIds = notificationFacade.findInactiveUsersForNotification();
             
@@ -70,7 +68,7 @@ public class NotificationScheduler {
     /**
      * 발송 대기 중인 알림 처리 (5분마다)
      */
-    @Scheduled(fixedRate = 300000) // 5분 = 5 * 60 * 1000ms
+    @Scheduled(fixedRate = INTERVAL_5_MINUTES)
     public void processPendingNotifications() {
         log.debug("Processing pending notifications");
         
@@ -104,7 +102,7 @@ public class NotificationScheduler {
     /**
      * 실패한 알림 재시도 (15분마다)
      */
-    @Scheduled(fixedRate = 900000) // 15분 = 15 * 60 * 1000ms
+    @Scheduled(fixedRate = INTERVAL_15_MINUTES)
     public void retryFailedNotifications() {
         log.debug("Processing failed notifications for retry");
         
@@ -196,8 +194,7 @@ public class NotificationScheduler {
                  notification.notificationId(), notification.title());
         
         // 성공으로 가정하고 상태 업데이트
-        var statusCommand = com.puppytalk.notification.dto.request.NotificationStatusUpdateCommand
-            .sent(notification.notificationId());
+        var statusCommand = NotificationStatusUpdateCommand.sent(notification.notificationId());
         
         notificationFacade.updateNotificationStatus(statusCommand);
     }

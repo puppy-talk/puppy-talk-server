@@ -23,17 +23,9 @@ public class UserActivityRepositoryImpl implements UserActivityRepository {
     
     @Override
     public ActivityId save(UserActivity activity) {
-        try {
-            UserActivityJpaEntity entity = UserActivityJpaEntity.fromDomain(activity);
-            UserActivityJpaEntity saved = jpaRepository.save(entity);
-            return ActivityId.from(saved.getId());
-        } catch (Exception e) {
-            throw ActivityTrackingException.trackingFailed(
-                activity.userId(), 
-                activity.activityType(), 
-                "Failed to save activity: " + e.getMessage()
-            );
-        }
+        UserActivityJpaEntity entity = UserActivityJpaEntity.fromDomain(activity);
+        UserActivityJpaEntity saved = jpaRepository.save(entity);
+        return ActivityId.from(saved.getId());
     }
     
     @Override
@@ -43,57 +35,10 @@ public class UserActivityRepositoryImpl implements UserActivityRepository {
     }
     
     @Override
-    public Optional<UserActivity> findLatestByUserId(UserId userId) {
-        return jpaRepository.findLatestByUserId(userId.getValue())
-            .map(UserActivityJpaEntity::toDomain);
-    }
-    
-    @Override
-    public List<UserActivity> findByUserIdAndActivityAtAfter(UserId userId, LocalDateTime since) {
-        return jpaRepository.findByUserIdAndActivityAtAfter(userId.getValue(), since)
-            .stream()
-            .map(UserActivityJpaEntity::toDomain)
-            .toList();
-    }
-    
-    @Override
-    public Optional<UserActivity> findLatestByUserIdAndActivityType(UserId userId, ActivityType activityType) {
-        return jpaRepository.findLatestByUserIdAndActivityType(userId.getValue(), activityType)
-            .map(UserActivityJpaEntity::toDomain);
-    }
-    
-    @Override
     public List<UserId> findInactiveUserIds(LocalDateTime inactivityThreshold) {
-        try {
-            return jpaRepository.findInactiveUserIds(inactivityThreshold)
-                .stream()
-                .map(UserId::of)
-                .toList();
-        } catch (Exception e) {
-            throw ActivityTrackingException.inactiveUserDetectionFailed(
-                "Database query failed: " + e.getMessage()
-            );
-        }
-    }
-    
-    @Override
-    public long countByUserIdAndDateRange(UserId userId, LocalDateTime startDate, LocalDateTime endDate) {
-        return jpaRepository.countByUserIdAndDateRange(userId.getValue(), startDate, endDate);
-    }
-    
-    @Override
-    public boolean existsById(ActivityId id) {
-        return jpaRepository.existsById(id.getValue());
-    }
-    
-    @Override
-    public int deleteActivitiesOlderThan(LocalDateTime cutoffDate) {
-        try {
-            return jpaRepository.deleteByCreatedAtBefore(cutoffDate);
-        } catch (Exception e) {
-            throw ActivityTrackingException.dataCorrupted(
-                "Failed to cleanup old activities: " + e.getMessage()
-            );
-        }
+        return jpaRepository.findInactiveUserIds(inactivityThreshold)
+            .stream()
+            .map(UserId::from)
+            .toList();
     }
 }

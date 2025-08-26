@@ -62,14 +62,13 @@ public class ActivityController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
     })
-    @GetMapping("/users/{userId}/latest")
-    public ResponseEntity<ApiResponse<ActivityResponse>> getLatestActivity(
+    @GetMapping("/users/{userId}/inactive")
+    public ResponseEntity<ApiResponse<Boolean>> isUserInactive(
         @Parameter(description = "사용자 ID", required = true, example = "1")
         @PathVariable Long userId
     ) {
-        ActivityResult result = activityFacade.getLatestActivity(userId);
-        ActivityResponse response = ActivityResponse.from(result);
+        boolean isInactive = activityFacade.isUserInactive(userId);
         
-        return ResponseEntity.ok(ApiResponse.success(response));
+        return ResponseEntity.ok(ApiResponse.success(isInactive));
     }
 }

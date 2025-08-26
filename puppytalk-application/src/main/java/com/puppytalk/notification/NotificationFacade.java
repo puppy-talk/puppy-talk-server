@@ -1,19 +1,17 @@
 package com.puppytalk.notification;
 
-import com.puppytalk.chat.ChatRoomId;
 import com.puppytalk.activity.ActivityDomainService;
+import com.puppytalk.chat.ChatRoomId;
 import com.puppytalk.notification.dto.request.NotificationCreateCommand;
 import com.puppytalk.notification.dto.request.NotificationStatusUpdateCommand;
 import com.puppytalk.notification.dto.response.NotificationListResult;
 import com.puppytalk.notification.dto.response.NotificationResult;
 import com.puppytalk.pet.PetId;
 import com.puppytalk.user.UserId;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * 알림 파사드
@@ -23,7 +21,8 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 public class NotificationFacade {
-    
+
+    private static final int LAST_ACTIVITY_HOURS = 2; // 마지막 활동 시간
     private final NotificationDomainService notificationDomainService;
     private final ActivityDomainService activityDomainService;
     
@@ -146,15 +145,29 @@ public class NotificationFacade {
      */
     @Transactional(readOnly = true)
     public List<Long> findInactiveUsersForNotification() {
-        // 1. Activity BC에서 비활성 사용자 목록 조회
-        List<UserId> inactiveUsers = activityDomainService.findInactiveUsers(2); // 2시간 기준
+        List<UserId> inactiveUsers = activityDomainService.findInactiveUsers(LAST_ACTIVITY_HOURS);
         
-        // 2. Notification BC에서 알림 가능 사용자 필터링
-        List<UserId> eligibleUsers = notificationDomainService.filterEligibleUsersForNotification(inactiveUsers);
+        // 알림 가능 사용자 필터링
+        List<UserId> targetUserList = notificationDomainService.filterUsersForNotification(inactiveUsers);
         
-        return eligibleUsers.stream()
+        return targetUserList.stream()
             .map(UserId::getValue)
             .toList();
     }
     
+    /**
+     * 만료된 알림 정리
+     */
+    @Transactional
+    public int cleanupExpiredNotifications() {
+        return notificationDomainService.cleanupExpiredNotifications();
+    }
+    
+    /**
+     * 오래된 완료 알림 정리
+     */
+    @Transactional
+    public int cleanupOldNotifications() {
+        return notificationDomainService.cleanupOldNotifications();
+    }
 }

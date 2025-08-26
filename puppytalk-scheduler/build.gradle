@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+    id 'java-library'
+    id 'io.spring.dependency-management'
+}
+
+group = 'com.puppytalk'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = '17'
+    targetCompatibility = '17'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencyManagement {
+    imports {
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.2.0'
+    }
+}
+
+dependencies {
+    // Core module dependencies - application 모듈을 통해 필요한 의존성 모두 제공받음
+    api project(':puppytalk-application')
+    
+    // Spring Framework - 스케줄링에 필요한 최소한의 의존성만
+    implementation 'org.springframework:spring-context'
+    
+    // 로깅 - 스케줄러에서 직접 사용
+    implementation 'org.slf4j:slf4j-api'
+    
+    // Test dependencies
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+

@@ -115,12 +115,12 @@ class MessageTest {
         String content = null;
         
         // when & then
-        NullPointerException exception = assertThrows(
-            NullPointerException.class,
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
             () -> Message.of(chatRoomId, content)
         );
         
-        assertTrue(exception.getMessage().contains("content"));
+        assertEquals("메시지 내용은 필수입니다", exception.getMessage());
     }
     
     @DisplayName("메시지 생성 - 빈 내용으로 실패")

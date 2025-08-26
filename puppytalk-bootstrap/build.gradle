@@ -9,6 +9,7 @@ dependencies {
     implementation project(':puppytalk-infrastructure')
     implementation project(':puppytalk-application')
     implementation project(':puppytalk-api')
+    implementation project(':puppytalk-scheduler')
     
     // Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter'

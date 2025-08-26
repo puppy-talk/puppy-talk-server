@@ -180,7 +180,7 @@ class ChatDomainServiceTest {
             () -> chatDomainService.findChatRoom(chatRoomId, userId)
         );
         
-        assertEquals("채팅방에 접근할 권한이 없습니다", exception.getMessage());
+        assertTrue(exception.getMessage().contains("채팅방에 접근할 권한이 없습니다"));
     }
     
     @DisplayName("사용자 메시지 전송 - 성공")

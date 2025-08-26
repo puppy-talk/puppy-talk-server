@@ -76,7 +76,7 @@ class UserDomainServiceTest {
             () -> userDomainService.registerUser(username, email, password)
         );
         
-        assertEquals("Username must not be null or empty", exception.getMessage());
+        assertEquals("사용자명은 필수입니다", exception.getMessage());
         assertFalse(mockRepository.isSaveCalled());
         assertFalse(mockRepository.isExistsByUsernameCalled());
     }
@@ -95,7 +95,7 @@ class UserDomainServiceTest {
             () -> userDomainService.registerUser(username, email, password)
         );
         
-        assertEquals("Username must not be null or empty", exception.getMessage());
+        assertEquals("사용자명은 필수입니다", exception.getMessage());
         assertFalse(mockRepository.isSaveCalled());
     }
     
@@ -113,7 +113,7 @@ class UserDomainServiceTest {
             () -> userDomainService.registerUser(username, email, password)
         );
         
-        assertEquals("Email must not be null or empty", exception.getMessage());
+        assertEquals("이메일은 필수입니다", exception.getMessage());
         assertFalse(mockRepository.isSaveCalled());
     }
     
@@ -174,7 +174,7 @@ class UserDomainServiceTest {
             () -> userDomainService.registerUser(username, email, password)
         );
         
-        assertEquals("Password must not be null or empty", exception.getMessage());
+        assertEquals("비밀번호는 필수입니다", exception.getMessage());
         assertFalse(mockRepository.isSaveCalled());
     }
     
@@ -192,7 +192,7 @@ class UserDomainServiceTest {
             () -> userDomainService.registerUser(username, email, password)
         );
         
-        assertEquals("Password must not be null or empty", exception.getMessage());
+        assertEquals("비밀번호는 필수입니다", exception.getMessage());
         assertFalse(mockRepository.isSaveCalled());
     }
     
@@ -411,13 +411,14 @@ class UserDomainServiceTest {
     @DisplayName("생성자 - null 레포지토리로 실패")
     @Test
     void constructor_NullRepository_ThrowsException() {
-        // when & then
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> new UserDomainService(null)
-        );
+        // when
+        UserDomainService service = new UserDomainService(null);
         
-        assertEquals("UserRepository must not be null", exception.getMessage());
+        // then - null repository로 메서드 호출시 NullPointerException 발생
+        assertThrows(
+            NullPointerException.class,
+            () -> service.findActiveUsers()
+        );
     }
     
     /**

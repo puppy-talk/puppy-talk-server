@@ -3,29 +3,27 @@ package com.puppytalk.notification;
 import com.puppytalk.chat.ChatRoomId;
 import com.puppytalk.pet.PetId;
 import com.puppytalk.user.UserId;
-
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * 알림 도메인 서비스
- * 
+ * <p>
  * Backend 관점: 높은 처리량과 장애 내성을 갖춘 알림 비즈니스 로직
  */
 public class NotificationDomainService {
-    
+
     private static final int DAILY_NOTIFICATION_LIMIT = 5;
 
     private final NotificationRepository notificationRepository;
-    
+
     public NotificationDomainService(NotificationRepository notificationRepository) {
         this.notificationRepository = notificationRepository;
     }
-    
+
     /**
      * 비활성 사용자 알림 생성
-     * 
+     * <p>
      * Backend 최적화: 중복 방지 및 발송 제한 확인
      */
     public NotificationId createInactivityNotification(
@@ -36,46 +34,36 @@ public class NotificationDomainService {
         String aiGeneratedContent
     ) {
         validateNotificationInput(userId, petId, aiGeneratedTitle, aiGeneratedContent);
-        
+
         // 중복 알림 방지 - 이미 대기 중인 비활성 알림이 있는지 확인
-        if (isDuplicateInactivityNotification(userId)) {
+        if (!isFirstInactivityNotification(userId)) {
             throw NotificationException.creationFailed("중복된 비활성화 알림이 이미 존재합니다");
         }
-        
+
         // 일일 발송 제한 확인
-        if (isDailyLimitExceeded(userId)) {
+        if (!isWithinDailyLimit(userId)) {
             throw NotificationException.dailyLimitExceeded();
         }
-        
-        try {
-            LocalDateTime scheduledAt = LocalDateTime.now().plusMinutes(5); // 5분 후 발송
-            
-            Notification notification = Notification.createInactivityNotification(
-                userId, petId, chatRoomId, aiGeneratedTitle, aiGeneratedContent, scheduledAt
-            );
-            
-            return notificationRepository.save(notification);
-            
-        } catch (Exception e) {
-            throw NotificationException.creationFailed(e.getMessage());
-        }
+
+        LocalDateTime scheduledAt = LocalDateTime.now().plusMinutes(5); // 5분 후 발송
+
+        Notification notification = Notification.createInactivityNotification(
+            userId, petId, chatRoomId, aiGeneratedTitle, aiGeneratedContent, scheduledAt
+        );
+
+        return notificationRepository.save(notification);
     }
-    
+
     /**
      * 시스템 알림 생성
      */
     public NotificationId createSystemNotification(UserId userId, String title, String content) {
         validateBasicNotificationInput(userId, title, content);
-        
-        try {
-            Notification notification = Notification.createSystemNotification(userId, title, content);
-            return notificationRepository.save(notification);
-            
-        } catch (Exception e) {
-            throw NotificationException.creationFailed(e.getMessage());
-        }
+
+        Notification notification = Notification.createSystemNotification(userId, title, content);
+        return notificationRepository.save(notification);
     }
-    
+
     /**
      * 발송 대기 중인 알림 목록 조회 (스케줄러용)
      */
@@ -83,25 +71,25 @@ public class NotificationDomainService {
         if (batchSize <= 0 || batchSize > 1000) {
             throw new IllegalArgumentException("Batch size must be between 1 and 1000");
         }
-        
+
         LocalDateTime now = LocalDateTime.now();
         return notificationRepository.findPendingNotifications(now, batchSize);
     }
-    
+
     /**
      * 알림 발송 완료 처리
      */
     public void markAsSent(NotificationId notificationId) {
         updateNotificationStatus(notificationId, NotificationStatus.SENT);
     }
-    
+
     /**
      * 알림 읽음 처리
      */
     public void markAsRead(NotificationId notificationId) {
         updateNotificationStatus(notificationId, NotificationStatus.READ);
     }
-    
+
     /**
      * 알림 발송 실패 처리 (재시도 로직 포함)
      */
@@ -109,23 +97,14 @@ public class NotificationDomainService {
         if (notificationId == null) {
             throw new IllegalArgumentException("NotificationId must not be null");
         }
-        
-        try {
-            Optional<Notification> optionalNotification = notificationRepository.findById(notificationId);
-            if (optionalNotification.isEmpty()) {
-                throw NotificationException.notFound(notificationId);
-            }
+
+        Notification notification = notificationRepository.findById(notificationId)
+            .orElseThrow(() -> NotificationException.notFound(notificationId));
             
-            Notification notification = optionalNotification.get();
-            Notification updatedNotification = notification.incrementRetry(failureReason);
-            
-            notificationRepository.save(updatedNotification);
-            
-        } catch (Exception e) {
-            throw NotificationException.sendingFailed("Failed to mark as failed: " + e.getMessage());
-        }
+        Notification updatedNotification = notification.incrementRetry(failureReason);
+        notificationRepository.save(updatedNotification);
     }
-    
+
     /**
      * 재시도 대상 실패 알림 조회
      */
@@ -133,10 +112,10 @@ public class NotificationDomainService {
         if (batchSize <= 0 || batchSize > 100) {
             throw new IllegalArgumentException("Retry batch size must be between 1 and 100");
         }
-        
+
         return notificationRepository.findRetryableFailedNotifications(batchSize);
     }
-    
+
     /**
      * 사용자 미읽은 알림 목록 조회
      */
@@ -144,10 +123,10 @@ public class NotificationDomainService {
         if (userId == null) {
             throw new IllegalArgumentException("UserId must not be null");
         }
-        
+
         return notificationRepository.findUnreadByUserId(userId);
     }
-    
+
     /**
      * 사용자 미읽은 알림 개수 조회
      */
@@ -155,32 +134,28 @@ public class NotificationDomainService {
         if (userId == null) {
             throw new IllegalArgumentException("UserId must not be null");
         }
-        
+
         return notificationRepository.countUnreadByUserId(userId);
     }
-    
+
     /**
      * 알림 대상자 필터링 (중복 방지, 일일 제한 확인)
-     * 
+     * <p>
      * Application layer에서 비활성 사용자 목록을 전달받아 필터링
      */
-    public List<UserId> filterEligibleUsersForNotification(List<UserId> candidateUsers) {
+    public List<UserId> filterUsersForNotification(List<UserId> candidateUsers) {
         if (candidateUsers == null || candidateUsers.isEmpty()) {
             return List.of();
         }
-        
-        try {
-            // 이미 알림을 받은 사용자는 제외 (중복 방지)
-            return candidateUsers.stream()
-                .filter(userId -> !isDuplicateInactivityNotification(userId))
-                .filter(userId -> !isDailyLimitExceeded(userId))
-                .toList();
-                
-        } catch (Exception e) {
-            throw new NotificationException("Failed to filter eligible users: " + e.getMessage());
-        }
+
+        // 이미 알림을 받은 사용자는 제외 (중복 방지)
+        return candidateUsers.stream()
+            .filter(this::isFirstInactivityNotification)
+            .filter(this::isWithinDailyLimit)
+            .toList();
+
     }
-    
+
     /**
      * 만료된 알림 정리 (성능 유지)
      */
@@ -188,7 +163,7 @@ public class NotificationDomainService {
         LocalDateTime cutoffDate = LocalDateTime.now().minusHours(24);
         return notificationRepository.deleteExpiredNotifications(cutoffDate);
     }
-    
+
     /**
      * 완료된 오래된 알림 정리 (30일 기준)
      */
@@ -196,12 +171,12 @@ public class NotificationDomainService {
         LocalDateTime cutoffDate = LocalDateTime.now().minusDays(30);
         return notificationRepository.deleteCompletedNotificationsOlderThan(cutoffDate);
     }
-    
+
     /**
      * 알림 통계 조회
      */
     public NotificationRepository.NotificationStats getNotificationStats(
-        LocalDateTime startDate, 
+        LocalDateTime startDate,
         LocalDateTime endDate
     ) {
         if (startDate == null || endDate == null) {
@@ -210,14 +185,14 @@ public class NotificationDomainService {
         if (startDate.isAfter(endDate)) {
             throw new IllegalArgumentException("Start date must be before end date");
         }
-        
+
         return notificationRepository.getNotificationStats(startDate, endDate);
     }
-    
-    
+
     // === Private Helper Methods ===
-    
-    private void validateNotificationInput(UserId userId, PetId petId, String title, String content) {
+
+    private void validateNotificationInput(UserId userId, PetId petId, String title,
+        String content) {
         if (userId == null) {
             throw new IllegalArgumentException("UserId must not be null");
         }
@@ -226,7 +201,7 @@ public class NotificationDomainService {
         }
         validateBasicNotificationInput(userId, title, content);
     }
-    
+
     private void validateBasicNotificationInput(UserId userId, String title, String content) {
         if (userId == null) {
             throw new IllegalArgumentException("UserId must not be null");
@@ -238,46 +213,43 @@ public class NotificationDomainService {
             throw new IllegalArgumentException("Content must not be null or empty");
         }
     }
-    
-    private boolean isDuplicateInactivityNotification(UserId userId) {
-        return notificationRepository.existsByUserIdAndTypeAndStatus(
-            userId, 
-            NotificationType.INACTIVITY_MESSAGE, 
-            NotificationStatus.CREATED
-        ) || notificationRepository.existsByUserIdAndTypeAndStatus(
-            userId, 
-            NotificationType.INACTIVITY_MESSAGE, 
-            NotificationStatus.QUEUED
-        );
+
+    private boolean isFirstInactivityNotification(UserId userId) {
+        boolean alreadyExists =
+            notificationRepository.existsByUserIdAndTypeAndStatus(
+                userId,
+                NotificationType.INACTIVITY_MESSAGE,
+                NotificationStatus.CREATED
+            )
+                || notificationRepository.existsByUserIdAndTypeAndStatus(
+                userId,
+                NotificationType.INACTIVITY_MESSAGE,
+                NotificationStatus.QUEUED
+            );
+
+        return !alreadyExists; // 기존에 없으면 "첫 알림"
     }
-    
-    private boolean isDailyLimitExceeded(UserId userId) {
+
+    private boolean isWithinDailyLimit(UserId userId) {
         LocalDateTime today = LocalDateTime.now().toLocalDate().atStartOfDay();
         long todayCount = notificationRepository.countSentNotificationsByUserAndDate(userId, today);
-        return todayCount >= DAILY_NOTIFICATION_LIMIT;
+
+        return todayCount < DAILY_NOTIFICATION_LIMIT; // 제한 이하일 때만 true
     }
-    
-    private void updateNotificationStatus(NotificationId notificationId, NotificationStatus status) {
+
+    private void updateNotificationStatus(NotificationId notificationId,
+        NotificationStatus status) {
         if (notificationId == null) {
             throw new IllegalArgumentException("NotificationId must not be null");
         }
         if (status == null) {
             throw new IllegalArgumentException("NotificationStatus must not be null");
         }
-        
-        try {
-            Optional<Notification> optionalNotification = notificationRepository.findById(notificationId);
-            if (optionalNotification.isEmpty()) {
-                throw NotificationException.notFound(notificationId);
-            }
+
+        Notification notification = notificationRepository.findById(notificationId)
+            .orElseThrow(() -> NotificationException.notFound(notificationId));
             
-            Notification notification = optionalNotification.get();
-            Notification updatedNotification = notification.updateStatus(status);
-            
-            notificationRepository.save(updatedNotification);
-            
-        } catch (Exception e) {
-            throw NotificationException.sendingFailed("Failed to update status to " + status + ": " + e.getMessage());
-        }
+        Notification updatedNotification = notification.updateStatus(status);
+        notificationRepository.save(updatedNotification);
     }
 }

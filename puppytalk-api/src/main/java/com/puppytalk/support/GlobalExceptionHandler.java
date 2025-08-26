@@ -114,16 +114,12 @@ public class GlobalExceptionHandler {
             MessageValidationException ex, HttpServletRequest request) {
         
         String traceId = getTraceId(request);
-        log.warn("[{}] Message validation failed: {} (Field: {}, Value: {})", 
-                traceId, ex.getMessage(), ex.getFieldName(), ex.getRejectedValue());
+        log.warn("[{}] Message validation failed: {}", traceId, ex.getMessage());
         
         Map<String, Object> metadata = new HashMap<>();
-        metadata.put("fieldName", ex.getFieldName());
-        metadata.put("rejectedValue", ex.getRejectedValue());
-        metadata.put("validationType", ex.getValidationType());
-        metadata.putAll(ex.getContext());
+        metadata.put("validationType", "MESSAGE_VALIDATION");
         
-        ErrorCode errorCode = determineValidationErrorCode(ex.getValidationType());
+        ErrorCode errorCode = ErrorCode.VALIDATION_FAILED;
         ErrorResponse errorResponse = ErrorResponse.withMetadata(
             traceId, 
             request.getRequestURI(), 
@@ -228,15 +224,7 @@ public class GlobalExceptionHandler {
         log.warn("[{}] ChatRoom not found: {}", traceId, ex.getMessage());
         
         Map<String, Object> metadata = new HashMap<>();
-        if (ex.getChatRoomId() != null) {
-            metadata.put("chatRoomId", ex.getChatRoomId().toString());
-        }
-        if (ex.getRequestedBy() != null) {
-            metadata.put("requestedBy", ex.getRequestedBy().toString());
-        }
-        if (ex.getErrorCode() != null) {
-            metadata.put("errorCode", ex.getErrorCode());
-        }
+        metadata.put("resource", "ChatRoom");
         
         ErrorResponse errorResponse = ErrorCode.CHATROOM_NOT_FOUND.toErrorResponseWithMetadata(
             traceId, request.getRequestURI(), request.getMethod(), metadata
