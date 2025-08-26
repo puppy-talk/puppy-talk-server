@@ -21,7 +21,7 @@ public final class Password {
     private final PasswordEncoder encoder;
     
     private Password(String encryptedValue, PasswordEncoder encoder) {
-        if (encryptedValue == null || encryptedValue.trim().isEmpty()) {
+        if (encryptedValue == null || encryptedValue.isBlank()) {
             throw new IllegalArgumentException("암호화된 비밀번호는 필수입니다");
         }
         if (encoder == null) {

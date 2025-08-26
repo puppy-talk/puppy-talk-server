@@ -11,9 +11,6 @@ public class UserDomainService {
     private final UserRepository userRepository;
     
     public UserDomainService(UserRepository userRepository) {
-        if (userRepository == null) {
-            throw new IllegalArgumentException("UserRepository must not be null");
-        }
         this.userRepository = userRepository;
     }
     
@@ -27,13 +24,13 @@ public class UserDomainService {
      * @throws DuplicateUserException 사용자명 또는 이메일이 중복된 경우
      */
     public UserId registerUser(String username, String email, String password) {
-        if (username == null || username.trim().isEmpty()) {
+        if (username == null || username.isBlank()) {
             throw new IllegalArgumentException("사용자명은 필수입니다");
         }
-        if (email == null || email.trim().isEmpty()) {
+        if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("이메일은 필수입니다");
         }
-        if (password == null || password.trim().isEmpty()) {
+        if (password == null || password.isBlank()) {
             throw new IllegalArgumentException("비밀번호는 필수입니다");
         }
         
@@ -68,7 +65,7 @@ public class UserDomainService {
      * @throws UserNotFoundException 사용자가 존재하지 않는 경우
      */
     public User findUserByUsername(String username) {
-        if (username == null || username.trim().isEmpty()) {
+        if (username == null || username.isBlank()) {
             throw new IllegalArgumentException("Username must not be null or empty");
         }
         
@@ -93,7 +90,7 @@ public class UserDomainService {
      * @throws UserNotFoundException 사용자가 존재하지 않는 경우
      */
     public User findUserByEmail(String email) {
-        if (email == null || email.trim().isEmpty()) {
+        if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("Email must not be null or empty");
         }
         

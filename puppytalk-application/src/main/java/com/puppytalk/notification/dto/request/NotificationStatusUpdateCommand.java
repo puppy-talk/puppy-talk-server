@@ -13,8 +13,8 @@ public record NotificationStatusUpdateCommand(
         if (notificationId == null || notificationId <= 0) {
             throw new IllegalArgumentException("NotificationId must be positive");
         }
-        if (status == null || status.trim().isEmpty()) {
-            throw new IllegalArgumentException("Status must not be null or empty");
+        if (status == null || status.isBlank()) {
+            throw new IllegalArgumentException("알림 상태는 필수입니다");
         }
     }
     

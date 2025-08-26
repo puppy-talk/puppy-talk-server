@@ -13,17 +13,17 @@ public class Pet {
     private final PetStatus status;
 
     private Pet(PetId id, UserId ownerId, String name, String persona,
-                LocalDateTime createdAt, PetStatus status) {
+                 LocalDateTime createdAt, PetStatus status) {
         if (ownerId == null || !ownerId.isStored()) {
             throw new IllegalArgumentException("소유자 ID는 필수입니다");
         }
-        if (name == null || name.trim().isEmpty()) {
+        if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("반려동물 이름은 필수입니다");
         }
         if (name.trim().length() > 20) {
             throw new IllegalArgumentException("반려동물 이름은 20자를 초과할 수 없습니다");
         }
-        if (persona == null || persona.trim().isEmpty()) {
+        if (persona == null || persona.isBlank()) {
             throw new IllegalArgumentException("반려동물 페르소나는 필수입니다");
         }
         if (persona.trim().length() > 500) {

@@ -68,7 +68,7 @@ public class ChatDomainService {
             return ChatRoomResult.existing(room.get());
         }
         
-        ChatRoom savedRoom = chatRoomRepository.save(
+        ChatRoom savedRoom = chatRoomRepository.create(
             ChatRoom.create(userId, petId)
         );
 
@@ -100,7 +100,7 @@ public class ChatDomainService {
      * 사용자 메시지 전송
      */
     public void sendUserMessage(ChatRoomId chatRoomId, UserId userId, String content) {
-        if (content == null || content.trim().isEmpty()) {
+        if (content == null || content.isBlank()) {
             throw new IllegalArgumentException("Message content must not be null or empty");
         }
 
@@ -110,7 +110,7 @@ public class ChatDomainService {
         messageRepository.save(message);
         
         ChatRoom updatedChatRoom = chatRoom.withLastMessageTime();
-        chatRoomRepository.save(updatedChatRoom);
+        chatRoomRepository.update(updatedChatRoom);
     }
     
     /**
@@ -121,7 +121,7 @@ public class ChatDomainService {
             throw new IllegalArgumentException("ChatRoomId must not be null");
         }
 
-        if (content == null || content.trim().isEmpty()) {
+        if (content == null || content.isBlank()) {
             throw new IllegalArgumentException("Message content must not be null or empty");
         }
 
@@ -135,7 +135,7 @@ public class ChatDomainService {
         
         // 채팅방 마지막 메시지 시각 업데이트
         ChatRoom updatedChatRoom = chatRoom.withLastMessageTime();
-        chatRoomRepository.save(updatedChatRoom);
+        chatRoomRepository.update(updatedChatRoom);
         
         return message;
     }

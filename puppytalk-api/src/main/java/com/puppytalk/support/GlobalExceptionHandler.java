@@ -382,13 +382,13 @@ public class GlobalExceptionHandler {
     private String getTraceId(HttpServletRequest request) {
         // MDC에서 먼저 확인
         String traceId = MDC.get("traceId");
-        if (traceId != null) {
-            return traceId;
+        if (traceId != null && !traceId.isBlank()) {
+            log.error("Trace ID: {}", traceId);
         }
         
         // 헤더에서 확인
         traceId = request.getHeader(TRACE_ID_HEADER);
-        if (traceId != null && !traceId.trim().isEmpty()) {
+        if (traceId != null && !traceId.isBlank()) {
             return traceId;
         }
         

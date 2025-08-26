@@ -83,7 +83,7 @@ public class SimpleAiMessageGenerationServiceImpl implements AiMessageGeneration
         }
         
         // 페르소나 반영 (간단한 키워드 매칭)
-        if (petPersona != null && !petPersona.trim().isEmpty()) {
+        if (petPersona != null && !petPersona.isBlank()) {
             if (petPersona.toLowerCase().contains("활발") || petPersona.toLowerCase().contains("energetic")) {
                 content.append(" 저는 오늘도 에너지 넘쳐요! 🎾");
             } else if (petPersona.toLowerCase().contains("차분") || petPersona.toLowerCase().contains("calm")) {

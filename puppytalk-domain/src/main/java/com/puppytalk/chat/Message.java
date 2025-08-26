@@ -21,7 +21,7 @@ public class Message {
         if (type == null) {
             throw new IllegalArgumentException("메시지 타입은 필수입니다");
         }
-        if (content == null || content.trim().isEmpty()) {
+        if (content == null || content.isBlank()) {
             throw new IllegalArgumentException("메시지 내용은 필수입니다");
         }
         if (content.trim().length() > 1000) {

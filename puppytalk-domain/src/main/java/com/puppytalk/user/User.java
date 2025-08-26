@@ -27,7 +27,7 @@ public class User {
 
     private User(UserId id, String username, String email, Password password,
                  LocalDateTime createdAt, boolean isDeleted) {
-        if (username == null || username.trim().isEmpty()) {
+        if (username == null || username.isBlank()) {
             throw new IllegalArgumentException("사용자명은 필수입니다");
         }
         if (username.trim().length() < MIN_USERNAME_LENGTH || username.trim().length() > MAX_USERNAME_LENGTH) {
@@ -35,7 +35,7 @@ public class User {
                 String.format("사용자명은 %d-%d자 사이여야 합니다", MIN_USERNAME_LENGTH, MAX_USERNAME_LENGTH)
             );
         }
-        if (email == null || email.trim().isEmpty()) {
+        if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("이메일은 필수입니다");
         }
         if (!isValidEmail(email)) {
@@ -80,7 +80,7 @@ public class User {
     }
 
     private static boolean isValidEmail(String email) {
-        if (email == null || email.trim().isEmpty()) {
+        if (email == null || email.isBlank()) {
             return false;
         }
         
@@ -126,6 +126,17 @@ public class User {
      */
     public User withRestoredStatus() {
         return new User(id, username, email, password, createdAt, false);
+    }
+
+    public User withEmail(String newEmail) {
+        if (newEmail == null || newEmail.isBlank()) {
+            throw new IllegalArgumentException("새 이메일은 필수입니다");
+        }
+        if (newEmail.trim().length() > 100) {
+            throw new IllegalArgumentException("이메일은 100자를 초과할 수 없습니다");
+        }
+        
+        return new User(this.id, this.username, newEmail.trim(), this.password, this.createdAt, this.isDeleted);
     }
 
     // getter

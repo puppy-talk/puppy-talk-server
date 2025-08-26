@@ -15,10 +15,10 @@ public record NotificationCreateCommand(
         if (userId == null || userId <= 0) {
             throw new IllegalArgumentException("UserId must be positive");
         }
-        if (title == null || title.trim().isEmpty()) {
+        if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("Title must not be null or empty");
         }
-        if (content == null || content.trim().isEmpty()) {
+        if (content == null || content.isBlank()) {
             throw new IllegalArgumentException("Content must not be null or empty");
         }
     }

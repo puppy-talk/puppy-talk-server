@@ -13,8 +13,8 @@ public record ActivityRecordCommand(
         if (userId == null || userId <= 0) {
             throw new IllegalArgumentException("UserId must be positive");
         }
-        if (activityType == null || activityType.trim().isEmpty()) {
-            throw new IllegalArgumentException("ActivityType must not be null or empty");
+        if (activityType == null || activityType.isBlank()) {
+            throw new IllegalArgumentException("활동 타입은 필수입니다");
         }
     }
     

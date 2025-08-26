@@ -1,5 +1,6 @@
 package com.puppytalk.user;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -85,7 +86,7 @@ public final class SHA256PasswordEncoder implements PasswordEncoder {
      * @throws IllegalArgumentException 비밀번호가 유효하지 않은 경우
      */
     private void validateRawPassword(String rawPassword) {
-        if (rawPassword == null || rawPassword.trim().isEmpty()) {
+        if (rawPassword == null || rawPassword.isBlank()) {
             throw new IllegalArgumentException("비밀번호는 필수입니다");
         }
     }
