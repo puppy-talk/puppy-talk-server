@@ -28,7 +28,7 @@ public class NotificationRepositoryImpl implements NotificationRepository {
         try {
             NotificationJpaEntity entity = NotificationJpaEntity.fromDomain(notification);
             NotificationJpaEntity saved = jpaRepository.save(entity);
-            return NotificationId.of(saved.getId());
+            return NotificationId.from(saved.getId());
         } catch (Exception e) {
             throw NotificationException.creationFailed(
                 notification.userId(),

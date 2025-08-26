@@ -134,7 +134,7 @@ public class MessageRepositoryImpl implements MessageRepository {
         );
         
         // ID가 있는 경우 설정 (업데이트)
-        if (message.id().isValid()) {
+        if (message.id() != null && message.id().isValid()) {
             entity.setId(message.id().getValue());
         }
         

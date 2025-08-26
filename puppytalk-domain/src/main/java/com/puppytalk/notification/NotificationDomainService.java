@@ -1,7 +1,5 @@
 package com.puppytalk.notification;
 
-import com.puppytalk.activity.ActivityDomainService;
-import com.puppytalk.activity.UserActivity;
 import com.puppytalk.chat.ChatRoomId;
 import com.puppytalk.pet.PetId;
 import com.puppytalk.user.UserId;
@@ -18,17 +16,11 @@ import java.util.Optional;
 public class NotificationDomainService {
     
     private static final int DAILY_NOTIFICATION_LIMIT = 5;
-    private static final int INACTIVITY_THRESHOLD_HOURS = 2;
-    
+
     private final NotificationRepository notificationRepository;
-    private final ActivityDomainService activityDomainService;
     
-    public NotificationDomainService(
-        NotificationRepository notificationRepository,
-        ActivityDomainService activityDomainService
-    ) {
+    public NotificationDomainService(NotificationRepository notificationRepository) {
         this.notificationRepository = notificationRepository;
-        this.activityDomainService = activityDomainService;
     }
     
     /**
@@ -47,13 +39,12 @@ public class NotificationDomainService {
         
         // 중복 알림 방지 - 이미 대기 중인 비활성 알림이 있는지 확인
         if (isDuplicateInactivityNotification(userId)) {
-            throw NotificationException.creationFailed(userId, NotificationType.INACTIVITY_MESSAGE, 
-                "Duplicate inactivity notification already exists");
+            throw NotificationException.creationFailed("중복된 비활성화 알림이 이미 존재합니다");
         }
         
         // 일일 발송 제한 확인
         if (isDailyLimitExceeded(userId)) {
-            throw NotificationException.dailyLimitExceeded(userId, DAILY_NOTIFICATION_LIMIT);
+            throw NotificationException.dailyLimitExceeded();
         }
         
         try {
@@ -66,7 +57,7 @@ public class NotificationDomainService {
             return notificationRepository.save(notification);
             
         } catch (Exception e) {
-            throw NotificationException.creationFailed(userId, NotificationType.INACTIVITY_MESSAGE, e.getMessage());
+            throw NotificationException.creationFailed(e.getMessage());
         }
     }
     
@@ -81,7 +72,7 @@ public class NotificationDomainService {
             return notificationRepository.save(notification);
             
         } catch (Exception e) {
-            throw NotificationException.creationFailed(userId, NotificationType.SYSTEM_NOTIFICATION, e.getMessage());
+            throw NotificationException.creationFailed(e.getMessage());
         }
     }
     
@@ -122,7 +113,7 @@ public class NotificationDomainService {
         try {
             Optional<Notification> optionalNotification = notificationRepository.findById(notificationId);
             if (optionalNotification.isEmpty()) {
-                throw NotificationException.notificationNotFound(notificationId);
+                throw NotificationException.notFound(notificationId);
             }
             
             Notification notification = optionalNotification.get();
@@ -131,7 +122,7 @@ public class NotificationDomainService {
             notificationRepository.save(updatedNotification);
             
         } catch (Exception e) {
-            throw NotificationException.sendingFailed(notificationId, "Failed to mark as failed", e);
+            throw NotificationException.sendingFailed("Failed to mark as failed: " + e.getMessage());
         }
     }
     
@@ -169,22 +160,24 @@ public class NotificationDomainService {
     }
     
     /**
-     * 비활성 사용자 일괄 감지 및 알림 생성 후보 반환
+     * 알림 대상자 필터링 (중복 방지, 일일 제한 확인)
      * 
-     * Backend 최적화: 대량 사용자 처리를 위한 효율적 설계
+     * Application layer에서 비활성 사용자 목록을 전달받아 필터링
      */
-    public List<UserId> findInactiveUsersForNotification() {
+    public List<UserId> filterEligibleUsersForNotification(List<UserId> candidateUsers) {
+        if (candidateUsers == null || candidateUsers.isEmpty()) {
+            return List.of();
+        }
+        
         try {
-            List<UserId> inactiveUsers = activityDomainService.findInactiveUsers(INACTIVITY_THRESHOLD_HOURS);
-            
             // 이미 알림을 받은 사용자는 제외 (중복 방지)
-            return inactiveUsers.stream()
+            return candidateUsers.stream()
                 .filter(userId -> !isDuplicateInactivityNotification(userId))
                 .filter(userId -> !isDailyLimitExceeded(userId))
                 .toList();
                 
         } catch (Exception e) {
-            throw NotificationException.schedulingFailed("Failed to find inactive users: " + e.getMessage());
+            throw new NotificationException("Failed to filter eligible users: " + e.getMessage());
         }
     }
     
@@ -221,16 +214,6 @@ public class NotificationDomainService {
         return notificationRepository.getNotificationStats(startDate, endDate);
     }
     
-    /**
-     * 사용자가 특정 시간 동안 비활성 상태인지 확인
-     */
-    public boolean isUserInactive(UserId userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId must not be null");
-        }
-        
-        return !activityDomainService.isUserActive(userId, INACTIVITY_THRESHOLD_HOURS);
-    }
     
     // === Private Helper Methods ===
     
@@ -285,7 +268,7 @@ public class NotificationDomainService {
         try {
             Optional<Notification> optionalNotification = notificationRepository.findById(notificationId);
             if (optionalNotification.isEmpty()) {
-                throw NotificationException.notificationNotFound(notificationId);
+                throw NotificationException.notFound(notificationId);
             }
             
             Notification notification = optionalNotification.get();
@@ -294,8 +277,7 @@ public class NotificationDomainService {
             notificationRepository.save(updatedNotification);
             
         } catch (Exception e) {
-            throw NotificationException.sendingFailed(notificationId, 
-                "Failed to update status to " + status, e);
+            throw NotificationException.sendingFailed("Failed to update status to " + status + ": " + e.getMessage());
         }
     }
 }

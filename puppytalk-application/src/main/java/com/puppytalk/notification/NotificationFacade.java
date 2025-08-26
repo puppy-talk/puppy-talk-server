@@ -1,11 +1,11 @@
 package com.puppytalk.notification;
 
 import com.puppytalk.chat.ChatRoomId;
+import com.puppytalk.activity.ActivityDomainService;
 import com.puppytalk.notification.dto.request.NotificationCreateCommand;
 import com.puppytalk.notification.dto.request.NotificationStatusUpdateCommand;
 import com.puppytalk.notification.dto.response.NotificationListResult;
 import com.puppytalk.notification.dto.response.NotificationResult;
-import com.puppytalk.notification.dto.response.NotificationStatsResult;
 import com.puppytalk.pet.PetId;
 import com.puppytalk.user.UserId;
 import org.springframework.stereotype.Service;
@@ -25,9 +25,14 @@ import java.util.List;
 public class NotificationFacade {
     
     private final NotificationDomainService notificationDomainService;
+    private final ActivityDomainService activityDomainService;
     
-    public NotificationFacade(NotificationDomainService notificationDomainService) {
+    public NotificationFacade(
+        NotificationDomainService notificationDomainService,
+        ActivityDomainService activityDomainService
+    ) {
         this.notificationDomainService = notificationDomainService;
+        this.activityDomainService = activityDomainService;
     }
     
     /**
@@ -39,9 +44,9 @@ public class NotificationFacade {
         Assert.notNull(command.petId(), "PetId must not be null for inactivity notification");
         Assert.notNull(command.chatRoomId(), "ChatRoomId must not be null for inactivity notification");
         
-        UserId userId = UserId.of(command.userId());
-        PetId petId = PetId.of(command.petId());
-        ChatRoomId chatRoomId = ChatRoomId.of(command.chatRoomId());
+        UserId userId = UserId.from(command.userId());
+        PetId petId = PetId.from(command.petId());
+        ChatRoomId chatRoomId = ChatRoomId.from(command.chatRoomId());
         
         NotificationId notificationId = notificationDomainService.createInactivityNotification(
             userId, petId, chatRoomId, command.title(), command.content()
@@ -60,7 +65,7 @@ public class NotificationFacade {
         Assert.hasText(command.title(), "Title cannot be null or empty");
         Assert.hasText(command.content(), "Content cannot be null or empty");
 
-        UserId userId = UserId.of(command.userId());
+        UserId userId = UserId.from(command.userId());
         
         NotificationId notificationId = notificationDomainService.createSystemNotification(
             userId, command.title(), command.content()
@@ -88,7 +93,7 @@ public class NotificationFacade {
     public void updateNotificationStatus(NotificationStatusUpdateCommand command) {
         Assert.notNull(command, "NotificationStatusUpdateCommand must not be null");
         
-        NotificationId notificationId = NotificationId.of(command.notificationId());
+        NotificationId notificationId = NotificationId.from(command.notificationId());
         
         switch (command.status().toUpperCase()) {
             case "SENT" -> notificationDomainService.markAsSent(notificationId);
@@ -117,7 +122,7 @@ public class NotificationFacade {
     public NotificationListResult getUnreadNotifications(Long userId) {
         Assert.notNull(userId, "UserId must not be null");
         
-        UserId userIdObj = UserId.of(userId);
+        UserId userIdObj = UserId.from(userId);
         List<Notification> notifications = notificationDomainService.getUnreadNotifications(userIdObj);
         
         return NotificationListResult.from(notifications);
@@ -130,51 +135,26 @@ public class NotificationFacade {
     public long getUnreadCount(Long userId) {
         Assert.notNull(userId, "UserId must not be null");
         
-        UserId userIdObj = UserId.of(userId);
+        UserId userIdObj = UserId.from(userId);
         return notificationDomainService.getUnreadCount(userIdObj);
     }
     
     /**
      * 비활성 사용자 목록 조회 (알림 대상)
+     * 
+     * Application 계층에서 BC 간 오케스트레이션 담당
      */
     @Transactional(readOnly = true)
     public List<Long> findInactiveUsersForNotification() {
-        return notificationDomainService.findInactiveUsersForNotification()
-            .stream()
+        // 1. Activity BC에서 비활성 사용자 목록 조회
+        List<UserId> inactiveUsers = activityDomainService.findInactiveUsers(2); // 2시간 기준
+        
+        // 2. Notification BC에서 알림 가능 사용자 필터링
+        List<UserId> eligibleUsers = notificationDomainService.filterEligibleUsersForNotification(inactiveUsers);
+        
+        return eligibleUsers.stream()
             .map(UserId::getValue)
             .toList();
     }
     
-    /**
-     * 알림 통계 조회
-     */
-    @Transactional(readOnly = true)
-    public NotificationStatsResult getNotificationStats(LocalDateTime startDate, LocalDateTime endDate) {
-        if (startDate == null || endDate == null) {
-            // 기본값: 최근 7일
-            endDate = LocalDateTime.now();
-            startDate = endDate.minusDays(7);
-        }
-        
-        NotificationRepository.NotificationStats stats = 
-            notificationDomainService.getNotificationStats(startDate, endDate);
-        
-        return NotificationStatsResult.from(stats);
-    }
-    
-    /**
-     * 만료된 알림 정리
-     */
-    @Transactional
-    public int cleanupExpiredNotifications() {
-        return notificationDomainService.cleanupExpiredNotifications();
-    }
-    
-    /**
-     * 오래된 알림 정리
-     */
-    @Transactional
-    public int cleanupOldNotifications() {
-        return notificationDomainService.cleanupOldNotifications();
-    }
 }

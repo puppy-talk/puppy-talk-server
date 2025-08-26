@@ -2,12 +2,12 @@
 -- PuppyTalk Sample Data for Development and Testing
 -- 개발 및 테스트용 초기 데이터
 
--- 테스트 사용자 생성
-INSERT INTO users (username, email, status) VALUES 
-('puppy_lover', 'puppy@example.com', 'ACTIVE'),
-('dog_owner', 'dog@example.com', 'ACTIVE'),
-('cat_friend', 'cat@example.com', 'ACTIVE'),
-('test_user', 'test@example.com', 'INACTIVE');
+-- 테스트 사용자 생성 (비밀번호는 'password123'으로 암호화됨)
+INSERT INTO users (username, email, password, status) VALUES 
+('puppy_lover', 'puppy@example.com', 'OGQzZGNlZWYwMTVlNjQyNGZmZDNmY2Y2ZGUxZjg3NzY=:MzQyZDA5MDc5YzFlZWY2MDAwMzIyNGI1ZmUzMDJjY2Y4N2Q2YzQ3ZDdjMmQ0YTQ5OWU3N2I3Mjk5ZWE5ODQ5Ng==:10000', 'ACTIVE'),
+('dog_owner', 'dog@example.com', 'OGQzZGNlZWYwMTVlNjQyNGZmZDNmY2Y2ZGUxZjg3NzY=:MzQyZDA5MDc5YzFlZWY2MDAwMzIyNGI1ZmUzMDJjY2Y4N2Q2YzQ3ZDdjMmQ0YTQ5OWU3N2I3Mjk5ZWE5ODQ5Ng==:10000', 'ACTIVE'),
+('cat_friend', 'cat@example.com', 'OGQzZGNlZWYwMTVlNjQyNGZmZDNmY2Y2ZGUxZjg3NzY=:MzQyZDA5MDc5YzFlZWY2MDAwMzIyNGI1ZmUzMDJjY2Y4N2Q2YzQ3ZDdjMmQ0YTQ5OWU3N2I3Mjk5ZWE5ODQ5Ng==:10000', 'ACTIVE'),
+('test_user', 'test@example.com', 'OGQzZGNlZWYwMTVlNjQyNGZmZDNmY2Y2ZGUxZjg3NzY=:MzQyZDA5MDc5YzFlZWY2MDAwMzIyNGI1ZmUzMDJjY2Y4N2Q2YzQ3ZDdjMmQ0YTQ5OWU3N2I3Mjk5ZWE5ODQ5Ng==:10000', 'INACTIVE');
 
 -- 테스트 반려동물 생성
 INSERT INTO pets (owner_id, name, persona, status) VALUES 
@@ -44,7 +44,7 @@ INSERT INTO messages (chat_room_id, sender_type, content) VALUES
 (3, 'PET', '하이파이브! 좋은 아이디어네요! 손을 올리면 되나요? 🐾');
 
 -- 테스트 사용자 활동 생성
-INSERT INTO user_activities (user_id, activity_type, last_active_at) VALUES 
+INSERT INTO user_activities (user_id, activity_type, activity_at) VALUES 
 (1, 'APP_USAGE', DATE_SUB(NOW(), INTERVAL 30 MINUTE)),
 (1, 'CHAT_INTERACTION', DATE_SUB(NOW(), INTERVAL 45 MINUTE)),
 (2, 'APP_USAGE', DATE_SUB(NOW(), INTERVAL 1 HOUR)),
@@ -55,7 +55,7 @@ INSERT INTO user_activities (user_id, activity_type, last_active_at) VALUES
 (4, 'CHAT_INTERACTION', DATE_SUB(NOW(), INTERVAL 2 DAY));
 
 -- 테스트 알림 생성
-INSERT INTO notifications (user_id, pet_id, title, content, type, status) VALUES 
-(1, 1, '맥스가 보고싶어해요!', '맥스: 주인님, 오늘 산책 어떠셨나요? 저도 함께하고 싶었어요!', 'PET_MESSAGE', 'DELIVERED'),
-(2, 3, '코코의 새 트릭!', '코코: 주인님! 제가 새로운 트릭을 배웠어요! 보러 와주세요!', 'PET_MESSAGE', 'READ'),
-(3, 4, '모카의 간식 시간', '모카: 간식 시간이에요! 맛있는 거 주세요!', 'PET_MESSAGE', 'PENDING');
+INSERT INTO notifications (user_id, pet_id, chat_room_id, title, content, type, status, scheduled_at, sent_at, read_at) VALUES 
+(1, 1, 1, '맥스가 보고싶어해요!', '맥스: 주인님, 오늘 산책 어떠셨나요? 저도 함께하고 싶었어요!', 'PET_MESSAGE', 'SENT', DATE_SUB(NOW(), INTERVAL 10 MINUTE), DATE_SUB(NOW(), INTERVAL 10 MINUTE), DATE_SUB(NOW(), INTERVAL 5 MINUTE)),
+(2, 3, 3, '코코의 새 트릭!', '코코: 주인님! 제가 새로운 트릭을 배웠어요! 보러 와주세요!', 'PET_MESSAGE', 'SENT', DATE_SUB(NOW(), INTERVAL 20 MINUTE), DATE_SUB(NOW(), INTERVAL 20 MINUTE), DATE_SUB(NOW(), INTERVAL 15 MINUTE)),
+(3, 4, 4, '모카의 간식 시간', '모카: 간식 시간이에요! 맛있는 거 주세요!', 'PET_MESSAGE', 'QUEUED', NOW(), NULL, NULL);

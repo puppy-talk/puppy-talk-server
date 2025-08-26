@@ -65,7 +65,7 @@ public class UserJpaEntity extends BaseEntity {
      */
     public User toDomain() {
         return User.of(
-            UserId.of(this.id),
+            UserId.from(this.id),
             this.username,
             this.email,
             this.password,

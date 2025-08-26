@@ -18,8 +18,8 @@ class ChatRoomTest {
     @Test
     void create_Success() {
         // given
-        UserId userId = UserId.of(1L);
-        PetId petId = PetId.of(1L);
+        UserId userId = UserId.from(1L);
+        PetId petId = PetId.from(1L);
         LocalDateTime beforeCreate = LocalDateTime.now();
         
         // when
@@ -43,7 +43,7 @@ class ChatRoomTest {
     void create_NullUserId_ThrowsException() {
         // given
         UserId userId = null;
-        PetId petId = PetId.of(1L);
+        PetId petId = PetId.from(1L);
         
         // when & then
         IllegalArgumentException exception = assertThrows(
@@ -59,7 +59,7 @@ class ChatRoomTest {
     void create_NotStoredUserId_ThrowsException() {
         // given
         UserId userId = UserId.create(); // 저장되지 않은 ID
-        PetId petId = PetId.of(1L);
+        PetId petId = PetId.from(1L);
         
         // when & then
         IllegalArgumentException exception = assertThrows(
@@ -74,7 +74,7 @@ class ChatRoomTest {
     @Test
     void create_NullPetId_ThrowsException() {
         // given
-        UserId userId = UserId.of(1L);
+        UserId userId = UserId.from(1L);
         PetId petId = null;
         
         // when & then
@@ -90,9 +90,9 @@ class ChatRoomTest {
     @Test
     void of_Success() {
         // given
-        ChatRoomId id = ChatRoomId.of(1L);
-        UserId userId = UserId.of(1L);
-        PetId petId = PetId.of(1L);
+        ChatRoomId id = ChatRoomId.from(1L);
+        UserId userId = UserId.from(1L);
+        PetId petId = PetId.from(1L);
         LocalDateTime createdAt = LocalDateTime.now().minusDays(1);
         LocalDateTime lastMessageAt = LocalDateTime.now();
         
@@ -113,8 +113,8 @@ class ChatRoomTest {
     void of_NullId_ThrowsException() {
         // given
         ChatRoomId id = null;
-        UserId userId = UserId.of(1L);
-        PetId petId = PetId.of(1L);
+        UserId userId = UserId.from(1L);
+        PetId petId = PetId.from(1L);
         LocalDateTime createdAt = LocalDateTime.now();
         LocalDateTime lastMessageAt = LocalDateTime.now();
         
@@ -131,9 +131,9 @@ class ChatRoomTest {
     @Test
     void of_NullCreatedAt_ThrowsException() {
         // given
-        ChatRoomId id = ChatRoomId.of(1L);
-        UserId userId = UserId.of(1L);
-        PetId petId = PetId.of(1L);
+        ChatRoomId id = ChatRoomId.from(1L);
+        UserId userId = UserId.from(1L);
+        PetId petId = PetId.from(1L);
         LocalDateTime createdAt = null;
         LocalDateTime lastMessageAt = LocalDateTime.now();
         
@@ -150,9 +150,9 @@ class ChatRoomTest {
     @Test
     void of_NullLastMessageAt_ThrowsException() {
         // given
-        ChatRoomId id = ChatRoomId.of(1L);
-        UserId userId = UserId.of(1L);
-        PetId petId = PetId.of(1L);
+        ChatRoomId id = ChatRoomId.from(1L);
+        UserId userId = UserId.from(1L);
+        PetId petId = PetId.from(1L);
         LocalDateTime createdAt = LocalDateTime.now();
         LocalDateTime lastMessageAt = null;
         
@@ -170,9 +170,9 @@ class ChatRoomTest {
     void withLastMessageTime_Success() {
         // given
         ChatRoom originalChatRoom = ChatRoom.of(
-            ChatRoomId.of(1L),
-            UserId.of(1L),
-            PetId.of(1L),
+            ChatRoomId.from(1L),
+            UserId.from(1L),
+            PetId.from(1L),
             LocalDateTime.now().minusHours(2),
             LocalDateTime.now().minusHours(1)
         );
@@ -196,8 +196,8 @@ class ChatRoomTest {
     @Test
     void isOwnedBy_CorrectOwner_ReturnsTrue() {
         // given
-        UserId userId = UserId.of(1L);
-        ChatRoom chatRoom = ChatRoom.create(userId, PetId.of(1L));
+        UserId userId = UserId.from(1L);
+        ChatRoom chatRoom = ChatRoom.create(userId, PetId.from(1L));
         
         // when & then
         assertTrue(chatRoom.isOwnedBy(userId));
@@ -207,9 +207,9 @@ class ChatRoomTest {
     @Test
     void isOwnedBy_WrongOwner_ReturnsFalse() {
         // given
-        UserId ownerId = UserId.of(1L);
-        UserId otherUserId = UserId.of(2L);
-        ChatRoom chatRoom = ChatRoom.create(ownerId, PetId.of(1L));
+        UserId ownerId = UserId.from(1L);
+        UserId otherUserId = UserId.from(2L);
+        ChatRoom chatRoom = ChatRoom.create(ownerId, PetId.from(1L));
         
         // when & then
         assertFalse(chatRoom.isOwnedBy(otherUserId));
@@ -219,9 +219,9 @@ class ChatRoomTest {
     @Test
     void equals_SameId_ReturnsTrue() {
         // given
-        ChatRoomId id = ChatRoomId.of(1L);
-        ChatRoom chatRoom1 = ChatRoom.of(id, UserId.of(1L), PetId.of(1L), LocalDateTime.now(), LocalDateTime.now());
-        ChatRoom chatRoom2 = ChatRoom.of(id, UserId.of(2L), PetId.of(2L), LocalDateTime.now(), LocalDateTime.now());
+        ChatRoomId id = ChatRoomId.from(1L);
+        ChatRoom chatRoom1 = ChatRoom.of(id, UserId.from(1L), PetId.from(1L), LocalDateTime.now(), LocalDateTime.now());
+        ChatRoom chatRoom2 = ChatRoom.of(id, UserId.from(2L), PetId.from(2L), LocalDateTime.now(), LocalDateTime.now());
         
         // when & then
         assertEquals(chatRoom1, chatRoom2);
@@ -231,8 +231,8 @@ class ChatRoomTest {
     @Test
     void equals_DifferentId_ReturnsFalse() {
         // given
-        ChatRoom chatRoom1 = ChatRoom.of(ChatRoomId.of(1L), UserId.of(1L), PetId.of(1L), LocalDateTime.now(), LocalDateTime.now());
-        ChatRoom chatRoom2 = ChatRoom.of(ChatRoomId.of(2L), UserId.of(1L), PetId.of(1L), LocalDateTime.now(), LocalDateTime.now());
+        ChatRoom chatRoom1 = ChatRoom.of(ChatRoomId.from(1L), UserId.from(1L), PetId.from(1L), LocalDateTime.now(), LocalDateTime.now());
+        ChatRoom chatRoom2 = ChatRoom.of(ChatRoomId.from(2L), UserId.from(1L), PetId.from(1L), LocalDateTime.now(), LocalDateTime.now());
         
         // when & then
         assertNotEquals(chatRoom1, chatRoom2);
@@ -242,9 +242,9 @@ class ChatRoomTest {
     @Test
     void hashCode_SameId_ReturnsSameHashCode() {
         // given
-        ChatRoomId id = ChatRoomId.of(1L);
-        ChatRoom chatRoom1 = ChatRoom.of(id, UserId.of(1L), PetId.of(1L), LocalDateTime.now(), LocalDateTime.now());
-        ChatRoom chatRoom2 = ChatRoom.of(id, UserId.of(2L), PetId.of(2L), LocalDateTime.now(), LocalDateTime.now());
+        ChatRoomId id = ChatRoomId.from(1L);
+        ChatRoom chatRoom1 = ChatRoom.of(id, UserId.from(1L), PetId.from(1L), LocalDateTime.now(), LocalDateTime.now());
+        ChatRoom chatRoom2 = ChatRoom.of(id, UserId.from(2L), PetId.from(2L), LocalDateTime.now(), LocalDateTime.now());
         
         // when & then
         assertEquals(chatRoom1.hashCode(), chatRoom2.hashCode());

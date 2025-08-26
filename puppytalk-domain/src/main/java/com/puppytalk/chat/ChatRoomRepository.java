@@ -8,9 +8,14 @@ import java.util.Optional;
 public interface ChatRoomRepository {
     
     /**
-     * 채팅방 저장
+     * 새로운 채팅방 생성
      */
-    ChatRoom save(ChatRoom chatRoom);
+    ChatRoom create(ChatRoom chatRoom);
+    
+    /**
+     * 기존 채팅방 업데이트
+     */
+    ChatRoom update(ChatRoom chatRoom);
     
     /**
      * ID로 채팅방 조회

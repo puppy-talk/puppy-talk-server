@@ -116,10 +116,10 @@ public class NotificationJpaEntity extends BaseEntity {
     public Notification toDomain() {
         if (id != null) {
             return Notification.of(
-                NotificationId.of(id),
-                com.puppytalk.user.UserId.of(userId),
-                petId != null ? com.puppytalk.pet.PetId.of(petId) : null,
-                chatRoomId != null ? com.puppytalk.chat.ChatRoomId.of(chatRoomId) : null,
+                NotificationId.from(id),
+                com.puppytalk.user.UserId.from(userId),
+                petId != null ? com.puppytalk.pet.PetId.from(petId) : null,
+                chatRoomId != null ? com.puppytalk.chat.ChatRoomId.from(chatRoomId) : null,
                 type,
                 title,
                 content,
@@ -136,16 +136,16 @@ public class NotificationJpaEntity extends BaseEntity {
             // 새로운 알림 생성 (ID가 없는 경우)
             if (type == NotificationType.INACTIVITY_MESSAGE) {
                 return Notification.createInactivityNotification(
-                    com.puppytalk.user.UserId.of(userId),
-                    petId != null ? com.puppytalk.pet.PetId.of(petId) : null,
-                    chatRoomId != null ? com.puppytalk.chat.ChatRoomId.of(chatRoomId) : null,
+                    com.puppytalk.user.UserId.from(userId),
+                    petId != null ? com.puppytalk.pet.PetId.from(petId) : null,
+                    chatRoomId != null ? com.puppytalk.chat.ChatRoomId.from(chatRoomId) : null,
                     title,
                     content,
                     scheduledAt
                 );
             } else if (type == NotificationType.SYSTEM_NOTIFICATION) {
                 return Notification.createSystemNotification(
-                    com.puppytalk.user.UserId.of(userId),
+                    com.puppytalk.user.UserId.from(userId),
                     title,
                     content
                 );

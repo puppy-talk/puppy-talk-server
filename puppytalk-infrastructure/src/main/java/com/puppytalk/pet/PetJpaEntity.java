@@ -49,7 +49,7 @@ public class PetJpaEntity extends BaseEntity {
     
     public static PetJpaEntity from(Pet pet) {
         return new PetJpaEntity(
-            pet.id().isValid() ? pet.id().value() : null,
+            pet.id() != null && pet.id().isValid() ? pet.id().value() : null,
             pet.ownerId().value(),
             pet.name(),
             pet.persona(),
@@ -64,8 +64,8 @@ public class PetJpaEntity extends BaseEntity {
      */
     public Pet toDomain() {
         return Pet.of(
-            PetId.of(this.id),
-            UserId.of(this.ownerId),
+            PetId.from(this.id),
+            UserId.from(this.ownerId),
             this.name,
             this.persona,
             this.createdAt,
@@ -74,7 +74,6 @@ public class PetJpaEntity extends BaseEntity {
     }
     
     // Getters
-    public Long getId() { return id; }
     public Long getOwnerId() { return ownerId; }
     public String getName() { return name; }
     public String getPersona() { return persona; }
@@ -88,14 +87,11 @@ public class PetJpaEntity extends BaseEntity {
     }
     
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof PetJpaEntity other)) return false;
-        return Objects.equals(id, other.id);
+    protected Object getId() {
+        return id;
     }
     
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
+    public Long getPetId() {
+        return id;
     }
 }

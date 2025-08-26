@@ -124,7 +124,7 @@ public class AiInactivityNotificationService {
     public record UserPetPair(UserId userId, PetId petId) {
         
         public static UserPetPair of(Long userId, Long petId) {
-            return new UserPetPair(UserId.of(userId), PetId.of(petId));
+            return new UserPetPair(UserId.from(userId), PetId.from(petId));
         }
     }
     

@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PuppyTalk API 테스트</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .section {
+            background: white;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .section-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            cursor: pointer;
+            font-weight: 600;
+            color: #495057;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-header:hover {
+            background: #e9ecef;
+        }
+        
+        .section-content {
+            padding: 20px;
+            display: none;
+        }
+        
+        .section.active .section-content {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        button:hover {
+            background: #5a67d8;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .response-area {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .success {
+            color: #28a745;
+        }
+        
+        .error {
+            color: #dc3545;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .toggle-icon {
+            font-size: 18px;
+        }
+        
+        .api-info {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🐶 PuppyTalk API 테스트</h1>
+        <p>반려동물 채팅 서비스 API 기능 동작 확인</p>
+    </div>
+
+    <!-- 사용자 관리 -->
+    <div class="section active">
+        <div class="section-header" onclick="toggleSection(this)">
+            <span>👤 사용자 관리</span>
+            <span class="toggle-icon">▼</span>
+        </div>
+        <div class="section-content">
+            <div class="api-info">
+                <strong>API:</strong> POST /api/users (생성), GET /api/users (목록), GET /api/users/{id} (단건 조회)
+            </div>
+            
+            <div class="grid">
+                <div>
+                    <h3>사용자 등록</h3>
+                    <div class="form-group">
+                        <label>사용자명</label>
+                        <input type="text" id="username" placeholder="사용자명 (3-20자)">
+                    </div>
+                    <div class="form-group">
+                        <label>이메일</label>
+                        <input type="email" id="email" placeholder="user@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>비밀번호</label>
+                        <input type="password" id="password" placeholder="비밀번호">
+                    </div>
+                    <button onclick="createUser()">사용자 등록</button>
+                    <div id="createUserResponse" class="response-area"></div>
+                </div>
+                
+                <div>
+                    <h3>사용자 조회</h3>
+                    <div class="form-group">
+                        <label>사용자 ID (단건 조회)</label>
+                        <input type="text" id="userId" placeholder="사용자 ID">
+                    </div>
+                    <button onclick="getUserById()">사용자 조회</button>
+                    <button onclick="getAllUsers()" class="btn-secondary">전체 사용자 목록</button>
+                    
+                    <h4 style="margin-top: 20px;">비밀번호 검증</h4>
+                    <div class="form-group">
+                        <label>검증할 비밀번호</label>
+                        <input type="password" id="passwordCheck" placeholder="비밀번호">
+                    </div>
+                    <button onclick="checkPassword()">비밀번호 검증</button>
+                    <div id="getUserResponse" class="response-area"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 반려동물 관리 -->
+    <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+            <span>🐕 반려동물 관리</span>
+            <span class="toggle-icon">►</span>
+        </div>
+        <div class="section-content">
+            <div class="api-info">
+                <strong>API:</strong> POST /api/pets (생성), GET /api/pets (목록), GET /api/pets/{id} (단건 조회)
+            </div>
+            
+            <div class="grid">
+                <div>
+                    <h3>반려동물 등록</h3>
+                    <div class="form-group">
+                        <label>소유자 ID</label>
+                        <input type="text" id="petOwnerId" placeholder="사용자 ID">
+                    </div>
+                    <div class="form-group">
+                        <label>반려동물 이름</label>
+                        <input type="text" id="petName" placeholder="반려동물 이름">
+                    </div>
+                    <div class="form-group">
+                        <label>페르소나</label>
+                        <select id="petPersona">
+                            <option value="FRIENDLY">친근한</option>
+                            <option value="PLAYFUL">장난기 많은</option>
+                            <option value="CALM">차분한</option>
+                            <option value="ENERGETIC">활발한</option>
+                        </select>
+                    </div>
+                    <button onclick="createPet()">반려동물 등록</button>
+                    <div id="createPetResponse" class="response-area"></div>
+                </div>
+                
+                <div>
+                    <h3>반려동물 조회</h3>
+                    <div class="form-group">
+                        <label>반려동물 ID</label>
+                        <input type="text" id="petId" placeholder="반려동물 ID">
+                    </div>
+                    <button onclick="getPetById()">반려동물 조회</button>
+                    <button onclick="getAllPets()" class="btn-secondary">전체 반려동물 목록</button>
+                    <div id="getPetResponse" class="response-area"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 채팅 관리 -->
+    <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+            <span>💬 채팅 관리</span>
+            <span class="toggle-icon">►</span>
+        </div>
+        <div class="section-content">
+            <div class="api-info">
+                <strong>API:</strong> POST /api/chat-rooms (채팅방 생성), GET /api/chat-rooms (목록), POST /api/messages (메시지 전송)
+            </div>
+            
+            <div class="grid">
+                <div>
+                    <h3>채팅방 생성</h3>
+                    <div class="form-group">
+                        <label>사용자 ID</label>
+                        <input type="text" id="chatUserId" placeholder="사용자 ID">
+                    </div>
+                    <div class="form-group">
+                        <label>반려동물 ID</label>
+                        <input type="text" id="chatPetId" placeholder="반려동물 ID">
+                    </div>
+                    <button onclick="createChatRoom()">채팅방 생성</button>
+                    <div id="createChatResponse" class="response-area"></div>
+                </div>
+                
+                <div>
+                    <h3>메시지 전송</h3>
+                    <div class="form-group">
+                        <label>채팅방 ID</label>
+                        <input type="text" id="messageRoomId" placeholder="채팅방 ID">
+                    </div>
+                    <div class="form-group">
+                        <label>발신자 ID</label>
+                        <input type="text" id="messageSenderId" placeholder="사용자 또는 반려동물 ID">
+                    </div>
+                    <div class="form-group">
+                        <label>메시지 내용</label>
+                        <textarea id="messageContent" placeholder="메시지 내용" rows="3"></textarea>
+                    </div>
+                    <button onclick="sendMessage()">메시지 전송</button>
+                    <button onclick="getChatRooms()" class="btn-secondary">채팅방 목록</button>
+                    <div id="getChatResponse" class="response-area"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 시스템 정보 -->
+    <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+            <span>ℹ️ 시스템 정보</span>
+            <span class="toggle-icon">►</span>
+        </div>
+        <div class="section-content">
+            <div class="api-info">
+                <strong>정보:</strong> 서버 상태, 데이터베이스 연결, API 응답 시간 등
+            </div>
+            
+            <button onclick="checkHealth()">서버 상태 확인</button>
+            <button onclick="clearAllResponses()" class="btn-secondary">모든 응답 지우기</button>
+            <div id="systemResponse" class="response-area"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+        
+        function toggleSection(header) {
+            const section = header.parentElement;
+            const isActive = section.classList.contains('active');
+            
+            // 모든 섹션 닫기
+            document.querySelectorAll('.section').forEach(s => {
+                s.classList.remove('active');
+                s.querySelector('.toggle-icon').textContent = '►';
+            });
+            
+            // 클릭한 섹션이 활성화되어 있지 않았다면 열기
+            if (!isActive) {
+                section.classList.add('active');
+                header.querySelector('.toggle-icon').textContent = '▼';
+            }
+        }
+        
+        function showResponse(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString('ko-KR');
+            const status = isError ? 'error' : 'success';
+            
+            element.className = `response-area ${status}`;
+            element.textContent = `[${timestamp}] ${JSON.stringify(data, null, 2)}`;
+        }
+        
+        async function apiCall(url, method = 'GET', body = null) {
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                
+                if (body) {
+                    options.body = JSON.stringify(body);
+                }
+                
+                const response = await fetch(API_BASE + url, options);
+                const data = await response.json();
+                
+                return { data, error: !response.ok };
+            } catch (error) {
+                return { 
+                    data: { error: '네트워크 오류', message: error.message }, 
+                    error: true 
+                };
+            }
+        }
+        
+        // 사용자 관리 함수들
+        async function createUser() {
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !email || !password) {
+                showResponse('createUserResponse', { error: '모든 필드를 입력해주세요.' }, true);
+                return;
+            }
+            
+            const { data, error } = await apiCall('/api/users', 'POST', {
+                username,
+                email,
+                password
+            });
+            
+            showResponse('createUserResponse', data, error);
+            
+            if (!error && data.data) {
+                document.getElementById('userId').value = data.data.id;
+                document.getElementById('petOwnerId').value = data.data.id;
+                document.getElementById('chatUserId').value = data.data.id;
+            }
+        }
+        
+        async function getUserById() {
+            const userId = document.getElementById('userId').value;
+            
+            if (!userId) {
+                showResponse('getUserResponse', { error: '사용자 ID를 입력해주세요.' }, true);
+                return;
+            }
+            
+            const { data, error } = await apiCall(`/api/users/${userId}`);
+            showResponse('getUserResponse', data, error);
+        }
+        
+        async function getAllUsers() {
+            const { data, error } = await apiCall('/api/users');
+            showResponse('getUserResponse', data, error);
+        }
+        
+        async function checkPassword() {
+            const userId = document.getElementById('userId').value;
+            const passwordCheck = document.getElementById('passwordCheck').value;
+            
+            if (!userId || !passwordCheck) {
+                showResponse('getUserResponse', { error: '사용자 ID와 비밀번호를 입력해주세요.' }, true);
+                return;
+            }
+            
+            // 실제로는 사용자 정보를 다시 조회해서 비밀번호 검증 결과를 확인
+            const { data, error } = await apiCall(`/api/users/${userId}`);
+            
+            if (!error && data.data) {
+                const result = {
+                    userId: userId,
+                    passwordMatch: '비밀번호 검증은 서버에서 수행됩니다',
+                    message: '실제 앱에서는 로그인 API를 통해 비밀번호를 검증합니다',
+                    user: data.data
+                };
+                showResponse('getUserResponse', result);
+            } else {
+                showResponse('getUserResponse', data, error);
+            }
+        }
+        
+        // 반려동물 관리 함수들
+        async function createPet() {
+            const ownerId = document.getElementById('petOwnerId').value;
+            const name = document.getElementById('petName').value;
+            const persona = document.getElementById('petPersona').value;
+            
+            if (!ownerId || !name || !persona) {
+                showResponse('createPetResponse', { error: '모든 필드를 입력해주세요.' }, true);
+                return;
+            }
+            
+            const { data, error } = await apiCall('/api/pets', 'POST', {
+                ownerId,
+                name,
+                persona
+            });
+            
+            showResponse('createPetResponse', data, error);
+            
+            if (!error && data.data) {
+                document.getElementById('petId').value = data.data.id;
+                document.getElementById('chatPetId').value = data.data.id;
+            }
+        }
+        
+        async function getPetById() {
+            const petId = document.getElementById('petId').value;
+            
+            if (!petId) {
+                showResponse('getPetResponse', { error: '반려동물 ID를 입력해주세요.' }, true);
+                return;
+            }
+            
+            const { data, error } = await apiCall(`/api/pets/${petId}`);
+            showResponse('getPetResponse', data, error);
+        }
+        
+        async function getAllPets() {
+            const { data, error } = await apiCall('/api/pets');
+            showResponse('getPetResponse', data, error);
+        }
+        
+        // 채팅 관리 함수들
+        async function createChatRoom() {
+            const userId = document.getElementById('chatUserId').value;
+            const petId = document.getElementById('chatPetId').value;
+            
+            if (!userId || !petId) {
+                showResponse('createChatResponse', { error: '사용자 ID와 반려동물 ID를 입력해주세요.' }, true);
+                return;
+            }
+            
+            const { data, error } = await apiCall('/api/chat-rooms', 'POST', {
+                userId,
+                petId
+            });
+            
+            showResponse('createChatResponse', data, error);
+            
+            if (!error && data.data) {
+                document.getElementById('messageRoomId').value = data.data.id;
+            }
+        }
+        
+        async function sendMessage() {
+            const roomId = document.getElementById('messageRoomId').value;
+            const senderId = document.getElementById('messageSenderId').value;
+            const content = document.getElementById('messageContent').value;
+            
+            if (!roomId || !senderId || !content) {
+                showResponse('getChatResponse', { error: '모든 필드를 입력해주세요.' }, true);
+                return;
+            }
+            
+            const { data, error } = await apiCall('/api/messages', 'POST', {
+                chatRoomId: roomId,
+                senderId,
+                content
+            });
+            
+            showResponse('getChatResponse', data, error);
+        }
+        
+        async function getChatRooms() {
+            const { data, error } = await apiCall('/api/chat-rooms');
+            showResponse('getChatResponse', data, error);
+        }
+        
+        // 시스템 정보 함수들
+        async function checkHealth() {
+            const startTime = Date.now();
+            const { data, error } = await apiCall('/actuator/health');
+            const endTime = Date.now();
+            
+            const healthInfo = {
+                status: error ? 'DOWN' : 'UP',
+                responseTime: `${endTime - startTime}ms`,
+                timestamp: new Date().toISOString(),
+                serverResponse: data
+            };
+            
+            showResponse('systemResponse', healthInfo, error);
+        }
+        
+        function clearAllResponses() {
+            document.querySelectorAll('.response-area').forEach(area => {
+                area.textContent = '';
+                area.className = 'response-area';
+            });
+        }
+        
+        // 페이지 로드 시 첫 번째 섹션을 활성화
+        document.addEventListener('DOMContentLoaded', function() {
+            // 기본적으로 첫 번째 섹션이 열려있도록 설정
+            checkHealth();
+        });
+    </script>
+</body>
+</html>

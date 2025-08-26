@@ -6,11 +6,6 @@ import com.puppytalk.user.UserId;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-/**
- * 사용자 활동 도메인 모델
- * 
- * Backend 관점: 성능 최적화를 위한 불변 설계
- */
 public class UserActivity {
     private final ActivityId id;
     private final UserId userId;
@@ -21,20 +16,6 @@ public class UserActivity {
 
     private UserActivity(ActivityId id, UserId userId, ChatRoomId chatRoomId,
                         ActivityType activityType, LocalDateTime activityAt, LocalDateTime createdAt) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId must not be null");
-        }
-        if (activityType == null) {
-            throw new IllegalArgumentException("ActivityType must not be null");
-        }
-        if (activityAt == null) {
-            throw new IllegalArgumentException("ActivityAt must not be null");
-        }
-        if (createdAt == null) {
-            throw new IllegalArgumentException("CreatedAt must not be null");
-        }
-        // chatRoomId는 LOGIN/LOGOUT 활동에서는 null일 수 있음
-
         this.id = id;
         this.userId = userId;
         this.chatRoomId = chatRoomId;
@@ -52,8 +33,12 @@ public class UserActivity {
         ActivityType activityType,
         LocalDateTime activityAt
     ) {
+        validateUserId(userId);
+        validateActivityType(activityType);
+        validateActivityAt(activityAt);
+        
         return new UserActivity(
-            null, // ID는 저장 시 생성됨
+            null,
             userId,
             chatRoomId,
             activityType,
@@ -70,6 +55,10 @@ public class UserActivity {
         ActivityType activityType,
         LocalDateTime activityAt
     ) {
+        validateUserId(userId);
+        validateActivityType(activityType);
+        validateActivityAt(activityAt);
+        
         if (!activityType.equals(ActivityType.LOGIN) && !activityType.equals(ActivityType.LOGOUT)) {
             throw new IllegalArgumentException("Global activity is only allowed for LOGIN/LOGOUT");
         }
@@ -92,10 +81,34 @@ public class UserActivity {
         if (id == null || !id.isValid()) {
             throw new IllegalArgumentException("저장된 활동 ID가 필요합니다");
         }
+        validateUserId(userId);
+        validateActivityType(activityType);
+        validateActivityAt(activityAt);
+        if (createdAt == null) {
+            throw new IllegalArgumentException("CreatedAt must not be null");
+        }
 
         return new UserActivity(id, userId, chatRoomId, activityType, activityAt, createdAt);
     }
     
+    private static void validateUserId(UserId userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("UserId must not be null");
+        }
+    }
+    
+    private static void validateActivityType(ActivityType activityType) {
+        if (activityType == null) {
+            throw new IllegalArgumentException("ActivityType must not be null");
+        }
+    }
+    
+    private static void validateActivityAt(LocalDateTime activityAt) {
+        if (activityAt == null) {
+            throw new IllegalArgumentException("ActivityAt must not be null");
+        }
+    }
+
     /**
      * ID를 포함한 새로운 UserActivity 생성 (Repository에서 사용)
      */

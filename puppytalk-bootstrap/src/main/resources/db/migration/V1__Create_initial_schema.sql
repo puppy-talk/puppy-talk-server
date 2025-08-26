@@ -1,5 +1,4 @@
--- V1__Initial_schema.sql
--- PuppyTalk Database Schema - Initial Version
+-- PuppyTalk Database Schema for MariaDB
 -- 생성형 AI 기반 반려동물 채팅 서비스
 
 -- 사용자 테이블
@@ -7,6 +6,7 @@ CREATE TABLE users (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(30) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(500) NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -67,15 +67,16 @@ CREATE TABLE user_activities (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
     activity_type VARCHAR(50) NOT NULL,
-    last_active_at TIMESTAMP NOT NULL,
+    activity_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE KEY uk_user_activities_user_type (user_id, activity_type),
     INDEX idx_user_activities_user_id (user_id),
-    INDEX idx_user_activities_last_active (last_active_at),
-    INDEX idx_user_activities_type (activity_type)
+    INDEX idx_user_activities_user_activity_desc (user_id, activity_at DESC),
+    INDEX idx_user_activities_activity_at_desc (activity_at DESC),
+    INDEX idx_user_activities_type_activity_at (activity_type, activity_at DESC)
 );
 
 -- 알림 테이블
@@ -83,18 +84,26 @@ CREATE TABLE notifications (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
     pet_id BIGINT,
+    chat_room_id BIGINT,
     title VARCHAR(100) NOT NULL,
     content VARCHAR(500) NOT NULL,
     type VARCHAR(20) NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    status VARCHAR(20) NOT NULL DEFAULT 'CREATED',
+    scheduled_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    sent_at TIMESTAMP NULL,
+    read_at TIMESTAMP NULL,
+    retry_count INT NOT NULL DEFAULT 0,
+    failure_reason VARCHAR(1000),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE SET NULL,
+    FOREIGN KEY (chat_room_id) REFERENCES chat_rooms(id) ON DELETE SET NULL,
     INDEX idx_notifications_user_id (user_id),
     INDEX idx_notifications_pet_id (pet_id),
     INDEX idx_notifications_status (status),
     INDEX idx_notifications_type (type),
+    INDEX idx_notifications_scheduled_at (scheduled_at),
     INDEX idx_notifications_created_at (created_at)
 );

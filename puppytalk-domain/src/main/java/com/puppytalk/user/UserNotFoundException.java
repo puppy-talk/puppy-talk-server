@@ -1,19 +1,20 @@
 package com.puppytalk.user;
 
-/**
- * 사용자를 찾을 수 없을 때 발생하는 예외
- */
 public class UserNotFoundException extends RuntimeException {
     
-    public UserNotFoundException(UserId userId) {
-        super("사용자를 찾을 수 없습니다. ID: " + userId.value());
+    public UserNotFoundException(String message) {
+        super(message);
     }
     
-    public UserNotFoundException(String identifier) {
-        super("사용자를 찾을 수 없습니다. 식별자: " + identifier);
+    public static UserNotFoundException byId(UserId userId) {
+        return new UserNotFoundException("사용자를 찾을 수 없습니다. ID: " + userId.getValue());
+    }
+    
+    public static UserNotFoundException byUsername(String username) {
+        return new UserNotFoundException("사용자를 찾을 수 없습니다. 사용자명: " + username);
     }
     
     public static UserNotFoundException byEmail(String email) {
-        return new UserNotFoundException("이메일로 사용자를 찾을 수 없습니다: " + email);
+        return new UserNotFoundException("사용자를 찾을 수 없습니다. 이메일: " + email);
     }
 }

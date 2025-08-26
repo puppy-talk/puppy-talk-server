@@ -3,34 +3,35 @@ package com.puppytalk.activity;
 /**
  * 활동 ID 값 객체
  */
-public record ActivityId(Long value) {
-    
-    public ActivityId {
-        // 생성자 검증은 of() 메서드에서 수행
+public class ActivityId {
+
+    private final Long value;
+
+    private ActivityId(Long value) {
+        this.value = value;
     }
-    
-    public static ActivityId of(Long value) {
-        if (value == null || value <= 0) {
-            throw new IllegalArgumentException("ActivityId must be positive");
-        }
-        return new ActivityId(value);
-    }
-    
-    public static ActivityId create() {
-        return new ActivityId(null);
-    }
-    
+
+    /**
+     * 하나의 매개변수를 받아 타입 변환 (데이터베이스에서 조회된 값용)
+     */
     public static ActivityId from(Long value) {
         return new ActivityId(value);
     }
-    
+
+    /**
+     * 항상 새로운 인스턴스를 생성해 반환 (신규 생성용)
+     */
+    public static ActivityId create() {
+        return new ActivityId(null);
+    }
+
     /**
      * ID가 유효한지 확인
      */
     public boolean isValid() {
         return value != null && value > 0;
     }
-    
+
     /**
      * JPA 호환성을 위한 값 접근
      */

@@ -9,19 +9,18 @@ public record UserId(Long value) {
         return value;
     }
     
-    public static UserId of(Long value) {
-        if (value == null || value <= 0) {
-            throw new IllegalArgumentException("사용자 ID는 양수여야 합니다");
-        }
-        return new UserId(value);
-    }
-    
-    public static UserId create() {
-        return new UserId(null);
-    }
-    
+    /**
+     * 하나의 매개변수를 받아 타입 변환 (데이터베이스에서 조회된 값용)
+     */
     public static UserId from(Long value) {
         return new UserId(value);
+    }
+    
+    /**
+     * 항상 새로운 인스턴스를 생성해 반환 (신규 생성용)
+     */
+    public static UserId create() {
+        return new UserId(null);
     }
 
     public boolean isStored() {

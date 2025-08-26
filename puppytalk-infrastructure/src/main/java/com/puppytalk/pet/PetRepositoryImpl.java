@@ -21,19 +21,31 @@ public class PetRepositoryImpl implements PetRepository {
 
     @Override
     @Transactional
-    public void save(Pet pet) {
-        if (pet.id().isValid()) {
-            // 기존 반려동물 업데이트
-            PetJpaEntity existingEntity = petJpaRepository.findById(pet.id().value())
-                .orElseThrow(() -> new IllegalStateException("반려동물을 찾을 수 없습니다: " + pet.id().value()));
-            
-            existingEntity.update(pet);
-            petJpaRepository.save(existingEntity);
-        } else {
-            // 새로운 반려동물 생성
-            PetJpaEntity entity = PetJpaEntity.from(pet);
-            petJpaRepository.save(entity);
+    public Pet create(Pet pet) {
+        if (pet.id() != null && pet.id().isValid()) {
+            throw new IllegalArgumentException("새로운 반려동물은 ID를 가질 수 없습니다");
         }
+        
+        PetJpaEntity entity = PetJpaEntity.from(pet);
+        PetJpaEntity savedEntity = petJpaRepository.save(entity);
+        
+        return savedEntity.toDomain();
+    }
+
+    @Override
+    @Transactional
+    public Pet delete(Pet pet) {
+        if (pet.id() == null || !pet.id().isValid()) {
+            throw new IllegalArgumentException("삭제할 반려동물은 유효한 ID가 필요합니다");
+        }
+        
+        PetJpaEntity petEntity = petJpaRepository.findById(pet.id().value())
+            .orElseThrow(() -> new IllegalArgumentException("반려동물을 찾을 수 없습니다: " + pet.id()));
+
+        petEntity.update(pet);
+        PetJpaEntity savedEntity = petJpaRepository.save(petEntity);
+        
+        return savedEntity.toDomain();
     }
 
     @Override

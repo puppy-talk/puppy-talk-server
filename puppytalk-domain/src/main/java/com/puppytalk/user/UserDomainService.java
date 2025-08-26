@@ -54,7 +54,7 @@ public class UserDomainService {
         }
         
         return userRepository.findById(userId)
-            .orElseThrow(() -> new UserNotFoundException(userId));
+            .orElseThrow(() -> UserNotFoundException.byId(userId));
     }
     
     /**
@@ -70,7 +70,7 @@ public class UserDomainService {
         }
         
         return userRepository.findByUsername(username.trim())
-            .orElseThrow(() -> new UserNotFoundException(username));
+            .orElseThrow(() -> UserNotFoundException.byUsername(username));
     }
     
     /**
@@ -130,7 +130,7 @@ public class UserDomainService {
      */
     private void validateUniqueUsername(String username) {
         if (userRepository.existsByUsername(username)) {
-            throw new DuplicateUserException(username);
+            throw DuplicateUserException.byUsername(username);
         }
     }
     

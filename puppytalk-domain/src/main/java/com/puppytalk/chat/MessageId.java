@@ -13,19 +13,18 @@ public class MessageId {
         this.value = value;
     }
     
-    public static MessageId of(Long value) {
-        if (value == null || value <= 0) {
-            throw new IllegalArgumentException("메시지 ID는 양수여야 합니다");
-        }
-        return new MessageId(value);
-    }
-    
-    public static MessageId create() {
-        return new MessageId(null);
-    }
-    
+    /**
+     * 하나의 매개변수를 받아 타입 변환 (데이터베이스에서 조회된 값용)
+     */
     public static MessageId from(Long value) {
         return new MessageId(value);
+    }
+    
+    /**
+     * 항상 새로운 인스턴스를 생성해 반환 (신규 생성용)
+     */
+    public static MessageId create() {
+        return new MessageId(null);
     }
     
     public boolean isValid() {

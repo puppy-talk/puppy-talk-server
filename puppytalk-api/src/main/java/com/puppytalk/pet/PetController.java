@@ -40,14 +40,31 @@ public class PetController {
         this.petFacade = petFacade;
     }
 
-    @Operation(summary = "반려동물 생성", description = "새로운 반려동물을 생성합니다.")
+    @Operation(
+        summary = "반려동물 생성", 
+        description = "새로운 반려동물을 생성합니다. 반려동물은 불변 엔티티로 생성 후 수정되지 않습니다."
+    )
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "반려동물 생성 성공"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "201", 
+            description = "반려동물 생성 성공",
+            content = @Content(schema = @Schema(implementation = PetResponse.class))
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400", 
+            description = "잘못된 요청 - 필수 필드 누락 또는 유효성 검증 실패"
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "500", 
+            description = "서버 내부 오류"
+        )
     })
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> createPet(
-        @Parameter(description = "반려동물 생성 요청 정보", required = true)
+    public ResponseEntity<ApiResponse<PetResponse>> createPet(
+        @Parameter(
+            description = "반려동물 생성 요청 정보 - 소유자 ID, 이름, 페르소나 포함", 
+            required = true
+        )
         @Valid @RequestBody PetCreateRequest request
     ) {
         PetCreateCommand command = PetCreateCommand.of(

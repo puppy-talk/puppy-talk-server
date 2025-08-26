@@ -6,9 +6,14 @@ import java.util.Optional;
 public interface PetRepository {
     
     /**
-     * 반려동물 저장
+     * 새로운 반려동물 생성
      */
-    void save(Pet pet);
+    Pet create(Pet pet);
+    
+    /**
+     * 반려동물 삭제 (소프트 삭제)
+     */
+    Pet delete(Pet pet);
     
     /**
      * ID로 반려동물 조회

@@ -39,8 +39,7 @@ public class DomainAssemblyConfig {
     }
     
     @Bean
-    public NotificationDomainService notificationDomainService(NotificationRepository notificationRepository,
-                                                              ActivityDomainService activityDomainService) {
-        return new NotificationDomainService(notificationRepository, activityDomainService);
+    public NotificationDomainService notificationDomainService(NotificationRepository notificationRepository) {
+        return new NotificationDomainService(notificationRepository);
     }
 }

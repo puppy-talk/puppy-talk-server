@@ -37,7 +37,7 @@ class UserDomainServiceTest {
         String username = "testuser";
         String email = "test@example.com";
         String password = "password123";
-        UserId expectedUserId = UserId.of(1L);
+        UserId expectedUserId = UserId.from(1L);
         
         mockRepository.setSaveResult(expectedUserId);
         mockRepository.setExistsByUsernameResult(false);
@@ -76,7 +76,7 @@ class UserDomainServiceTest {
             () -> userDomainService.registerUser(username, email, password)
         );
         
-        assertEquals("사용자명은 필수입니다", exception.getMessage());
+        assertEquals("Username must not be null or empty", exception.getMessage());
         assertFalse(mockRepository.isSaveCalled());
         assertFalse(mockRepository.isExistsByUsernameCalled());
     }
@@ -95,7 +95,7 @@ class UserDomainServiceTest {
             () -> userDomainService.registerUser(username, email, password)
         );
         
-        assertEquals("사용자명은 필수입니다", exception.getMessage());
+        assertEquals("Username must not be null or empty", exception.getMessage());
         assertFalse(mockRepository.isSaveCalled());
     }
     
@@ -113,7 +113,7 @@ class UserDomainServiceTest {
             () -> userDomainService.registerUser(username, email, password)
         );
         
-        assertEquals("이메일은 필수입니다", exception.getMessage());
+        assertEquals("Email must not be null or empty", exception.getMessage());
         assertFalse(mockRepository.isSaveCalled());
     }
     
@@ -174,7 +174,7 @@ class UserDomainServiceTest {
             () -> userDomainService.registerUser(username, email, password)
         );
         
-        assertEquals("비밀번호는 필수입니다", exception.getMessage());
+        assertEquals("Password must not be null or empty", exception.getMessage());
         assertFalse(mockRepository.isSaveCalled());
     }
     
@@ -192,7 +192,7 @@ class UserDomainServiceTest {
             () -> userDomainService.registerUser(username, email, password)
         );
         
-        assertEquals("비밀번호는 필수입니다", exception.getMessage());
+        assertEquals("Password must not be null or empty", exception.getMessage());
         assertFalse(mockRepository.isSaveCalled());
     }
     
@@ -200,7 +200,7 @@ class UserDomainServiceTest {
     @Test
     void findUserById_Success() {
         // given
-        UserId userId = UserId.of(1L);
+        UserId userId = UserId.from(1L);
         User expectedUser = User.of(
             userId,
             "testuser",
@@ -241,7 +241,7 @@ class UserDomainServiceTest {
     @Test
     void findUserById_UserNotFound_ThrowsException() {
         // given
-        UserId userId = UserId.of(1L);
+        UserId userId = UserId.from(1L);
         mockRepository.setFindByIdResult(Optional.empty());
         
         // when & then
@@ -260,7 +260,7 @@ class UserDomainServiceTest {
         // given
         String username = "testuser";
         User expectedUser = User.of(
-            UserId.of(1L),
+            UserId.from(1L),
             username,
             "test@example.com",
             "password123",
@@ -317,8 +317,8 @@ class UserDomainServiceTest {
     void findActiveUsers_Success() {
         // given
         List<User> expectedUsers = Arrays.asList(
-            User.of(UserId.of(1L), "user1", "user1@example.com", "password1", LocalDateTime.now(), false),
-            User.of(UserId.of(2L), "user2", "user2@example.com", "password2", LocalDateTime.now(), false)
+            User.of(UserId.from(1L), "user1", "user1@example.com", "password1", LocalDateTime.now(), false),
+            User.of(UserId.from(2L), "user2", "user2@example.com", "password2", LocalDateTime.now(), false)
         );
         
         mockRepository.setFindActiveUsersResult(expectedUsers);
@@ -337,7 +337,7 @@ class UserDomainServiceTest {
         // given
         String email = "Test@EXAMPLE.COM";
         User expectedUser = User.of(
-            UserId.of(1L),
+            UserId.from(1L),
             "testuser",
             "test@example.com",
             "password123",
@@ -360,7 +360,7 @@ class UserDomainServiceTest {
     @Test
     void deleteUser_Success() {
         // given
-        UserId userId = UserId.of(1L);
+        UserId userId = UserId.from(1L);
         User user = User.of(userId, "testuser", "test@example.com", "password123", LocalDateTime.now(), false);
         
         mockRepository.setFindByIdResult(Optional.of(user));
@@ -386,7 +386,7 @@ class UserDomainServiceTest {
     @Test
     void restoreUser_Success() {
         // given
-        UserId userId = UserId.of(1L);
+        UserId userId = UserId.from(1L);
         User deletedUser = User.of(userId, "testuser", "test@example.com", "password123", LocalDateTime.now(), true);
         
         mockRepository.setFindByIdResult(Optional.of(deletedUser));

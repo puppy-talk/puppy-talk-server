@@ -33,7 +33,7 @@ public class UserRepositoryImpl implements UserRepository {
             // 새로운 사용자 생성
             UserJpaEntity entity = UserJpaEntity.fromDomain(user);
             UserJpaEntity savedEntity = userJpaRepository.save(entity);
-            return UserId.of(savedEntity.getId());
+            return UserId.from(savedEntity.getId());
         }
     }
     

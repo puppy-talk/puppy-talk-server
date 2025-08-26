@@ -2,7 +2,7 @@ package com.puppytalk.chat;
 
 public record ChatRoomResult(
     ChatRoom chatRoom,
-    boolean isNewlyCreated
+    boolean isCreated
 ) {
     public static ChatRoomResult created(ChatRoom chatRoom) {
         return new ChatRoomResult(chatRoom, true);

@@ -1,5 +1,11 @@
 package com.puppytalk.unit.pet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.puppytalk.pet.Pet;
 import com.puppytalk.pet.PetDomainService;
 import com.puppytalk.pet.PetId;
@@ -7,16 +13,13 @@ import com.puppytalk.pet.PetNotFoundException;
 import com.puppytalk.pet.PetRepository;
 import com.puppytalk.pet.PetStatus;
 import com.puppytalk.user.UserId;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 @DisplayName("PetDomainService 단위 테스트")
 class PetDomainServiceTest {
@@ -34,8 +37,8 @@ class PetDomainServiceTest {
     @Test
     void findPet_Success() {
         // given
-        PetId petId = PetId.of(1L);
-        UserId ownerId = UserId.of(1L);
+        PetId petId = PetId.from(1L);
+        UserId ownerId = UserId.from(1L);
         Pet expectedPet = Pet.of(
             petId,
             ownerId,
@@ -62,7 +65,7 @@ class PetDomainServiceTest {
     void findPet_NullPetId_ThrowsException() {
         // given
         PetId petId = null;
-        UserId ownerId = UserId.of(1L);
+        UserId ownerId = UserId.from(1L);
         
         // when & then
         IllegalArgumentException exception = assertThrows(
@@ -78,7 +81,7 @@ class PetDomainServiceTest {
     @Test
     void findPet_NullOwnerId_ThrowsException() {
         // given
-        PetId petId = PetId.of(1L);
+        PetId petId = PetId.from(1L);
         UserId ownerId = null;
         
         // when & then
@@ -95,8 +98,8 @@ class PetDomainServiceTest {
     @Test
     void findPet_PetNotFound_ThrowsException() {
         // given
-        PetId petId = PetId.of(1L);
-        UserId ownerId = UserId.of(1L);
+        PetId petId = PetId.from(1L);
+        UserId ownerId = UserId.from(1L);
         
         mockRepository.setFindByIdAndOwnerIdResult(Optional.empty());
         
@@ -114,33 +117,41 @@ class PetDomainServiceTest {
     @Test
     void createPet_Success() {
         // given
-        UserId ownerId = UserId.of(1L);
+        UserId ownerId = UserId.from(1L);
         String petName = "멍멍이";
         String petPersona = "활발하고 친근한 강아지";
+        Pet expectedPet = Pet.of(
+            PetId.from(1L),
+            ownerId,
+            petName.trim(),
+            petPersona.trim(),
+            LocalDateTime.now(),
+            PetStatus.ACTIVE
+        );
         
-        mockRepository.setSaveResult(PetId.of(1L));
+        mockRepository.setCreateResult(expectedPet);
         
         // when
         petDomainService.createPet(ownerId, petName, petPersona);
         
         // then
-        assertTrue(mockRepository.isSaveCalled());
-        Pet savedPet = mockRepository.getLastSavedPet();
-        assertNotNull(savedPet);
-        assertEquals(ownerId, savedPet.ownerId());
-        assertEquals(petName.trim(), savedPet.name());
-        assertEquals(petPersona.trim(), savedPet.persona());
-        assertEquals(PetStatus.ACTIVE, savedPet.status());
+        assertTrue(mockRepository.isCreateCalled());
+        Pet createdPet = mockRepository.getLastCreatedPet();
+        assertNotNull(createdPet);
+        assertEquals(ownerId, createdPet.ownerId());
+        assertEquals(petName.trim(), createdPet.name());
+        assertEquals(petPersona.trim(), createdPet.persona());
+        assertEquals(PetStatus.ACTIVE, createdPet.status());
     }
     
     @DisplayName("반려동물 목록 조회 - 성공")
     @Test
     void findPetList_Success() {
         // given
-        UserId ownerId = UserId.of(1L);
+        UserId ownerId = UserId.from(1L);
         List<Pet> expectedPets = Arrays.asList(
-            Pet.of(PetId.of(1L), ownerId, "멍멍이", "활발한 강아지", LocalDateTime.now(), PetStatus.ACTIVE),
-            Pet.of(PetId.of(2L), ownerId, "야옹이", "조용한 고양이", LocalDateTime.now(), PetStatus.ACTIVE)
+            Pet.of(PetId.from(1L), ownerId, "멍멍이", "활발한 강아지", LocalDateTime.now(), PetStatus.ACTIVE),
+            Pet.of(PetId.from(2L), ownerId, "야옹이", "조용한 고양이", LocalDateTime.now(), PetStatus.ACTIVE)
         );
         
         mockRepository.setFindByOwnerIdResult(expectedPets);
@@ -174,35 +185,36 @@ class PetDomainServiceTest {
     @Test
     void deletePet_Success() {
         // given
-        PetId petId = PetId.of(1L);
-        UserId ownerId = UserId.of(1L);
+        PetId petId = PetId.from(1L);
+        UserId ownerId = UserId.from(1L);
         Pet pet = Pet.of(petId, ownerId, "멍멍이", "활발한 강아지", LocalDateTime.now(), PetStatus.ACTIVE);
+        Pet deletedPet = pet.withDeletedStatus();
         
         mockRepository.setFindByIdAndOwnerIdResult(Optional.of(pet));
-        mockRepository.setSaveResult(petId);
+        mockRepository.setDeleteResult(deletedPet);
         
         // when
         petDomainService.deletePet(petId, ownerId);
         
         // then
         assertTrue(mockRepository.isFindByIdAndOwnerIdCalled());
-        assertTrue(mockRepository.isSaveCalled());
+        assertTrue(mockRepository.isDeleteCalled());
         
-        Pet savedPet = mockRepository.getLastSavedPet();
-        assertNotNull(savedPet);
-        assertEquals(pet.id(), savedPet.id());
-        assertEquals(pet.ownerId(), savedPet.ownerId());
-        assertEquals(pet.name(), savedPet.name());
-        assertEquals(pet.persona(), savedPet.persona());
-        assertEquals(PetStatus.DELETED, savedPet.status());
+        Pet deletedPetFromRepo = mockRepository.getLastDeletedPet();
+        assertNotNull(deletedPetFromRepo);
+        assertEquals(pet.id(), deletedPetFromRepo.id());
+        assertEquals(pet.ownerId(), deletedPetFromRepo.ownerId());
+        assertEquals(pet.name(), deletedPetFromRepo.name());
+        assertEquals(pet.persona(), deletedPetFromRepo.persona());
+        assertEquals(PetStatus.DELETED, deletedPetFromRepo.status());
     }
     
     @DisplayName("반려동물 삭제 - 존재하지 않는 반려동물로 실패")
     @Test
     void deletePet_PetNotFound_ThrowsException() {
         // given
-        PetId petId = PetId.of(1L);
-        UserId ownerId = UserId.of(1L);
+        PetId petId = PetId.from(1L);
+        UserId ownerId = UserId.from(1L);
         
         mockRepository.setFindByIdAndOwnerIdResult(Optional.empty());
         
@@ -214,43 +226,38 @@ class PetDomainServiceTest {
         
         assertTrue(exception.getMessage().contains("1"));
         assertTrue(mockRepository.isFindByIdAndOwnerIdCalled());
-        assertFalse(mockRepository.isSaveCalled());
+        assertFalse(mockRepository.isDeleteCalled());
     }
     
-    @DisplayName("생성자 - null 레포지토리로 실패")
-    @Test
-    void constructor_NullRepository_ThrowsException() {
-        // when & then
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> new PetDomainService(null)
-        );
-        
-        assertEquals("PetRepository must not be null", exception.getMessage());
-    }
-    
-    /**
-     * Mock PetRepository 구현체
-     * Mockito 라이브러리 사용 금지로 직접 Mock 객체 구현
-     */
     private static class MockPetRepository implements PetRepository {
-        private boolean saveCalled = false;
+        private boolean createCalled = false;
+        private boolean deleteCalled = false;
         private boolean findByIdAndOwnerIdCalled = false;
         private boolean findByOwnerIdCalled = false;
         
-        private Pet lastSavedPet;
+        private Pet lastCreatedPet;
+        private Pet lastDeletedPet;
         private PetId lastFindByIdAndOwnerIdPetId;
         private UserId lastFindByIdAndOwnerIdOwnerId;
         private UserId lastFindByOwnerIdParam;
         
-        private PetId saveResult;
+        private Pet createResult;
+        private Pet deleteResult;
         private Optional<Pet> findByIdAndOwnerIdResult = Optional.empty();
-        private List<Pet> findByOwnerIdResult = Arrays.asList();
+        private List<Pet> findByOwnerIdResult = List.of();
         
         @Override
-        public void save(Pet pet) {
-            saveCalled = true;
-            lastSavedPet = pet;
+        public Pet create(Pet pet) {
+            createCalled = true;
+            lastCreatedPet = pet;
+            return createResult != null ? createResult : pet;
+        }
+        
+        @Override
+        public Pet delete(Pet pet) {
+            deleteCalled = true;
+            lastDeletedPet = pet;
+            return deleteResult != null ? deleteResult : pet;
         }
         
         @Override
@@ -289,15 +296,18 @@ class PetDomainServiceTest {
         }
         
         // Test helper methods
-        public void setSaveResult(PetId result) { this.saveResult = result; }
+        public void setCreateResult(Pet result) { this.createResult = result; }
+        public void setDeleteResult(Pet result) { this.deleteResult = result; }
         public void setFindByIdAndOwnerIdResult(Optional<Pet> result) { this.findByIdAndOwnerIdResult = result; }
         public void setFindByOwnerIdResult(List<Pet> result) { this.findByOwnerIdResult = result; }
         
-        public boolean isSaveCalled() { return saveCalled; }
+        public boolean isCreateCalled() { return createCalled; }
+        public boolean isDeleteCalled() { return deleteCalled; }
         public boolean isFindByIdAndOwnerIdCalled() { return findByIdAndOwnerIdCalled; }
         public boolean isFindByOwnerIdCalled() { return findByOwnerIdCalled; }
         
-        public Pet getLastSavedPet() { return lastSavedPet; }
+        public Pet getLastCreatedPet() { return lastCreatedPet; }
+        public Pet getLastDeletedPet() { return lastDeletedPet; }
         public PetId getLastFindByIdAndOwnerIdPetId() { return lastFindByIdAndOwnerIdPetId; }
         public UserId getLastFindByIdAndOwnerIdOwnerId() { return lastFindByIdAndOwnerIdOwnerId; }
         public UserId getLastFindByOwnerIdParam() { return lastFindByOwnerIdParam; }

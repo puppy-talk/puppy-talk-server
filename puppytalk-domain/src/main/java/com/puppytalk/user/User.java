@@ -27,27 +27,6 @@ public class User {
 
     private User(UserId id, String username, String email, Password password,
                  LocalDateTime createdAt, boolean isDeleted) {
-        if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("사용자명은 필수입니다");
-        }
-        if (username.trim().length() < MIN_USERNAME_LENGTH || username.trim().length() > MAX_USERNAME_LENGTH) {
-            throw new IllegalArgumentException(
-                String.format("사용자명은 %d-%d자 사이여야 합니다", MIN_USERNAME_LENGTH, MAX_USERNAME_LENGTH)
-            );
-        }
-        if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("이메일은 필수입니다");
-        }
-        if (!isValidEmail(email)) {
-            throw new IllegalArgumentException("올바른 이메일 형식이 아닙니다");
-        }
-        if (password == null) {
-            throw new IllegalArgumentException("비밀번호는 필수입니다");
-        }
-        if (createdAt == null) {
-            throw new IllegalArgumentException("생성 시각은 필수입니다");
-        }
-
         this.id = id;
         this.username = username;
         this.email = email;
@@ -57,6 +36,10 @@ public class User {
     }
 
     public static User create(String username, String email, String rawPassword) {
+        validateUsername(username);
+        validateEmail(email);
+        validateRawPassword(rawPassword);
+        
         Password password = Password.fromRawPassword(rawPassword);
         
         return new User(
@@ -74,11 +57,45 @@ public class User {
         if (id == null || !id.isStored()) {
             throw new IllegalArgumentException("저장된 사용자 ID가 필요합니다");
         }
+        validateUsername(username);
+        validateEmail(email);
+        if (encryptedPassword == null || encryptedPassword.isBlank()) {
+            throw new IllegalArgumentException("암호화된 비밀번호는 필수입니다");
+        }
+        if (createdAt == null) {
+            throw new IllegalArgumentException("생성 시각은 필수입니다");
+        }
 
         Password password = Password.fromEncryptedPassword(encryptedPassword);
         return new User(id, username, email, password, createdAt, isDeleted);
     }
 
+    private static void validateUsername(String username) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("사용자명은 필수입니다");
+        }
+        if (username.trim().length() < MIN_USERNAME_LENGTH || username.trim().length() > MAX_USERNAME_LENGTH) {
+            throw new IllegalArgumentException(
+                String.format("사용자명은 %d-%d자 사이여야 합니다", MIN_USERNAME_LENGTH, MAX_USERNAME_LENGTH)
+            );
+        }
+    }
+    
+    private static void validateEmail(String email) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("이메일은 필수입니다");
+        }
+        if (!isValidEmail(email)) {
+            throw new IllegalArgumentException("올바른 이메일 형식이 아닙니다");
+        }
+    }
+    
+    private static void validateRawPassword(String rawPassword) {
+        if (rawPassword == null || rawPassword.isBlank()) {
+            throw new IllegalArgumentException("비밀번호는 필수입니다");
+        }
+    }
+    
     private static boolean isValidEmail(String email) {
         if (email == null || email.isBlank()) {
             return false;

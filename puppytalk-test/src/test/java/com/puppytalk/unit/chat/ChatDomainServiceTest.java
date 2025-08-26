@@ -42,10 +42,10 @@ class ChatDomainServiceTest {
     @Test
     void findOrCreateChatRoom_ExistingRoom_ReturnsExistingRoom() {
         // given
-        UserId userId = UserId.of(1L);
-        PetId petId = PetId.of(1L);
+        UserId userId = UserId.from(1L);
+        PetId petId = PetId.from(1L);
         ChatRoom existingChatRoom = ChatRoom.of(
-            ChatRoomId.of(1L),
+            ChatRoomId.from(1L),
             userId,
             petId,
             LocalDateTime.now().minusDays(1),
@@ -59,7 +59,7 @@ class ChatDomainServiceTest {
         
         // then
         assertNotNull(result);
-        assertFalse(result.isNewlyCreated());
+        assertFalse(result.isCreated());
         assertEquals(existingChatRoom, result.chatRoom());
         assertTrue(mockChatRoomRepository.isFindByUserIdAndPetIdCalled());
         assertFalse(mockChatRoomRepository.isSaveCalled());
@@ -69,10 +69,10 @@ class ChatDomainServiceTest {
     @Test
     void findOrCreateChatRoom_NewRoom_CreatesNewRoom() {
         // given
-        UserId userId = UserId.of(1L);
-        PetId petId = PetId.of(1L);
+        UserId userId = UserId.from(1L);
+        PetId petId = PetId.from(1L);
         ChatRoom newChatRoom = ChatRoom.of(
-            ChatRoomId.of(1L),
+            ChatRoomId.from(1L),
             userId,
             petId,
             LocalDateTime.now(),
@@ -87,7 +87,7 @@ class ChatDomainServiceTest {
         
         // then
         assertNotNull(result);
-        assertTrue(result.isNewlyCreated());
+        assertTrue(result.isCreated());
         assertEquals(newChatRoom, result.chatRoom());
         assertTrue(mockChatRoomRepository.isFindByUserIdAndPetIdCalled());
         assertTrue(mockChatRoomRepository.isSaveCalled());
@@ -103,7 +103,7 @@ class ChatDomainServiceTest {
     void findOrCreateChatRoom_NullUserId_ThrowsException() {
         // given
         UserId userId = null;
-        PetId petId = PetId.of(1L);
+        PetId petId = PetId.from(1L);
         
         // when & then
         IllegalArgumentException exception = assertThrows(
@@ -119,7 +119,7 @@ class ChatDomainServiceTest {
     @Test
     void findOrCreateChatRoom_NullPetId_ThrowsException() {
         // given
-        UserId userId = UserId.of(1L);
+        UserId userId = UserId.from(1L);
         PetId petId = null;
         
         // when & then
@@ -136,12 +136,12 @@ class ChatDomainServiceTest {
     @Test
     void findChatRoom_Success() {
         // given
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
-        UserId userId = UserId.of(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
+        UserId userId = UserId.from(1L);
         ChatRoom chatRoom = ChatRoom.of(
             chatRoomId,
             userId,
-            PetId.of(1L),
+            PetId.from(1L),
             LocalDateTime.now(),
             LocalDateTime.now()
         );
@@ -161,13 +161,13 @@ class ChatDomainServiceTest {
     @Test
     void findChatRoom_AccessDenied_ThrowsException() {
         // given
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
-        UserId userId = UserId.of(1L);
-        UserId otherUserId = UserId.of(2L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
+        UserId userId = UserId.from(1L);
+        UserId otherUserId = UserId.from(2L);
         ChatRoom chatRoom = ChatRoom.of(
             chatRoomId,
             otherUserId, // 다른 사용자 소유
-            PetId.of(1L),
+            PetId.from(1L),
             LocalDateTime.now(),
             LocalDateTime.now()
         );
@@ -187,19 +187,19 @@ class ChatDomainServiceTest {
     @Test
     void sendUserMessage_Success() {
         // given
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
-        UserId userId = UserId.of(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
+        UserId userId = UserId.from(1L);
         String content = "안녕하세요!";
         ChatRoom chatRoom = ChatRoom.of(
             chatRoomId,
             userId,
-            PetId.of(1L),
+            PetId.from(1L),
             LocalDateTime.now().minusHours(1),
             LocalDateTime.now().minusMinutes(30)
         );
         
         mockChatRoomRepository.setFindByIdResult(Optional.of(chatRoom));
-        mockMessageRepository.setSaveResult(MessageId.of(1L));
+        mockMessageRepository.setSaveResult(MessageId.from(1L));
         mockChatRoomRepository.setSaveResult(chatRoom);
         
         // when
@@ -225,8 +225,8 @@ class ChatDomainServiceTest {
     @Test
     void sendUserMessage_NullContent_ThrowsException() {
         // given
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
-        UserId userId = UserId.of(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
+        UserId userId = UserId.from(1L);
         String content = null;
         
         // when & then
@@ -243,8 +243,8 @@ class ChatDomainServiceTest {
     @Test
     void sendUserMessage_EmptyContent_ThrowsException() {
         // given
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
-        UserId userId = UserId.of(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
+        UserId userId = UserId.from(1L);
         String content = "   ";
         
         // when & then
@@ -261,19 +261,19 @@ class ChatDomainServiceTest {
     @Test
     void sendPetMessage_Success() {
         // given
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
         String content = "멍멍! 잘 지내고 있어요!";
         ChatRoom chatRoom = ChatRoom.of(
             chatRoomId,
-            UserId.of(1L),
-            PetId.of(1L),
+            UserId.from(1L),
+            PetId.from(1L),
             LocalDateTime.now(),
             LocalDateTime.now()
         );
         Message expectedMessage = Message.createPetMessage(chatRoomId, content);
         
         mockChatRoomRepository.setFindByIdResult(Optional.of(chatRoom));
-        mockMessageRepository.setSaveResult(MessageId.of(1L));
+        mockMessageRepository.setSaveResult(MessageId.from(1L));
         mockChatRoomRepository.setSaveResult(chatRoom);
         
         // when
@@ -292,7 +292,7 @@ class ChatDomainServiceTest {
     @Test
     void sendPetMessage_ChatRoomNotFound_ThrowsException() {
         // given
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
         String content = "멍멍!";
         
         mockChatRoomRepository.setFindByIdResult(Optional.empty());
@@ -311,10 +311,10 @@ class ChatDomainServiceTest {
     @Test
     void findChatRoomList_Success() {
         // given
-        UserId userId = UserId.of(1L);
+        UserId userId = UserId.from(1L);
         List<ChatRoom> expectedChatRooms = Arrays.asList(
-            ChatRoom.of(ChatRoomId.of(1L), userId, PetId.of(1L), LocalDateTime.now(), LocalDateTime.now()),
-            ChatRoom.of(ChatRoomId.of(2L), userId, PetId.of(2L), LocalDateTime.now(), LocalDateTime.now())
+            ChatRoom.of(ChatRoomId.from(1L), userId, PetId.from(1L), LocalDateTime.now(), LocalDateTime.now()),
+            ChatRoom.of(ChatRoomId.from(2L), userId, PetId.from(2L), LocalDateTime.now(), LocalDateTime.now())
         );
         
         mockChatRoomRepository.setFindByUserIdResult(expectedChatRooms);
@@ -348,19 +348,19 @@ class ChatDomainServiceTest {
     @Test
     void findNewMessages_Success() {
         // given
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
-        UserId userId = UserId.of(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
+        UserId userId = UserId.from(1L);
         LocalDateTime since = LocalDateTime.now().minusHours(1);
         ChatRoom chatRoom = ChatRoom.of(
             chatRoomId,
             userId,
-            PetId.of(1L),
+            PetId.from(1L),
             LocalDateTime.now(),
             LocalDateTime.now()
         );
         List<Message> expectedMessages = Arrays.asList(
-            Message.restore(MessageId.of(1L), chatRoomId, MessageType.PET, "새 메시지1", LocalDateTime.now()),
-            Message.restore(MessageId.of(2L), chatRoomId, MessageType.PET, "새 메시지2", LocalDateTime.now())
+            Message.restore(MessageId.from(1L), chatRoomId, MessageType.PET, "새 메시지1", LocalDateTime.now()),
+            Message.restore(MessageId.from(2L), chatRoomId, MessageType.PET, "새 메시지2", LocalDateTime.now())
         );
         
         mockChatRoomRepository.setFindByIdResult(Optional.of(chatRoom));
@@ -381,8 +381,8 @@ class ChatDomainServiceTest {
     @Test
     void findNewMessages_NullSince_ThrowsException() {
         // given
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
-        UserId userId = UserId.of(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
+        UserId userId = UserId.from(1L);
         LocalDateTime since = null;
         
         // when & then
@@ -399,12 +399,12 @@ class ChatDomainServiceTest {
     @Test
     void validateChatRoom_Success() {
         // given
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
-        UserId userId = UserId.of(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
+        UserId userId = UserId.from(1L);
         ChatRoom chatRoom = ChatRoom.of(
             chatRoomId,
             userId,
-            PetId.of(1L),
+            PetId.from(1L),
             LocalDateTime.now(),
             LocalDateTime.now()
         );
@@ -437,7 +437,14 @@ class ChatDomainServiceTest {
         private Optional<ChatRoom> findByUserIdAndPetIdResult = Optional.empty();
         
         @Override
-        public ChatRoom save(ChatRoom chatRoom) {
+        public ChatRoom create(ChatRoom chatRoom) {
+            saveCalled = true;
+            lastSavedChatRoom = chatRoom;
+            return saveResult != null ? saveResult : chatRoom;
+        }
+        
+        @Override
+        public ChatRoom update(ChatRoom chatRoom) {
             saveCalled = true;
             lastSavedChatRoom = chatRoom;
             return saveResult != null ? saveResult : chatRoom;

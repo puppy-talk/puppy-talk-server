@@ -26,8 +26,8 @@ public class ActivityFacade {
         Assert.notNull(command, "ActivityRecordCommand must not be null");
         Assert.hasText(command.activityType(), "ActivityType cannot be null or empty");
 
-        UserId userId = UserId.of(command.userId());
-        ChatRoomId chatRoomId = command.chatRoomId() != null ? ChatRoomId.of(command.chatRoomId()) : null;
+        UserId userId = UserId.from(command.userId());
+        ChatRoomId chatRoomId = command.chatRoomId() != null ? ChatRoomId.from(command.chatRoomId()) : null;
         ActivityType activityType = ActivityType.valueOf(command.activityType());
         
         ActivityId activityId;
@@ -46,7 +46,7 @@ public class ActivityFacade {
     public ActivityResult getLatestActivity(Long userId) {
         Assert.notNull(userId, "UserId must not be null");
         
-        UserId userIdObj = UserId.of(userId);
+        UserId userIdObj = UserId.from(userId);
         
         return activityDomainService.getLatestActivity(userIdObj)
             .map(ActivityResult::from)

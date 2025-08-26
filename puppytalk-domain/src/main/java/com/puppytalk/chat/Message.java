@@ -15,22 +15,6 @@ public class Message {
 
     private Message(MessageId id, ChatRoomId chatRoomId, MessageType type,
                    String content, LocalDateTime createdAt) {
-        if (chatRoomId == null || !chatRoomId.isValid()) {
-            throw new IllegalArgumentException("채팅방 ID는 필수입니다");
-        }
-        if (type == null) {
-            throw new IllegalArgumentException("메시지 타입은 필수입니다");
-        }
-        if (content == null || content.isBlank()) {
-            throw new IllegalArgumentException("메시지 내용은 필수입니다");
-        }
-        if (content.trim().length() > 1000) {
-            throw new IllegalArgumentException("메시지 내용은 1000자를 초과할 수 없습니다");
-        }
-        if (createdAt == null) {
-            throw new IllegalArgumentException("생성 시각은 필수입니다");
-        }
-
         this.id = id;
         this.chatRoomId = chatRoomId;
         this.type = type;
@@ -39,6 +23,9 @@ public class Message {
     }
 
     public static Message of(ChatRoomId chatRoomId, String content) {
+        validateChatRoomId(chatRoomId);
+        validateContent(content);
+        
         return new Message(
             null,
             chatRoomId,
@@ -49,6 +36,9 @@ public class Message {
     }
 
     public static Message createPetMessage(ChatRoomId chatRoomId, String content) {
+        validateChatRoomId(chatRoomId);
+        validateContent(content);
+        
         return new Message(
             null,
             chatRoomId,
@@ -63,8 +53,31 @@ public class Message {
         if (id == null || !id.isValid()) {
             throw new IllegalArgumentException("저장된 메시지 ID가 필요합니다");
         }
+        validateChatRoomId(chatRoomId);
+        if (type == null) {
+            throw new IllegalArgumentException("메시지 타입은 필수입니다");
+        }
+        validateContent(content);
+        if (createdAt == null) {
+            throw new IllegalArgumentException("생성 시각은 필수입니다");
+        }
 
         return new Message(id, chatRoomId, type, content, createdAt);
+    }
+
+    private static void validateChatRoomId(ChatRoomId chatRoomId) {
+        if (chatRoomId == null || !chatRoomId.isValid()) {
+            throw new IllegalArgumentException("채팅방 ID는 필수입니다");
+        }
+    }
+    
+    private static void validateContent(String content) {
+        if (content == null || content.isBlank()) {
+            throw new IllegalArgumentException("메시지 내용은 필수입니다");
+        }
+        if (content.trim().length() > 1000) {
+            throw new IllegalArgumentException("메시지 내용은 1000자를 초과할 수 없습니다");
+        }
     }
 
     /**

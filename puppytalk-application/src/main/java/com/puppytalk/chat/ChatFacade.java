@@ -48,8 +48,8 @@ public class ChatFacade {
         log.info("Creating or finding chat room for user: {}, pet: {}",
             command.userId(), command.petId());
 
-        UserId userId = UserId.of(command.userId());
-        PetId petId = PetId.of(command.petId());
+        UserId userId = UserId.from(command.userId());
+        PetId petId = PetId.from(command.petId());
 
         ChatRoomResult result = chatDomainService.
             findOrCreateChatRoom(userId, petId);
@@ -78,8 +78,8 @@ public class ChatFacade {
         log.debug("Sending user message in chat room: {} by user: {}",
             command.chatRoomId(), command.userId());
 
-        ChatRoomId chatRoomId = ChatRoomId.of(command.chatRoomId());
-        UserId userId = UserId.of(command.userId());
+        ChatRoomId chatRoomId = ChatRoomId.from(command.chatRoomId());
+        UserId userId = UserId.from(command.userId());
 
         chatDomainService.sendUserMessage(chatRoomId, userId, command.content());
 
@@ -94,7 +94,7 @@ public class ChatFacade {
         Assert.notNull(query, "ChatRoomListQuery must not be null");
         Assert.notNull(query.userId(), "UserId must not be null");
 
-        UserId userId = UserId.of(query.userId());
+        UserId userId = UserId.from(query.userId());
         List<ChatRoom> chatRooms = chatDomainService.findChatRoomList(userId);
 
         return ChatRoomListResult.from(chatRooms);
@@ -108,10 +108,10 @@ public class ChatFacade {
         Assert.notNull(query.chatRoomId(), "ChatRoomId must not be null");
         Assert.notNull(query.userId(), "UserId must not be null");
 
-        ChatRoomId chatRoomId = ChatRoomId.of(query.chatRoomId());
-        UserId userId = UserId.of(query.userId());
+        ChatRoomId chatRoomId = ChatRoomId.from(query.chatRoomId());
+        UserId userId = UserId.from(query.userId());
 
-        MessageId cursor = query.cursor() != null ? MessageId.of(query.cursor()) : null;
+        MessageId cursor = query.cursor() != null ? MessageId.from(query.cursor()) : null;
         int size = query.getSize();
 
         List<Message> messages = chatDomainService.findMessageListWithCursor(
@@ -136,8 +136,8 @@ public class ChatFacade {
         Assert.notNull(query.userId(), "UserId must not be null");
         Assert.notNull(query.since(), "Since must not be null");
 
-        ChatRoomId chatRoomId = ChatRoomId.of(query.chatRoomId());
-        UserId userId = UserId.of(query.userId());
+        ChatRoomId chatRoomId = ChatRoomId.from(query.chatRoomId());
+        UserId userId = UserId.from(query.userId());
 
         List<Message> newMessages = chatDomainService.findNewMessages(
             chatRoomId, userId, query.since()

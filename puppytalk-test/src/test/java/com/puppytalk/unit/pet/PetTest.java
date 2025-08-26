@@ -18,7 +18,7 @@ class PetTest {
     @Test
     void create_Success() {
         // given
-        UserId ownerId = UserId.of(1L);
+        UserId ownerId = UserId.from(1L);
         String name = "멍멍이";
         String persona = "활발하고 친근한 강아지";
         
@@ -75,7 +75,7 @@ class PetTest {
     @Test
     void create_NullName_ThrowsException() {
         // given
-        UserId ownerId = UserId.of(1L);
+        UserId ownerId = UserId.from(1L);
         String name = null;
         String persona = "활발하고 친근한 강아지";
         
@@ -92,7 +92,7 @@ class PetTest {
     @Test
     void create_EmptyName_ThrowsException() {
         // given
-        UserId ownerId = UserId.of(1L);
+        UserId ownerId = UserId.from(1L);
         String name = "   ";
         String persona = "활발하고 친근한 강아지";
         
@@ -109,7 +109,7 @@ class PetTest {
     @Test
     void create_TooLongName_ThrowsException() {
         // given
-        UserId ownerId = UserId.of(1L);
+        UserId ownerId = UserId.from(1L);
         String name = "a".repeat(21); // 20자 초과
         String persona = "활발하고 친근한 강아지";
         
@@ -126,7 +126,7 @@ class PetTest {
     @Test
     void create_NullPersona_ThrowsException() {
         // given
-        UserId ownerId = UserId.of(1L);
+        UserId ownerId = UserId.from(1L);
         String name = "멍멍이";
         String persona = null;
         
@@ -143,7 +143,7 @@ class PetTest {
     @Test
     void create_EmptyPersona_ThrowsException() {
         // given
-        UserId ownerId = UserId.of(1L);
+        UserId ownerId = UserId.from(1L);
         String name = "멍멍이";
         String persona = "   ";
         
@@ -160,7 +160,7 @@ class PetTest {
     @Test
     void create_TooLongPersona_ThrowsException() {
         // given
-        UserId ownerId = UserId.of(1L);
+        UserId ownerId = UserId.from(1L);
         String name = "멍멍이";
         String persona = "a".repeat(501); // 500자 초과
         
@@ -177,7 +177,7 @@ class PetTest {
     @Test
     void create_TrimsWhitespace() {
         // given
-        UserId ownerId = UserId.of(1L);
+        UserId ownerId = UserId.from(1L);
         String name = "  멍멍이  ";
         String persona = "  활발하고 친근한 강아지  ";
         
@@ -193,8 +193,8 @@ class PetTest {
     @Test
     void of_Success() {
         // given
-        PetId id = PetId.of(1L);
-        UserId ownerId = UserId.of(1L);
+        PetId id = PetId.from(1L);
+        UserId ownerId = UserId.from(1L);
         String name = "멍멍이";
         String persona = "활발하고 친근한 강아지";
         LocalDateTime createdAt = LocalDateTime.now();
@@ -218,7 +218,7 @@ class PetTest {
     void of_NullId_ThrowsException() {
         // given
         PetId id = null;
-        UserId ownerId = UserId.of(1L);
+        UserId ownerId = UserId.from(1L);
         String name = "멍멍이";
         String persona = "활발하고 친근한 강아지";
         LocalDateTime createdAt = LocalDateTime.now();
@@ -238,8 +238,8 @@ class PetTest {
     void withDeletedStatus_Success() {
         // given
         Pet pet = Pet.of(
-            PetId.of(1L),
-            UserId.of(1L),
+            PetId.from(1L),
+            UserId.from(1L),
             "멍멍이",
             "활발하고 친근한 강아지",
             LocalDateTime.now(),
@@ -265,8 +265,8 @@ class PetTest {
     void withDeletedStatus_AlreadyDeleted_ThrowsException() {
         // given
         Pet deletedPet = Pet.of(
-            PetId.of(1L),
-            UserId.of(1L),
+            PetId.from(1L),
+            UserId.from(1L),
             "멍멍이",
             "활발하고 친근한 강아지",
             LocalDateTime.now(),
@@ -287,8 +287,8 @@ class PetTest {
     void canChat_ActiveStatus_ReturnsTrue() {
         // given
         Pet pet = Pet.of(
-            PetId.of(1L),
-            UserId.of(1L),
+            PetId.from(1L),
+            UserId.from(1L),
             "멍멍이",
             "활발하고 친근한 강아지",
             LocalDateTime.now(),
@@ -304,8 +304,8 @@ class PetTest {
     void canChat_DeletedStatus_ReturnsFalse() {
         // given
         Pet pet = Pet.of(
-            PetId.of(1L),
-            UserId.of(1L),
+            PetId.from(1L),
+            UserId.from(1L),
             "멍멍이",
             "활발하고 친근한 강아지",
             LocalDateTime.now(),
@@ -320,9 +320,9 @@ class PetTest {
     @Test
     void isOwnedBy_CorrectOwner_ReturnsTrue() {
         // given
-        UserId ownerId = UserId.of(1L);
+        UserId ownerId = UserId.from(1L);
         Pet pet = Pet.of(
-            PetId.of(1L),
+            PetId.from(1L),
             ownerId,
             "멍멍이",
             "활발하고 친근한 강아지",
@@ -338,10 +338,10 @@ class PetTest {
     @Test
     void isOwnedBy_WrongOwner_ReturnsFalse() {
         // given
-        UserId ownerId = UserId.of(1L);
-        UserId otherUserId = UserId.of(2L);
+        UserId ownerId = UserId.from(1L);
+        UserId otherUserId = UserId.from(2L);
         Pet pet = Pet.of(
-            PetId.of(1L),
+            PetId.from(1L),
             ownerId,
             "멍멍이",
             "활발하고 친근한 강아지",
@@ -357,9 +357,9 @@ class PetTest {
     @Test
     void equals_SameId_ReturnsTrue() {
         // given
-        PetId id = PetId.of(1L);
-        Pet pet1 = Pet.of(id, UserId.of(1L), "pet1", "persona1", LocalDateTime.now(), PetStatus.ACTIVE);
-        Pet pet2 = Pet.of(id, UserId.of(2L), "pet2", "persona2", LocalDateTime.now(), PetStatus.ACTIVE);
+        PetId id = PetId.from(1L);
+        Pet pet1 = Pet.of(id, UserId.from(1L), "pet1", "persona1", LocalDateTime.now(), PetStatus.ACTIVE);
+        Pet pet2 = Pet.of(id, UserId.from(2L), "pet2", "persona2", LocalDateTime.now(), PetStatus.ACTIVE);
         
         // when & then
         assertEquals(pet1, pet2);
@@ -369,8 +369,8 @@ class PetTest {
     @Test
     void equals_DifferentId_ReturnsFalse() {
         // given
-        Pet pet1 = Pet.of(PetId.of(1L), UserId.of(1L), "pet1", "persona1", LocalDateTime.now(), PetStatus.ACTIVE);
-        Pet pet2 = Pet.of(PetId.of(2L), UserId.of(1L), "pet2", "persona2", LocalDateTime.now(), PetStatus.ACTIVE);
+        Pet pet1 = Pet.of(PetId.from(1L), UserId.from(1L), "pet1", "persona1", LocalDateTime.now(), PetStatus.ACTIVE);
+        Pet pet2 = Pet.of(PetId.from(2L), UserId.from(1L), "pet2", "persona2", LocalDateTime.now(), PetStatus.ACTIVE);
         
         // when & then
         assertNotEquals(pet1, pet2);
@@ -380,9 +380,9 @@ class PetTest {
     @Test
     void hashCode_SameId_ReturnsSameHashCode() {
         // given
-        PetId id = PetId.of(1L);
-        Pet pet1 = Pet.of(id, UserId.of(1L), "pet1", "persona1", LocalDateTime.now(), PetStatus.ACTIVE);
-        Pet pet2 = Pet.of(id, UserId.of(2L), "pet2", "persona2", LocalDateTime.now(), PetStatus.ACTIVE);
+        PetId id = PetId.from(1L);
+        Pet pet1 = Pet.of(id, UserId.from(1L), "pet1", "persona1", LocalDateTime.now(), PetStatus.ACTIVE);
+        Pet pet2 = Pet.of(id, UserId.from(2L), "pet2", "persona2", LocalDateTime.now(), PetStatus.ACTIVE);
         
         // when & then
         assertEquals(pet1.hashCode(), pet2.hashCode());

@@ -14,28 +14,6 @@ public class Pet {
 
     private Pet(PetId id, UserId ownerId, String name, String persona,
                  LocalDateTime createdAt, PetStatus status) {
-        if (ownerId == null || !ownerId.isStored()) {
-            throw new IllegalArgumentException("소유자 ID는 필수입니다");
-        }
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("반려동물 이름은 필수입니다");
-        }
-        if (name.trim().length() > 20) {
-            throw new IllegalArgumentException("반려동물 이름은 20자를 초과할 수 없습니다");
-        }
-        if (persona == null || persona.isBlank()) {
-            throw new IllegalArgumentException("반려동물 페르소나는 필수입니다");
-        }
-        if (persona.trim().length() > 500) {
-            throw new IllegalArgumentException("반려동물 페르소나는 500자를 초과할 수 없습니다");
-        }
-        if (createdAt == null) {
-            throw new IllegalArgumentException("생성 시각은 필수입니다");
-        }
-        if (status == null) {
-            throw new IllegalArgumentException("반려동물 상태는 필수입니다");
-        }
-
         this.id = id;
         this.ownerId = ownerId;
         this.name = name;
@@ -45,6 +23,10 @@ public class Pet {
     }
 
     public static Pet create(UserId ownerId, String name, String persona) {
+        validateOwnerId(ownerId);
+        validateName(name);
+        validatePersona(persona);
+        
         return new Pet(
             null,
             ownerId,
@@ -60,8 +42,41 @@ public class Pet {
         if (id == null || !id.isValid()) {
             throw new IllegalArgumentException("저장된 반려동물 ID가 필요합니다");
         }
+        validateOwnerId(ownerId);
+        validateName(name);
+        validatePersona(persona);
+        if (createdAt == null) {
+            throw new IllegalArgumentException("생성 시각은 필수입니다");
+        }
+        if (status == null) {
+            throw new IllegalArgumentException("반려동물 상태는 필수입니다");
+        }
 
         return new Pet(id, ownerId, name, persona, createdAt, status);
+    }
+
+    private static void validateOwnerId(UserId ownerId) {
+        if (ownerId == null || !ownerId.isStored()) {
+            throw new IllegalArgumentException("소유자 ID는 필수입니다");
+        }
+    }
+    
+    private static void validateName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("반려동물 이름은 필수입니다");
+        }
+        if (name.trim().length() > 20) {
+            throw new IllegalArgumentException("반려동물 이름은 20자를 초과할 수 없습니다");
+        }
+    }
+    
+    private static void validatePersona(String persona) {
+        if (persona == null || persona.isBlank()) {
+            throw new IllegalArgumentException("반려동물 페르소나는 필수입니다");
+        }
+        if (persona.trim().length() > 500) {
+            throw new IllegalArgumentException("반려동물 페르소나는 500자를 초과할 수 없습니다");
+        }
     }
 
     /**

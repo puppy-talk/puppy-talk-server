@@ -45,7 +45,7 @@ public class UserFacade {
         Assert.notNull(query, "UserGetQuery must not be null");
         Assert.notNull(query.userId(), "UserId must not be null");
         
-        UserId userId = UserId.of(query.userId());
+        UserId userId = UserId.from(query.userId());
         User user = userDomainService.findUserById(userId);
         
         return UserResult.from(user);

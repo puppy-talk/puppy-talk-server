@@ -12,7 +12,7 @@ import jakarta.persistence.*;
        indexes = {
            @Index(name = "idx_messages_chatroom_id_asc", columnList = "chat_room_id, id"),
            @Index(name = "idx_messages_chatroom_created_desc", columnList = "chat_room_id, created_at DESC"),
-           @Index(name = "idx_messages_type", columnList = "type")
+           @Index(name = "idx_messages_sender_type", columnList = "sender_type")
        })
 public class MessageJpaEntity extends BaseEntity {
     
@@ -24,7 +24,7 @@ public class MessageJpaEntity extends BaseEntity {
     private Long chatRoomId;
     
     @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false, length = 20)
+    @Column(name = "sender_type", nullable = false, length = 10)
     private MessageType type;
     
     @Column(name = "content", nullable = false, length = 2000)

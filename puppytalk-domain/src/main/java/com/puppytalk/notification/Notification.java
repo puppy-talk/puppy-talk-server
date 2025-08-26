@@ -33,28 +33,6 @@ public class Notification {
                         NotificationType type, String title, String content, NotificationStatus status,
                         LocalDateTime scheduledAt, LocalDateTime sentAt, LocalDateTime readAt,
                         LocalDateTime createdAt, LocalDateTime updatedAt, int retryCount, String failureReason) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId must not be null");
-        }
-        if (type == null) {
-            throw new IllegalArgumentException("NotificationType must not be null");
-        }
-        if (status == null) {
-            throw new IllegalArgumentException("NotificationStatus must not be null");
-        }
-        if (title == null || title.isBlank()) {
-            throw new IllegalArgumentException("Title must not be null or empty");
-        }
-        if (content == null || content.isBlank()) {
-            throw new IllegalArgumentException("Content must not be null or empty");
-        }
-        if (createdAt == null) {
-            throw new IllegalArgumentException("CreatedAt must not be null");
-        }
-        if (retryCount < 0) {
-            throw new IllegalArgumentException("RetryCount must not be negative");
-        }
-
         this.id = id;
         this.userId = userId;
         this.petId = petId;
@@ -83,6 +61,10 @@ public class Notification {
         String content,
         LocalDateTime scheduledAt
     ) {
+        validateUserId(userId);
+        validateTitle(title);
+        validateContent(content);
+        
         LocalDateTime now = LocalDateTime.now();
         
         return new Notification(
@@ -112,6 +94,10 @@ public class Notification {
         String title,
         String content
     ) {
+        validateUserId(userId);
+        validateTitle(title);
+        validateContent(content);
+        
         LocalDateTime now = LocalDateTime.now();
         
         return new Notification(
@@ -133,6 +119,24 @@ public class Notification {
         );
     }
 
+    private static void validateUserId(UserId userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("UserId must not be null");
+        }
+    }
+    
+    private static void validateTitle(String title) {
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("Title must not be null or empty");
+        }
+    }
+    
+    private static void validateContent(String content) {
+        if (content == null || content.isBlank()) {
+            throw new IllegalArgumentException("Content must not be null or empty");
+        }
+    }
+
     /**
      * 기존 알림 복원용 정적 팩토리 메서드 (Repository용)
      */
@@ -142,6 +146,21 @@ public class Notification {
                                  LocalDateTime createdAt, LocalDateTime updatedAt, int retryCount, String failureReason) {
         if (id == null || !id.isValid()) {
             throw new IllegalArgumentException("저장된 알림 ID가 필요합니다");
+        }
+        validateUserId(userId);
+        if (type == null) {
+            throw new IllegalArgumentException("NotificationType must not be null");
+        }
+        validateTitle(title);
+        validateContent(content);
+        if (status == null) {
+            throw new IllegalArgumentException("NotificationStatus must not be null");
+        }
+        if (createdAt == null) {
+            throw new IllegalArgumentException("CreatedAt must not be null");
+        }
+        if (retryCount < 0) {
+            throw new IllegalArgumentException("RetryCount must not be negative");
         }
 
         return new Notification(id, userId, petId, chatRoomId, type, title, content, status,

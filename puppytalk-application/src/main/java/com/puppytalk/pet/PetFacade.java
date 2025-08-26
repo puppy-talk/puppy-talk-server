@@ -31,7 +31,7 @@ public class PetFacade {
         Assert.hasText(command.petName(), "PetName cannot be null or empty");
         Assert.hasText(command.persona(), "Persona cannot be null or empty");
 
-        UserId ownerId = UserId.of(command.ownerId());
+        UserId ownerId = UserId.from(command.ownerId());
         
         petDomainService.createPet(ownerId, command.petName(), command.persona());
     }
@@ -42,7 +42,7 @@ public class PetFacade {
     public PetListResult getPetList(PetListQuery query) {
         Assert.notNull(query, "PetListQuery must not be null");
 
-        UserId ownerId = UserId.of(query.ownerId());
+        UserId ownerId = UserId.from(query.ownerId());
         List<Pet> pets = petDomainService.findPetList(ownerId);
         return PetListResult.from(pets);
     }
@@ -55,8 +55,8 @@ public class PetFacade {
         Assert.notNull(query.ownerId(), "OwnerId must not be null");
         Assert.notNull(query.petId(), "PetId must not be null");
 
-        PetId petId = PetId.of(query.petId());
-        UserId ownerId = UserId.of(query.ownerId());
+        PetId petId = PetId.from(query.petId());
+        UserId ownerId = UserId.from(query.ownerId());
 
         Pet pet = petDomainService.findPet(petId, ownerId);
         return PetResult.from(pet);
@@ -72,8 +72,8 @@ public class PetFacade {
         Assert.notNull(command.petId(), "PetId must not be null");
 
         petDomainService.deletePet(
-            PetId.of(command.petId()),
-            UserId.of(command.ownerId())
+            PetId.from(command.petId()),
+            UserId.from(command.ownerId())
         );
     }
 }

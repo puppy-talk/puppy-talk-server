@@ -19,7 +19,7 @@ class MessageTest {
     @Test
     void of_UserMessage_Success() {
         // given
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
         String content = "안녕하세요!";
         LocalDateTime beforeCreate = LocalDateTime.now();
         
@@ -43,7 +43,7 @@ class MessageTest {
     @Test
     void of_UserMessage_TrimsWhitespace() {
         // given
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
         String content = "  안녕하세요!  ";
         
         // when
@@ -57,7 +57,7 @@ class MessageTest {
     @Test
     void createPetMessage_Success() {
         // given
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
         String content = "멍멍! 잘 지내고 있어요!";
         LocalDateTime beforeCreate = LocalDateTime.now();
         
@@ -81,7 +81,7 @@ class MessageTest {
     @Test
     void createPetMessage_TrimsWhitespace() {
         // given
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
         String content = "  멍멍! 잘 지내고 있어요!  ";
         
         // when
@@ -111,7 +111,7 @@ class MessageTest {
     @Test
     void of_NullContent_ThrowsException() {
         // given
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
         String content = null;
         
         // when & then
@@ -127,7 +127,7 @@ class MessageTest {
     @Test
     void of_EmptyContent_ThrowsException() {
         // given
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
         String content = "   ";
         
         // when & then
@@ -143,7 +143,7 @@ class MessageTest {
     @Test
     void of_TooLongContent_ThrowsException() {
         // given
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
         String content = "a".repeat(1001); // 1000자 초과
         
         // when & then
@@ -159,8 +159,8 @@ class MessageTest {
     @Test
     void restore_Success() {
         // given
-        MessageId id = MessageId.of(1L);
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
+        MessageId id = MessageId.from(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
         MessageType type = MessageType.USER;
         String content = "안녕하세요!";
         LocalDateTime createdAt = LocalDateTime.now();
@@ -182,7 +182,7 @@ class MessageTest {
     void restore_NullId_ThrowsException() {
         // given
         MessageId id = null;
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
         MessageType type = MessageType.USER;
         String content = "안녕하세요!";
         LocalDateTime createdAt = LocalDateTime.now();
@@ -200,7 +200,7 @@ class MessageTest {
     @Test
     void isFromUser_ChecksCorrectly() {
         // given
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
         Message userMessage = Message.of(chatRoomId, "사용자 메시지");
         Message petMessage = Message.createPetMessage(chatRoomId, "반려동물 메시지");
         
@@ -213,7 +213,7 @@ class MessageTest {
     @Test
     void isFromPet_ChecksCorrectly() {
         // given
-        ChatRoomId chatRoomId = ChatRoomId.of(1L);
+        ChatRoomId chatRoomId = ChatRoomId.from(1L);
         Message userMessage = Message.of(chatRoomId, "사용자 메시지");
         Message petMessage = Message.createPetMessage(chatRoomId, "반려동물 메시지");
         
@@ -226,8 +226,8 @@ class MessageTest {
     @Test
     void belongsToChatRoom_ChecksCorrectly() {
         // given
-        ChatRoomId chatRoomId1 = ChatRoomId.of(1L);
-        ChatRoomId chatRoomId2 = ChatRoomId.of(2L);
+        ChatRoomId chatRoomId1 = ChatRoomId.from(1L);
+        ChatRoomId chatRoomId2 = ChatRoomId.from(2L);
         Message message = Message.of(chatRoomId1, "메시지");
         
         // when & then
@@ -239,9 +239,9 @@ class MessageTest {
     @Test
     void equals_SameId_ReturnsTrue() {
         // given
-        MessageId id = MessageId.of(1L);
-        Message message1 = Message.restore(id, ChatRoomId.of(1L), MessageType.USER, "content1", LocalDateTime.now());
-        Message message2 = Message.restore(id, ChatRoomId.of(2L), MessageType.PET, "content2", LocalDateTime.now());
+        MessageId id = MessageId.from(1L);
+        Message message1 = Message.restore(id, ChatRoomId.from(1L), MessageType.USER, "content1", LocalDateTime.now());
+        Message message2 = Message.restore(id, ChatRoomId.from(2L), MessageType.PET, "content2", LocalDateTime.now());
         
         // when & then
         assertEquals(message1, message2);
@@ -251,8 +251,8 @@ class MessageTest {
     @Test
     void equals_DifferentId_ReturnsFalse() {
         // given
-        Message message1 = Message.restore(MessageId.of(1L), ChatRoomId.of(1L), MessageType.USER, "content", LocalDateTime.now());
-        Message message2 = Message.restore(MessageId.of(2L), ChatRoomId.of(1L), MessageType.USER, "content", LocalDateTime.now());
+        Message message1 = Message.restore(MessageId.from(1L), ChatRoomId.from(1L), MessageType.USER, "content", LocalDateTime.now());
+        Message message2 = Message.restore(MessageId.from(2L), ChatRoomId.from(1L), MessageType.USER, "content", LocalDateTime.now());
         
         // when & then
         assertNotEquals(message1, message2);
@@ -262,9 +262,9 @@ class MessageTest {
     @Test
     void hashCode_SameId_ReturnsSameHashCode() {
         // given
-        MessageId id = MessageId.of(1L);
-        Message message1 = Message.restore(id, ChatRoomId.of(1L), MessageType.USER, "content1", LocalDateTime.now());
-        Message message2 = Message.restore(id, ChatRoomId.of(2L), MessageType.PET, "content2", LocalDateTime.now());
+        MessageId id = MessageId.from(1L);
+        Message message1 = Message.restore(id, ChatRoomId.from(1L), MessageType.USER, "content1", LocalDateTime.now());
+        Message message2 = Message.restore(id, ChatRoomId.from(2L), MessageType.PET, "content2", LocalDateTime.now());
         
         // when & then
         assertEquals(message1.hashCode(), message2.hashCode());

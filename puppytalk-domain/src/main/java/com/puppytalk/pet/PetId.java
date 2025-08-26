@@ -6,19 +6,18 @@ public record PetId(Long value) {
         return value;
     }
     
-    public static PetId of(Long value) {
-        if (value == null || value <= 0) {
-            throw new IllegalArgumentException("반려동물 ID는 양수여야 합니다");
-        }
-        return new PetId(value);
-    }
-    
-    public static PetId create() {
-        return new PetId(null);
-    }
-    
+    /**
+     * 하나의 매개변수를 받아 타입 변환 (데이터베이스에서 조회된 값용)
+     */
     public static PetId from(Long value) {
         return new PetId(value);
+    }
+    
+    /**
+     * 항상 새로운 인스턴스를 생성해 반환 (신규 생성용)
+     */
+    public static PetId create() {
+        return new PetId(null);
     }
 
     public boolean isValid() {

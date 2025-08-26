@@ -19,19 +19,6 @@ public class ChatRoom {
 
     private ChatRoom(ChatRoomId id, UserId userId, PetId petId,
                      LocalDateTime createdAt, LocalDateTime lastMessageAt) {
-        if (userId == null || !userId.isStored()) {
-            throw new IllegalArgumentException("사용자 ID는 필수입니다");
-        }
-        if (petId == null || !petId.isValid()) {
-            throw new IllegalArgumentException("반려동물 ID는 필수입니다");
-        }
-        if (createdAt == null) {
-            throw new IllegalArgumentException("생성 시각은 필수입니다");
-        }
-        if (lastMessageAt == null) {
-            throw new IllegalArgumentException("마지막 메시지 시각은 필수입니다");
-        }
-
         this.id = id;
         this.userId = userId;
         this.petId = petId;
@@ -40,6 +27,9 @@ public class ChatRoom {
     }
 
     public static ChatRoom create(UserId userId, PetId petId) {
+        validateUserId(userId);
+        validatePetId(petId);
+        
         LocalDateTime now = LocalDateTime.now();
         return new ChatRoom(
             ChatRoomId.create(),
@@ -60,8 +50,28 @@ public class ChatRoom {
         if (id == null || !id.isValid()) {
             throw new IllegalArgumentException("저장된 채팅방 ID가 필요합니다");
         }
+        validateUserId(userId);
+        validatePetId(petId);
+        if (createdAt == null) {
+            throw new IllegalArgumentException("생성 시각은 필수입니다");
+        }
+        if (lastMessageAt == null) {
+            throw new IllegalArgumentException("마지막 메시지 시각은 필수입니다");
+        }
 
         return new ChatRoom(id, userId, petId, createdAt, lastMessageAt);
+    }
+
+    private static void validateUserId(UserId userId) {
+        if (userId == null || !userId.isStored()) {
+            throw new IllegalArgumentException("사용자 ID는 필수입니다");
+        }
+    }
+    
+    private static void validatePetId(PetId petId) {
+        if (petId == null || !petId.isValid()) {
+            throw new IllegalArgumentException("반려동물 ID는 필수입니다");
+        }
     }
 
     /**

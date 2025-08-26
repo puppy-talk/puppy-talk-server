@@ -16,11 +16,33 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
     }
     
     @Override
-    public ChatRoom save(ChatRoom chatRoom) {
+    public ChatRoom create(ChatRoom chatRoom) {
+        if (chatRoom.id() != null && chatRoom.id().isValid()) {
+            throw new IllegalArgumentException("새로운 채팅방은 ID를 가질 수 없습니다");
+        }
+        
         ChatRoomJpaEntity entity = toJpaEntity(chatRoom);
         ChatRoomJpaEntity savedEntity = jpaRepository.save(entity);
         
-        // 저장된 엔티티를 도메인 객체로 변환하여 반환
+        return ChatRoomJpaEntity.toModel(savedEntity);
+    }
+    
+    @Override
+    public ChatRoom update(ChatRoom chatRoom) {
+        if (chatRoom.id() == null || !chatRoom.id().isValid()) {
+            throw new IllegalArgumentException("기존 채팅방은 유효한 ID가 필요합니다");
+        }
+        
+        // 기존 엔티티를 조회 후 수정
+        ChatRoomJpaEntity entity = jpaRepository.findById(chatRoom.id().getValue())
+                .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다: " + chatRoom.id()));
+        
+        entity.setUserId(chatRoom.userId().value());
+        entity.setPetId(chatRoom.petId().value());
+        entity.setLastMessageAt(chatRoom.lastMessageAt());
+        
+        ChatRoomJpaEntity savedEntity = jpaRepository.save(entity);
+        
         return ChatRoomJpaEntity.toModel(savedEntity);
     }
     
@@ -94,17 +116,12 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
     }
     
     private ChatRoomJpaEntity toJpaEntity(ChatRoom chatRoom) {
-        ChatRoomJpaEntity entity = new ChatRoomJpaEntity(
+        // 새로운 엔티티 생성 시에는 ID를 설정하지 않음 (DB에서 자동 생성)
+        return new ChatRoomJpaEntity(
             chatRoom.userId().value(),
             chatRoom.petId().value(),
             chatRoom.lastMessageAt()
         );
-        
-        if (chatRoom.id().isValid()) {
-            entity.setId(chatRoom.id().getValue());
-        }
-        
-        return entity;
     }
     
 

@@ -176,7 +176,7 @@ class UserPasswordTest {
         String rawPassword = "password123!";
         User originalUser = User.create("testuser", "test@example.com", rawPassword);
         
-        UserId id = UserId.of(1L);
+        UserId id = UserId.from(1L);
         String encryptedPassword = originalUser.password();
 
         // when

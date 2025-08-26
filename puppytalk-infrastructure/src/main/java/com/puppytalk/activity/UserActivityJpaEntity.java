@@ -65,9 +65,9 @@ public class UserActivityJpaEntity extends BaseEntity {
     public UserActivity toDomain() {
         if (id != null) {
             return UserActivity.of(
-                ActivityId.of(id),
-                UserId.of(userId),
-                chatRoomId != null ? com.puppytalk.chat.ChatRoomId.of(chatRoomId) : null,
+                ActivityId.from(id),
+                UserId.from(userId),
+                chatRoomId != null ? com.puppytalk.chat.ChatRoomId.from(chatRoomId) : null,
                 activityType,
                 activityAt,
                 getCreatedAt()
@@ -76,14 +76,14 @@ public class UserActivityJpaEntity extends BaseEntity {
             // 새로운 활동 생성 (ID가 없는 경우)
             if (chatRoomId != null) {
                 return UserActivity.createActivity(
-                    UserId.of(userId),
-                    com.puppytalk.chat.ChatRoomId.of(chatRoomId),
+                    UserId.from(userId),
+                    com.puppytalk.chat.ChatRoomId.from(chatRoomId),
                     activityType,
                     activityAt
                 );
             } else {
                 return UserActivity.createGlobalActivity(
-                    UserId.of(userId),
+                    UserId.from(userId),
                     activityType,
                     activityAt
                 );

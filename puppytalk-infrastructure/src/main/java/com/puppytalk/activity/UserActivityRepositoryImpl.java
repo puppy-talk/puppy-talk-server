@@ -26,7 +26,7 @@ public class UserActivityRepositoryImpl implements UserActivityRepository {
         try {
             UserActivityJpaEntity entity = UserActivityJpaEntity.fromDomain(activity);
             UserActivityJpaEntity saved = jpaRepository.save(entity);
-            return ActivityId.of(saved.getId());
+            return ActivityId.from(saved.getId());
         } catch (Exception e) {
             throw ActivityTrackingException.trackingFailed(
                 activity.userId(), 
