@@ -5,8 +5,8 @@ package com.puppytalk.notification.dto.request;
  */
 public record NotificationCreateCommand(
     Long userId,
-    Long petId,     // null 가능 (시스템 알림 시)
-    Long chatRoomId, // null 가능 (시스템 알림 시)
+    Long petId,     // null-able
+    Long chatRoomId, // null-able
     String title,
     String content
 ) {

@@ -56,7 +56,10 @@ public class NotificationFacade {
     @Transactional
     public NotificationResult createSystemNotification(NotificationCreateCommand command) {
         Assert.notNull(command, "NotificationCreateCommand must not be null");
-        
+        Assert.notNull(command.userId(), "UserId must not be null");
+        Assert.hasText(command.title(), "Title cannot be null or empty");
+        Assert.hasText(command.content(), "Content cannot be null or empty");
+
         UserId userId = UserId.of(command.userId());
         
         NotificationId notificationId = notificationDomainService.createSystemNotification(
@@ -173,16 +176,5 @@ public class NotificationFacade {
     @Transactional
     public int cleanupOldNotifications() {
         return notificationDomainService.cleanupOldNotifications();
-    }
-    
-    /**
-     * 사용자 비활성 상태 확인
-     */
-    @Transactional(readOnly = true)
-    public boolean isUserInactive(Long userId) {
-        Assert.notNull(userId, "UserId must not be null");
-        
-        UserId userIdObj = UserId.of(userId);
-        return notificationDomainService.isUserInactive(userIdObj);
     }
 }

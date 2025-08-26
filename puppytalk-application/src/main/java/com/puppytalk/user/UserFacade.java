@@ -8,10 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-/**
- * 사용자 파사드
- * 사용자 관련 유스케이스를 조율하고 트랜잭션 경계를 관리한다.
- */
 @Service
 @Transactional(readOnly = true)
 public class UserFacade {
@@ -38,7 +34,6 @@ public class UserFacade {
             command.password()
         );
         
-        // 생성된 사용자 정보를 조회하여 완전한 결과 반환
         User createdUser = userDomainService.findUserById(userId);
         return UserCreateResult.from(createdUser);
     }

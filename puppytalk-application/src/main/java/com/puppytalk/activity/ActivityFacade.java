@@ -24,7 +24,8 @@ public class ActivityFacade {
     @Transactional
     public ActivityResult recordActivity(ActivityRecordCommand command) {
         Assert.notNull(command, "ActivityRecordCommand must not be null");
-        
+        Assert.hasText(command.activityType(), "ActivityType cannot be null or empty");
+
         UserId userId = UserId.of(command.userId());
         ChatRoomId chatRoomId = command.chatRoomId() != null ? ChatRoomId.of(command.chatRoomId()) : null;
         ActivityType activityType = ActivityType.valueOf(command.activityType());
@@ -42,7 +43,6 @@ public class ActivityFacade {
     /**
      * 사용자 최근 활동 조회
      */
-    @Transactional(readOnly = true)
     public ActivityResult getLatestActivity(Long userId) {
         Assert.notNull(userId, "UserId must not be null");
         

@@ -28,10 +28,12 @@ public class PetFacade {
     @Transactional
     public void createPet(PetCreateCommand command) {
         Assert.notNull(command, "PetCreateCommand must not be null");
-        
+        Assert.hasText(command.petName(), "PetName cannot be null or empty");
+        Assert.hasText(command.persona(), "Persona cannot be null or empty");
+
         UserId ownerId = UserId.of(command.ownerId());
         
-        petDomainService.createPet(ownerId, command.petName(), command.petPersona());
+        petDomainService.createPet(ownerId, command.petName(), command.persona());
     }
 
     /**
@@ -50,7 +52,9 @@ public class PetFacade {
      */
     public PetResult getPet(PetGetQuery query) {
         Assert.notNull(query, "PetGetQuery must not be null");
-        
+        Assert.notNull(query.ownerId(), "OwnerId must not be null");
+        Assert.notNull(query.petId(), "PetId must not be null");
+
         PetId petId = PetId.of(query.petId());
         UserId ownerId = UserId.of(query.ownerId());
 
@@ -64,7 +68,9 @@ public class PetFacade {
     @Transactional
     public void deletePet(PetDeleteCommand command) {
         Assert.notNull(command, "PetDeleteCommand must not be null");
-        
+        Assert.notNull(command.ownerId(), "OwnerId must not be null");
+        Assert.notNull(command.petId(), "PetId must not be null");
+
         petDomainService.deletePet(
             PetId.of(command.petId()),
             UserId.of(command.ownerId())

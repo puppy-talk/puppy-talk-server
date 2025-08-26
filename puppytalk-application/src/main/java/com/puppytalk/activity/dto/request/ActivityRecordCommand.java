@@ -5,8 +5,8 @@ package com.puppytalk.activity.dto.request;
  */
 public record ActivityRecordCommand(
     Long userId,
-    Long chatRoomId, // null 가능 (LOGIN/LOGOUT 시)
-    String activityType // ActivityType enum name
+    Long chatRoomId, // null-able
+    String activityType
 ) {
     
     public ActivityRecordCommand {
