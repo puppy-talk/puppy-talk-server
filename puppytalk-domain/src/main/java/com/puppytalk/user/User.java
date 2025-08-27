@@ -14,19 +14,16 @@ public class User {
     private final String username;
     private final String email;
     private final String password;
-    private final PasswordEncoder passwordEncoder;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
     private final boolean isDeleted;
 
     private User(UserId id, String username, String email, String password,
-        PasswordEncoder passwordEncoder,
         LocalDateTime createdAt, LocalDateTime updatedAt, boolean isDeleted) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
-        this.passwordEncoder = passwordEncoder;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.isDeleted = isDeleted;
@@ -43,8 +40,7 @@ public class User {
         String validUsername = username.trim();
         String validEmail = email.trim();
         LocalDateTime now = LocalDateTime.now();
-        return new User(null, validUsername, validEmail, encryptedPassword, new SHA256PasswordEncoder(), now,
-            now, false);
+        return new User(null, validUsername, validEmail, encryptedPassword, now, now, false);
     }
 
     /**
@@ -52,31 +48,17 @@ public class User {
      */
     public static User of(UserId id, String username, String email, String encryptedPassword,
         LocalDateTime createdAt, LocalDateTime updatedAt, boolean isDeleted) {
-        return of(id, username, email, encryptedPassword, new SHA256PasswordEncoder(),
-            createdAt, updatedAt, isDeleted);
-    }
-
-    /**
-     * 기존 사용자 데이터로부터 객체 생성 (암호화 방식 지정)
-     */
-    public static User of(UserId id, String username, String email, String encryptedPassword,
-        PasswordEncoder passwordEncoder,
-        LocalDateTime createdAt, LocalDateTime updatedAt, boolean isDeleted) {
         Preconditions.requireValidId(id, "UserId");
         Preconditions.requireNonBlank(username, "Username", MAX_USERNAME_LENGTH);
         Preconditions.requireNonBlank(email, "Email", MAX_EMAIL_LENGTH);
         Preconditions.requireNonBlank(encryptedPassword, "Password");
-        if (passwordEncoder == null) {
-            throw new IllegalArgumentException("PasswordEncoder must not be null");
-        }
         if (createdAt == null) {
             throw new IllegalArgumentException("CreatedAt must not be null");
         }
 
         String validUsername = username.trim();
         String validEmail = email.trim();
-        return new User(id, validUsername, validEmail, encryptedPassword, passwordEncoder,
-            createdAt, updatedAt, isDeleted);
+        return new User(id, validUsername, validEmail, encryptedPassword, createdAt, updatedAt, isDeleted);
     }
 
 
@@ -86,38 +68,24 @@ public class User {
     public User withEmail(String newEmail) {
         Preconditions.requireNonBlank(newEmail, "Email", MAX_EMAIL_LENGTH);
         String validEmail = newEmail.trim();
-        return new User(this.id, this.username, validEmail, this.password, this.passwordEncoder,
+        return new User(this.id, this.username, validEmail, this.password,
             this.createdAt, LocalDateTime.now(), this.isDeleted);
     }
 
     /**
-     * 비밀번호 검증
-     *
-     * @param rawPassword 평문 비밀번호
-     * @return 비밀번호가 일치하면 true, 그렇지 않으면 false
+     * 비밀번호 변경 (이미 암호화된 비밀번호)
      */
-    public boolean checkPassword(String rawPassword) {
-        return passwordEncoder.matches(rawPassword, password);
-    }
-
-    /**
-     * 비밀번호 변경
-     *
-     * @param newRawPassword 새로운 평문 비밀번호
-     * @return 비밀번호가 변경된 새로운 User 인스턴스
-     */
-    public User changePassword(String newRawPassword) {
-        Preconditions.requireNonBlank(newRawPassword, "Password");
-        String newEncryptedPassword = passwordEncoder.encode(newRawPassword);
-        return new User(id, username, email, newEncryptedPassword, passwordEncoder, createdAt,
-            updatedAt, isDeleted);
+    public User withPassword(String newEncryptedPassword) {
+        Preconditions.requireNonBlank(newEncryptedPassword, "Encrypted Password");
+        return new User(id, username, email, newEncryptedPassword, createdAt,
+            LocalDateTime.now(), isDeleted);
     }
 
     /**
      * 사용자 삭제
      */
     public User withDeletedStatus() {
-        return new User(id, username, email, password, passwordEncoder, createdAt, updatedAt, true);
+        return new User(id, username, email, password, createdAt, LocalDateTime.now(), true);
     }
 
 
@@ -138,9 +106,6 @@ public class User {
         return password;
     }
 
-    public PasswordEncoder passwordEncoder() {
-        return passwordEncoder;
-    }
 
     public LocalDateTime createdAt() {
         return createdAt;

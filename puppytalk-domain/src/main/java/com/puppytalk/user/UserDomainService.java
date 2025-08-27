@@ -109,6 +109,34 @@ public class UserDomainService {
         userRepository.save(deletedUser);
     }
     
+    /**
+     * 비밀번호 검증
+     * 
+     * @param user 사용자
+     * @param rawPassword 평문 비밀번호
+     * @return 비밀번호가 일치하면 true
+     */
+    public boolean checkPassword(User user, String rawPassword) {
+        Preconditions.requireNonBlank(rawPassword, "Password");
+        return passwordEncoder.matches(rawPassword, user.password());
+    }
+    
+    /**
+     * 비밀번호 변경
+     * 
+     * @param userId 사용자 ID
+     * @param newRawPassword 새로운 평문 비밀번호
+     * @throws UserNotFoundException 사용자가 존재하지 않는 경우
+     */
+    public void changePassword(UserId userId, String newRawPassword) {
+        Preconditions.requireNonBlank(newRawPassword, "Password");
+        
+        User user = findUserById(userId);
+        String newEncryptedPassword = passwordEncoder.encode(newRawPassword);
+        User updatedUser = user.withPassword(newEncryptedPassword);
+        userRepository.save(updatedUser);
+    }
+    
     
     /**
      * 사용자명이 고유한지 검증한다.
