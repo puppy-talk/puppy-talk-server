@@ -2,6 +2,7 @@ package com.puppytalk.notification;
 
 import com.puppytalk.chat.ChatRoomId;
 import com.puppytalk.pet.PetId;
+import com.puppytalk.support.validation.Preconditions;
 import com.puppytalk.user.UserId;
 
 import java.time.LocalDateTime;
@@ -13,6 +14,12 @@ import java.util.Objects;
  * Backend 관점: 메시지 전달 보장과 추적 가능성 중심의 설계
  */
 public class Notification {
+    public static final int MAX_RETRY_COUNT = 3;
+    public static final int EXPIRY_HOURS = 24;
+    public static final int INITIAL_RETRY_COUNT = 0;
+    public static final int MAX_TITLE_LENGTH = 100;
+    public static final int MAX_CONTENT_LENGTH = 500;
+    
     private final NotificationId id;
     private final UserId userId;
     private final PetId petId;
@@ -61,10 +68,6 @@ public class Notification {
         String content,
         LocalDateTime scheduledAt
     ) {
-        validateUserId(userId);
-        validateTitle(title);
-        validateContent(content);
-        
         LocalDateTime now = LocalDateTime.now();
         
         return new Notification(
@@ -94,10 +97,6 @@ public class Notification {
         String title,
         String content
     ) {
-        validateUserId(userId);
-        validateTitle(title);
-        validateContent(content);
-        
         LocalDateTime now = LocalDateTime.now();
         
         return new Notification(
@@ -119,24 +118,6 @@ public class Notification {
         );
     }
 
-    private static void validateUserId(UserId userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId must not be null");
-        }
-    }
-    
-    private static void validateTitle(String title) {
-        if (title == null || title.isBlank()) {
-            throw new IllegalArgumentException("Title must not be null or empty");
-        }
-    }
-    
-    private static void validateContent(String content) {
-        if (content == null || content.isBlank()) {
-            throw new IllegalArgumentException("Content must not be null or empty");
-        }
-    }
-
     /**
      * 기존 알림 복원용 정적 팩토리 메서드 (Repository용)
      */
@@ -146,21 +127,6 @@ public class Notification {
                                  LocalDateTime createdAt, LocalDateTime updatedAt, int retryCount, String failureReason) {
         if (id == null || !id.isStored()) {
             throw new IllegalArgumentException("저장된 알림 ID가 필요합니다");
-        }
-        validateUserId(userId);
-        if (type == null) {
-            throw new IllegalArgumentException("NotificationType must not be null");
-        }
-        validateTitle(title);
-        validateContent(content);
-        if (status == null) {
-            throw new IllegalArgumentException("NotificationStatus must not be null");
-        }
-        if (createdAt == null) {
-            throw new IllegalArgumentException("CreatedAt must not be null");
-        }
-        if (retryCount < 0) {
-            throw new IllegalArgumentException("RetryCount must not be negative");
         }
 
         return new Notification(id, userId, petId, chatRoomId, type, title, content, status,

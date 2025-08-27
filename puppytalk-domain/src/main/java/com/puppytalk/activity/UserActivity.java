@@ -1,6 +1,7 @@
 package com.puppytalk.activity;
 
 import com.puppytalk.chat.ChatRoomId;
+import com.puppytalk.support.validation.Preconditions;
 import com.puppytalk.user.UserId;
 
 import java.time.LocalDateTime;
@@ -78,9 +79,7 @@ public class UserActivity {
      */
     public static UserActivity of(ActivityId id, UserId userId, ChatRoomId chatRoomId,
                                  ActivityType activityType, LocalDateTime activityAt, LocalDateTime createdAt) {
-        if (id == null || !id.isStored()) {
-            throw new IllegalArgumentException("저장된 활동 ID가 필요합니다");
-        }
+        Preconditions.requireValidId(id, "ActivityId");
         validateUserId(userId);
         validateActivityType(activityType);
         validateActivityAt(activityAt);
@@ -92,9 +91,7 @@ public class UserActivity {
     }
     
     private static void validateUserId(UserId userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId must not be null");
-        }
+        Preconditions.requireValidId(userId, "UserId");
     }
     
     private static void validateActivityType(ActivityType activityType) {

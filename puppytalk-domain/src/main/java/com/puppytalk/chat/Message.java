@@ -1,107 +1,103 @@
 package com.puppytalk.chat;
 
+import com.puppytalk.support.validation.Preconditions;
+import com.puppytalk.user.UserId;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
- * 채팅 메시지 엔티티
+ * 채팅 메시지 도메인 모델
  */
 public class Message {
+    public static final int MAX_CONTENT_LENGTH = 1000;
+    
     private final MessageId id;
     private final ChatRoomId chatRoomId;
-    private final MessageType type;
+    private final UserId senderId;
     private final String content;
+    private final MessageType type;
     private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
 
-    private Message(MessageId id, ChatRoomId chatRoomId, MessageType type,
-                   String content, LocalDateTime createdAt) {
+    private Message(MessageId id, ChatRoomId chatRoomId, UserId senderId, String content, 
+                   MessageType type, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.chatRoomId = chatRoomId;
-        this.type = type;
+        this.senderId = senderId;
         this.content = content;
+        this.type = type;
         this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
-    public static Message of(ChatRoomId chatRoomId, String content) {
-        validateChatRoomId(chatRoomId);
-        validateContent(content);
+    /**
+     * 사용자 메시지 생성
+     */
+    public static Message create(ChatRoomId chatRoomId, UserId senderId, String content) {
+        Preconditions.requireValidId(chatRoomId, "ChatRoomId");
+        Preconditions.requireValidId(senderId, "SenderId");
+        Preconditions.requireNonBlank(content, "Content", MAX_CONTENT_LENGTH);
         
-        return new Message(
-            null,
-            chatRoomId,
-            MessageType.USER,
-            content.trim(),
-            LocalDateTime.now()
-        );
+        String validContent = content.trim();
+        LocalDateTime now = LocalDateTime.now();
+        return new Message(null, chatRoomId, senderId, validContent, MessageType.USER, now, now);
     }
 
+    /**
+     * AI 메시지 생성
+     */
     public static Message createPetMessage(ChatRoomId chatRoomId, String content) {
-        validateChatRoomId(chatRoomId);
-        validateContent(content);
+        Preconditions.requireValidId(chatRoomId, "ChatRoomId");
+        Preconditions.requireNonBlank(content, "Content", MAX_CONTENT_LENGTH);
         
-        return new Message(
-            null,
-            chatRoomId,
-            MessageType.PET,
-            content.trim(),
-            LocalDateTime.now()
-        );
+        String validContent = content.trim();
+        LocalDateTime now = LocalDateTime.now();
+        return new Message(null, chatRoomId, null, validContent, MessageType.PET, now, now);
     }
 
-    public static Message restore(MessageId id, ChatRoomId chatRoomId, MessageType type,
-                                  String content, LocalDateTime createdAt) {
-        if (id == null || !id.isStored()) {
-            throw new IllegalArgumentException("저장된 메시지 ID가 필요합니다");
-        }
-        validateChatRoomId(chatRoomId);
+    /**
+     * 기존 메시지 데이터로부터 객체 생성
+     */
+    public static Message of(MessageId id, ChatRoomId chatRoomId, UserId senderId, 
+                                String content, MessageType type, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        Preconditions.requireValidId(id, "MessageId");
+        Preconditions.requireValidId(chatRoomId, "ChatRoomId");
+        Preconditions.requireNonBlank(content, "Content", MAX_CONTENT_LENGTH);
+        String validContent = content.trim();
         if (type == null) {
-            throw new IllegalArgumentException("메시지 타입은 필수입니다");
+            throw new IllegalArgumentException("MessageType must not be null");
         }
-        validateContent(content);
         if (createdAt == null) {
-            throw new IllegalArgumentException("생성 시각은 필수입니다");
+            throw new IllegalArgumentException("CreatedAt must not be null");
         }
 
-        return new Message(id, chatRoomId, type, content, createdAt);
+        return new Message(id, chatRoomId, senderId, validContent, type, createdAt, updatedAt);
     }
 
-    private static void validateChatRoomId(ChatRoomId chatRoomId) {
-        if (chatRoomId == null || !chatRoomId.isStored()) {
-            throw new IllegalArgumentException("채팅방 ID는 필수입니다");
-        }
-    }
-    
-    private static void validateContent(String content) {
-        if (content == null || content.isBlank()) {
-            throw new IllegalArgumentException("메시지 내용은 필수입니다");
-        }
-        if (content.trim().length() > 1000) {
-            throw new IllegalArgumentException("메시지 내용은 1000자를 초과할 수 없습니다");
-        }
+    // Getters
+    public MessageId getId() { return id; }
+    public ChatRoomId getChatRoomId() { return chatRoomId; }
+    public UserId getSenderId() { return senderId; }
+    public String getContent() { return content; }
+    public MessageType getType() { return type; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+    // Business methods
+    public boolean isUserMessage() {
+        return type == MessageType.USER;
     }
 
-    /**
-     * 사용자가 보낸 메시지인지 확인
-     */
-    public boolean isFromUser() {
-        return type.isUserMessage();
+    public boolean isPetMessage() {
+        return type == MessageType.PET;
     }
 
-    /**
-     * 반려동물이 보낸 메시지인지 확인
-     */
-    public boolean isFromPet() {
-        return type.isPetMessage();
+    public boolean isFromUser(UserId userId) {
+        return isUserMessage() && Objects.equals(senderId, userId);
     }
 
-    /**
-     * 특정 채팅방의 메시지인지 확인
-     */
-    public boolean belongsToChatRoom(ChatRoomId chatRoomId) {
-        return Objects.equals(this.chatRoomId, chatRoomId);
-    }
-
-    // getter
+    // 기존 호환성을 위한 메서드들
     public MessageId id() { return id; }
     public ChatRoomId chatRoomId() { return chatRoomId; }
     public MessageType type() { return type; }
@@ -109,15 +105,16 @@ public class Message {
     public LocalDateTime createdAt() { return createdAt; }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof Message other)) return false;
-        return Objects.equals(id, other.id);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Message message = (Message) o;
+        return Objects.equals(id, message.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hash(id);
     }
 
     @Override
@@ -125,8 +122,9 @@ public class Message {
         return "Message{" +
                 "id=" + id +
                 ", chatRoomId=" + chatRoomId +
-                ", type=" + type +
+                ", senderId=" + senderId +
                 ", content='" + content + '\'' +
+                ", type=" + type +
                 ", createdAt=" + createdAt +
                 '}';
     }

@@ -1,6 +1,7 @@
 package com.puppytalk.chat;
 
 import com.puppytalk.pet.PetId;
+import com.puppytalk.support.validation.Preconditions;
 import com.puppytalk.user.UserId;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -47,9 +48,7 @@ public class ChatRoom {
         LocalDateTime createdAt,
         LocalDateTime lastMessageAt
     ) {
-        if (id == null || !id.isStored()) {
-            throw new IllegalArgumentException("저장된 채팅방 ID가 필요합니다");
-        }
+        Preconditions.requireValidId(id, "ChatRoomId");
         validateUserId(userId);
         validatePetId(petId);
         if (createdAt == null) {
@@ -63,15 +62,11 @@ public class ChatRoom {
     }
 
     private static void validateUserId(UserId userId) {
-        if (userId == null || !userId.isStored()) {
-            throw new IllegalArgumentException("사용자 ID는 필수입니다");
-        }
+        Preconditions.requireValidId(userId, "UserId");
     }
     
     private static void validatePetId(PetId petId) {
-        if (petId == null || !petId.isStored()) {
-            throw new IllegalArgumentException("반려동물 ID는 필수입니다");
-        }
+        Preconditions.requireValidId(petId, "PetId");
     }
 
     /**

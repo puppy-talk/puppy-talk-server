@@ -1,82 +1,86 @@
 package com.puppytalk.pet;
 
+import com.puppytalk.support.validation.Preconditions;
 import com.puppytalk.user.UserId;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Pet {
+    public static final int MAX_NAME_LENGTH = 50;
+    public static final int MAX_PERSONA_LENGTH = 500;
+    
     private final PetId id;
     private final UserId ownerId;
     private final String name;
     private final String persona;
     private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
     private final PetStatus status;
 
     private Pet(PetId id, UserId ownerId, String name, String persona,
-                 LocalDateTime createdAt, PetStatus status) {
+                 LocalDateTime createdAt, LocalDateTime updatedAt, PetStatus status) {
         this.id = id;
         this.ownerId = ownerId;
         this.name = name;
         this.persona = persona;
         this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
         this.status = status;
     }
 
     public static Pet create(UserId ownerId, String name, String persona) {
-        validateOwnerId(ownerId);
-        validateName(name);
-        validatePersona(persona);
-        
+        Preconditions.requireValidId(ownerId, "OwnerId");
+        Preconditions.requireNonBlank(name, "Name", MAX_NAME_LENGTH);
+        Preconditions.requireNonBlank(persona, "Persona", MAX_PERSONA_LENGTH);
+
+        LocalDateTime now = LocalDateTime.now();
+
         return new Pet(
             null,
             ownerId,
-            name.trim(),
-            persona.trim(),
-            LocalDateTime.now(),
+            name,
+            persona,
+            now,
+            now,
             PetStatus.ACTIVE
         );
     }
 
     public static Pet of(PetId id, UserId ownerId, String name, String persona,
-                         LocalDateTime createdAt, PetStatus status) {
-        if (id == null || !id.isStored()) {
-            throw new IllegalArgumentException("저장된 반려동물 ID가 필요합니다");
-        }
-        validateOwnerId(ownerId);
-        validateName(name);
-        validatePersona(persona);
+                             LocalDateTime createdAt, LocalDateTime updatedAt) {
+        Preconditions.requireValidId(id, "PetId");
+        Preconditions.requireValidId(ownerId, "OwnerId");
+        Preconditions.requireNonBlank(name, "Name", MAX_NAME_LENGTH);
+        Preconditions.requireNonBlank(persona, "Persona", MAX_PERSONA_LENGTH);
+        
         if (createdAt == null) {
-            throw new IllegalArgumentException("생성 시각은 필수입니다");
-        }
-        if (status == null) {
-            throw new IllegalArgumentException("반려동물 상태는 필수입니다");
+            throw new IllegalArgumentException("CreatedAt must not be null");
         }
 
-        return new Pet(id, ownerId, name, persona, createdAt, status);
+        String validName = name.trim();
+        String validPersona = persona.trim();
+        return new Pet(id, ownerId, validName, validPersona, createdAt, updatedAt, PetStatus.ACTIVE);
     }
 
-    private static void validateOwnerId(UserId ownerId) {
-        if (ownerId == null || !ownerId.isStored()) {
-            throw new IllegalArgumentException("소유자 ID는 필수입니다");
-        }
+    /**
+     * 이름 변경
+     */
+    public Pet withName(String newName) {
+        Preconditions.requireNonBlank(newName, "Name", MAX_NAME_LENGTH);
+        String validName = newName.trim();
+        return new Pet(this.id, this.ownerId, validName, this.persona, 
+                       this.createdAt, LocalDateTime.now(), this.status);
     }
-    
-    private static void validateName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("반려동물 이름은 필수입니다");
-        }
-        if (name.trim().length() > 20) {
-            throw new IllegalArgumentException("반려동물 이름은 20자를 초과할 수 없습니다");
-        }
-    }
-    
-    private static void validatePersona(String persona) {
-        if (persona == null || persona.isBlank()) {
-            throw new IllegalArgumentException("반려동물 페르소나는 필수입니다");
-        }
-        if (persona.trim().length() > 500) {
-            throw new IllegalArgumentException("반려동물 페르소나는 500자를 초과할 수 없습니다");
-        }
+
+    /**
+     * 페르소나 변경
+     */
+    public Pet withPersona(String newPersona) {
+        Preconditions.requireNonBlank(newPersona, "Persona", MAX_PERSONA_LENGTH);
+        String validName = newPersona.trim();
+        return new Pet(this.id, this.ownerId, this.name, validName, 
+                       this.createdAt, LocalDateTime.now(), this.status);
     }
 
     /**
@@ -87,7 +91,7 @@ public class Pet {
         if (this.status == PetStatus.DELETED) {
             throw new IllegalStateException("이미 삭제된 반려동물입니다");
         }
-        return new Pet(id, ownerId, name, persona, createdAt, PetStatus.DELETED);
+        return new Pet(id, ownerId, name, persona, createdAt, LocalDateTime.now(), PetStatus.DELETED);
     }
 
     public boolean canChat() {
