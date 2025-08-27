@@ -9,13 +9,12 @@ import com.puppytalk.pet.Pet;
 import com.puppytalk.pet.PetId;
 import com.puppytalk.pet.PetRepository;
 import com.puppytalk.user.UserId;
+import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
 
 /**
  * 비활성 사용자 알림 파사드
@@ -27,6 +26,7 @@ import java.util.Optional;
 public class InactivityNotificationFacade {
     
     private static final Logger log = LoggerFactory.getLogger(InactivityNotificationFacade.class);
+    private static final int CHAT_HISTORY_LIMIT = 10;
     
     private final NotificationDomainService notificationDomainService;
     private final ChatDomainService chatDomainService;
@@ -92,8 +92,8 @@ public class InactivityNotificationFacade {
         ChatRoomId chatRoomId = chatRoom.get().id();
         log.debug("Found chat room: {}", chatRoomId.getValue());
         
-        // 3. 최근 채팅 히스토리 조회 (최대 10개)
-        List<Message> chatHistory = chatDomainService.findRecentChatHistory(chatRoomId, 10);
+        // 3. 최근 채팅 히스토리 조회
+        List<Message> chatHistory = chatDomainService.findRecentChatHistory(chatRoomId, CHAT_HISTORY_LIMIT);
         log.debug("Retrieved {} recent messages for context", chatHistory.size());
         
         // 4. AI 메시지 생성
@@ -116,75 +116,5 @@ public class InactivityNotificationFacade {
         return Optional.of(notificationId);
     }
     
-    /**
-     * 다중 비활성 사용자에 대한 일괄 알림 생성
-     * 
-     * @param inactiveUsers 비활성 사용자와 반려동물 ID 목록
-     * @return 일괄 처리 결과
-     */
-    @Transactional
-    public InactivityNotificationBatchResult createBatchInactivityNotifications(
-        List<UserPetPair> inactiveUsers) {
-        
-        log.info("Starting batch inactivity notification creation for {} users", inactiveUsers.size());
-        
-        int successCount = 0;
-        int failureCount = 0;
-        
-        for (UserPetPair userPet : inactiveUsers) {
-            try {
-                Optional<NotificationId> result = createInactivityNotificationInternal(
-                    userPet.userId(), userPet.petId());
-                
-                if (result.isPresent()) {
-                    successCount++;
-                } else {
-                    failureCount++;
-                    log.debug("No notification created for user: {}, pet: {} (no chat room)", 
-                            userPet.userId().getValue(), userPet.petId().getValue());
-                }
-            } catch (Exception e) {
-                failureCount++;
-                log.error("Failed to create notification for user: {}, pet: {}: {}", 
-                        userPet.userId().getValue(), userPet.petId().getValue(), e.getMessage());
-            }
-        }
-        
-        InactivityNotificationBatchResult result = new InactivityNotificationBatchResult(successCount, failureCount);
-        log.info("Batch notification creation completed. Success: {}, Failure: {}, Success Rate: {:.1f}%", 
-                successCount, failureCount, result.successRate() * 100);
-        
-        return result;
-    }
     
-    /**
-     * 사용자-반려동물 쌍
-     */
-    public record UserPetPair(UserId userId, PetId petId) {
-        
-        public static UserPetPair of(Long userId, Long petId) {
-            return new UserPetPair(UserId.from(userId), PetId.from(petId));
-        }
-    }
-    
-    /**
-     * 일괄 알림 생성 결과
-     */
-    public record InactivityNotificationBatchResult(
-        int successCount,
-        int failureCount
-    ) {
-        
-        public int totalCount() {
-            return successCount + failureCount;
-        }
-        
-        public double successRate() {
-            return totalCount() == 0 ? 0.0 : (double) successCount / totalCount();
-        }
-        
-        public boolean hasFailures() {
-            return failureCount > 0;
-        }
-    }
 }

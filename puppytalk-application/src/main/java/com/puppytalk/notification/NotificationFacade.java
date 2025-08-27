@@ -19,7 +19,10 @@ import org.springframework.util.Assert;
 @Transactional(readOnly = true)
 public class NotificationFacade {
 
-    private static final int LAST_ACTIVITY_HOURS = 2; // 마지막 활동 시간
+    private static final int LAST_ACTIVITY_HOURS = 2;
+    private static final int DEFAULT_BATCH_SIZE = 100;
+    private static final int DEFAULT_RETRY_BATCH_SIZE = 50;
+    
     private final NotificationDomainService notificationDomainService;
     private final ActivityDomainService activityDomainService;
     private final PetRepository petRepository;
@@ -78,7 +81,7 @@ public class NotificationFacade {
      */
     @Transactional(readOnly = true)
     public NotificationListResult getPendingNotifications(Integer batchSize) {
-        int size = batchSize != null ? batchSize : 100; // 기본 100개
+        int size = batchSize != null ? batchSize : DEFAULT_BATCH_SIZE;
         
         List<Notification> notifications = notificationDomainService.getPendingNotifications(size);
         
@@ -107,7 +110,7 @@ public class NotificationFacade {
      */
     @Transactional(readOnly = true)
     public NotificationListResult getRetryableNotifications(Integer batchSize) {
-        int size = batchSize != null ? batchSize : 50; // 기본 50개
+        int size = batchSize != null ? batchSize : DEFAULT_RETRY_BATCH_SIZE;
         
         List<Notification> notifications = notificationDomainService.getRetryableNotifications(size);
         

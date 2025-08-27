@@ -1,5 +1,6 @@
 package com.puppytalk.scheduler;
 
+import com.puppytalk.notification.InactivityNotificationFacade;
 import com.puppytalk.notification.NotificationFacade;
 import com.puppytalk.notification.dto.response.NotificationListResult;
 import com.puppytalk.notification.dto.response.NotificationResult;
@@ -19,12 +20,15 @@ class NotificationSchedulerTest {
 
     @Mock
     private NotificationFacade notificationFacade;
+    
+    @Mock
+    private InactivityNotificationFacade inactivityNotificationFacade;
 
     private NotificationScheduler notificationScheduler;
 
     @BeforeEach
     void setUp() {
-        notificationScheduler = new NotificationScheduler(notificationFacade);
+        notificationScheduler = new NotificationScheduler(notificationFacade, inactivityNotificationFacade);
     }
 
     @Test
