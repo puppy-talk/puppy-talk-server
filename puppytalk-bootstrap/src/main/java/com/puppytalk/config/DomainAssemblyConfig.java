@@ -9,6 +9,8 @@ import com.puppytalk.notification.NotificationDomainService;
 import com.puppytalk.notification.NotificationRepository;
 import com.puppytalk.pet.PetDomainService;
 import com.puppytalk.pet.PetRepository;
+import com.puppytalk.user.PasswordEncoder;
+import com.puppytalk.user.SHA256PasswordEncoder;
 import com.puppytalk.user.UserDomainService;
 import com.puppytalk.user.UserRepository;
 import org.springframework.context.annotation.Bean;
@@ -23,8 +25,13 @@ public class DomainAssemblyConfig {
     }
 
     @Bean
-    public UserDomainService userDomainService(UserRepository userRepository) {
-        return new UserDomainService(userRepository);
+    public PasswordEncoder passwordEncoder() {
+        return new SHA256PasswordEncoder();
+    }
+    
+    @Bean
+    public UserDomainService userDomainService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        return new UserDomainService(userRepository, passwordEncoder);
     }
     
     @Bean

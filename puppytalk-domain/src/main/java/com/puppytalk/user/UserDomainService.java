@@ -1,5 +1,6 @@
 package com.puppytalk.user;
 
+import com.puppytalk.support.validation.Preconditions;
 import java.util.List;
 
 /**
@@ -9,12 +10,17 @@ import java.util.List;
 public class UserDomainService {
     
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
     
-    public UserDomainService(UserRepository userRepository) {
+    public UserDomainService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         if (userRepository == null) {
             throw new IllegalArgumentException("UserRepository must not be null");
         }
+        if (passwordEncoder == null) {
+            throw new IllegalArgumentException("PasswordEncoder must not be null");
+        }
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
     
     /**
@@ -22,25 +28,21 @@ public class UserDomainService {
      * 
      * @param username 사용자명
      * @param email 이메일
-     * @param password 비밀번호
+     * @param rawPassword 원시 비밀번호
      * @return 저장된 사용자 ID
      * @throws DuplicateUserException 사용자명 또는 이메일이 중복된 경우
      */
-    public UserId registerUser(String username, String email, String password) {
-        if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("사용자명은 필수입니다");
-        }
-        if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("이메일은 필수입니다");
-        }
-        if (password == null || password.isBlank()) {
-            throw new IllegalArgumentException("비밀번호는 필수입니다");
-        }
+    public UserId registerUser(String username, String email, String rawPassword) {
+        Preconditions.requireNonBlank(username, "Username");
+        Preconditions.requireNonBlank(email, "Email");
+        Preconditions.requireNonBlank(rawPassword, "Password");
         
         validateUniqueUsername(username.trim());
         validateUniqueEmail(email.trim());
         
-        User user = User.create(username, email, password);
+        // 도메인 서비스에서 비밀번호 암호화 수행
+        String encryptedPassword = passwordEncoder.encode(rawPassword);
+        User user = User.create(username, email, encryptedPassword);
         return userRepository.save(user);
     }
     
@@ -52,9 +54,7 @@ public class UserDomainService {
      * @throws UserNotFoundException 사용자가 존재하지 않는 경우
      */
     public User findUserById(UserId userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId must not be null");
-        }
+        Preconditions.requireValidId(userId, "UserId");
         
         return userRepository.findById(userId)
             .orElseThrow(() -> UserNotFoundException.byId(userId));
@@ -68,12 +68,10 @@ public class UserDomainService {
      * @throws UserNotFoundException 사용자가 존재하지 않는 경우
      */
     public User findUserByUsername(String username) {
-        if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("Username must not be null or empty");
-        }
+        Preconditions.requireNonBlank(username, "Username");
         
         return userRepository.findByUsername(username.trim())
-            .orElseThrow(() -> UserNotFoundException.byUsername(username));
+            .orElseThrow(() -> new UserNotFoundException(username));
     }
     
     /**
@@ -93,9 +91,7 @@ public class UserDomainService {
      * @throws UserNotFoundException 사용자가 존재하지 않는 경우
      */
     public User findUserByEmail(String email) {
-        if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("Email must not be null or empty");
-        }
+        Preconditions.requireNonBlank(email, "Email");
         
         return userRepository.findByEmail(email.trim().toLowerCase())
             .orElseThrow(() -> UserNotFoundException.byEmail(email));
@@ -113,17 +109,6 @@ public class UserDomainService {
         userRepository.save(deletedUser);
     }
     
-    /**
-     * 사용자를 복구한다 (삭제 취소).
-     * 
-     * @param userId 사용자 ID
-     * @throws UserNotFoundException 사용자가 존재하지 않는 경우
-     */
-    public void restoreUser(UserId userId) {
-        User user = findUserById(userId);
-        User restoredUser = user.withRestoredStatus();
-        userRepository.save(restoredUser);
-    }
     
     /**
      * 사용자명이 고유한지 검증한다.
@@ -133,7 +118,7 @@ public class UserDomainService {
      */
     private void validateUniqueUsername(String username) {
         if (userRepository.existsByUsername(username)) {
-            throw DuplicateUserException.byUsername(username);
+            throw new DuplicateUserException(username);
         }
     }
     

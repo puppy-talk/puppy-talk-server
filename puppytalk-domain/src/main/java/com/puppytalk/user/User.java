@@ -1,173 +1,167 @@
 package com.puppytalk.user;
 
+import com.puppytalk.support.validation.Preconditions;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
-/**
- * 사용자 엔티티
- * 
- * 시스템에 가입한 사용자를 나타내는 도메인 엔티티입니다.
- */
 public class User {
-    
-    public static final int MIN_USERNAME_LENGTH = 3;
+
     public static final int MAX_USERNAME_LENGTH = 20;
     public static final int MAX_EMAIL_LENGTH = 100;
-    private static final Pattern EMAIL_PATTERN = Pattern.compile(
-        "^[A-Za-z0-9+_.-]+@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})$"
-    );
-    
+
+
     private final UserId id;
     private final String username;
     private final String email;
-    private final Password password;
+    private final String password;
+    private final PasswordEncoder passwordEncoder;
     private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
     private final boolean isDeleted;
 
-    private User(UserId id, String username, String email, Password password,
-                 LocalDateTime createdAt, boolean isDeleted) {
+    private User(UserId id, String username, String email, String password,
+        PasswordEncoder passwordEncoder,
+        LocalDateTime createdAt, LocalDateTime updatedAt, boolean isDeleted) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
+        this.passwordEncoder = passwordEncoder;
         this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
         this.isDeleted = isDeleted;
     }
 
-    public static User create(String username, String email, String rawPassword) {
-        validateUsername(username);
-        validateEmail(email);
-        validateRawPassword(rawPassword);
-        
-        Password password = Password.fromRawPassword(rawPassword);
-        
-        return new User(
-            UserId.create(),
-            username.trim(),
-            email.trim().toLowerCase(),
-            password,
-            LocalDateTime.now(),
-            false
-        );
+    /**
+     * 새 사용자 생성
+     */
+    public static User create(String username, String email, String encryptedPassword) {
+        Preconditions.requireNonBlank(username, "Username", MAX_USERNAME_LENGTH);
+        Preconditions.requireNonBlank(email, "Email", MAX_EMAIL_LENGTH);
+        Preconditions.requireNonBlank(encryptedPassword, "Encrypted Password");
+
+        String validUsername = username.trim();
+        String validEmail = email.trim();
+        LocalDateTime now = LocalDateTime.now();
+        return new User(null, validUsername, validEmail, encryptedPassword, new SHA256PasswordEncoder(), now,
+            now, false);
     }
 
+    /**
+     * 기존 사용자 데이터로부터 객체 생성
+     */
     public static User of(UserId id, String username, String email, String encryptedPassword,
-                          LocalDateTime createdAt, boolean isDeleted) {
-        if (id == null || !id.isStored()) {
-            throw new IllegalArgumentException("저장된 사용자 ID가 필요합니다");
-        }
-        validateUsername(username);
-        validateEmail(email);
-        if (encryptedPassword == null || encryptedPassword.isBlank()) {
-            throw new IllegalArgumentException("암호화된 비밀번호는 필수입니다");
+        LocalDateTime createdAt, LocalDateTime updatedAt, boolean isDeleted) {
+        return of(id, username, email, encryptedPassword, new SHA256PasswordEncoder(),
+            createdAt, updatedAt, isDeleted);
+    }
+
+    /**
+     * 기존 사용자 데이터로부터 객체 생성 (암호화 방식 지정)
+     */
+    public static User of(UserId id, String username, String email, String encryptedPassword,
+        PasswordEncoder passwordEncoder,
+        LocalDateTime createdAt, LocalDateTime updatedAt, boolean isDeleted) {
+        Preconditions.requireValidId(id, "UserId");
+        Preconditions.requireNonBlank(username, "Username", MAX_USERNAME_LENGTH);
+        Preconditions.requireNonBlank(email, "Email", MAX_EMAIL_LENGTH);
+        Preconditions.requireNonBlank(encryptedPassword, "Password");
+        if (passwordEncoder == null) {
+            throw new IllegalArgumentException("PasswordEncoder must not be null");
         }
         if (createdAt == null) {
-            throw new IllegalArgumentException("생성 시각은 필수입니다");
+            throw new IllegalArgumentException("CreatedAt must not be null");
         }
 
-        Password password = Password.fromEncryptedPassword(encryptedPassword);
-        return new User(id, username, email, password, createdAt, isDeleted);
+        String validUsername = username.trim();
+        String validEmail = email.trim();
+        return new User(id, validUsername, validEmail, encryptedPassword, passwordEncoder,
+            createdAt, updatedAt, isDeleted);
     }
 
-    private static void validateUsername(String username) {
-        if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("사용자명은 필수입니다");
-        }
-        if (username.trim().length() < MIN_USERNAME_LENGTH || username.trim().length() > MAX_USERNAME_LENGTH) {
-            throw new IllegalArgumentException(
-                String.format("사용자명은 %d-%d자 사이여야 합니다", MIN_USERNAME_LENGTH, MAX_USERNAME_LENGTH)
-            );
-        }
-    }
-    
-    private static void validateEmail(String email) {
-        if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("이메일은 필수입니다");
-        }
-        if (!isValidEmail(email)) {
-            throw new IllegalArgumentException("올바른 이메일 형식이 아닙니다");
-        }
-    }
-    
-    private static void validateRawPassword(String rawPassword) {
-        if (rawPassword == null || rawPassword.isBlank()) {
-            throw new IllegalArgumentException("비밀번호는 필수입니다");
-        }
-    }
-    
-    private static boolean isValidEmail(String email) {
-        if (email == null || email.isBlank()) {
-            return false;
-        }
-        
-        String trimmedEmail = email.trim();
-        
-        if (trimmedEmail.length() > MAX_EMAIL_LENGTH) {
-            return false;
-        }
-        
-        return EMAIL_PATTERN.matcher(trimmedEmail).matches();
+
+    /**
+     * 이메일 변경
+     */
+    public User withEmail(String newEmail) {
+        Preconditions.requireNonBlank(newEmail, "Email", MAX_EMAIL_LENGTH);
+        String validEmail = newEmail.trim();
+        return new User(this.id, this.username, validEmail, this.password, this.passwordEncoder,
+            this.createdAt, LocalDateTime.now(), this.isDeleted);
     }
 
     /**
      * 비밀번호 검증
-     * 
+     *
      * @param rawPassword 평문 비밀번호
      * @return 비밀번호가 일치하면 true, 그렇지 않으면 false
      */
     public boolean checkPassword(String rawPassword) {
-        return password.matches(rawPassword);
+        return passwordEncoder.matches(rawPassword, password);
     }
 
     /**
      * 비밀번호 변경
-     * 
+     *
      * @param newRawPassword 새로운 평문 비밀번호
      * @return 비밀번호가 변경된 새로운 User 인스턴스
      */
     public User changePassword(String newRawPassword) {
-        Password newPassword = password.change(newRawPassword);
-        return new User(id, username, email, newPassword, createdAt, isDeleted);
+        Preconditions.requireNonBlank(newRawPassword, "Password");
+        String newEncryptedPassword = passwordEncoder.encode(newRawPassword);
+        return new User(id, username, email, newEncryptedPassword, passwordEncoder, createdAt,
+            updatedAt, isDeleted);
     }
 
     /**
      * 사용자 삭제
      */
     public User withDeletedStatus() {
-        return new User(id, username, email, password, createdAt, true);
+        return new User(id, username, email, password, passwordEncoder, createdAt, updatedAt, true);
     }
 
-    /**
-     * 사용자 복구
-     */
-    public User withRestoredStatus() {
-        return new User(id, username, email, password, createdAt, false);
-    }
-
-    public User withEmail(String newEmail) {
-        if (newEmail == null || newEmail.isBlank()) {
-            throw new IllegalArgumentException("새 이메일은 필수입니다");
-        }
-        if (newEmail.trim().length() > 100) {
-            throw new IllegalArgumentException("이메일은 100자를 초과할 수 없습니다");
-        }
-        
-        return new User(this.id, this.username, newEmail.trim(), this.password, this.createdAt, this.isDeleted);
-    }
 
     // getter
-    public UserId id() { return id; }
-    public String username() { return username; }
-    public String email() { return email; }
-    public String password() { return password.value(); }
-    public LocalDateTime createdAt() { return createdAt; }
-    public boolean isDeleted() { return isDeleted; }
+    public UserId id() {
+        return id;
+    }
+
+    public String username() {
+        return username;
+    }
+
+    public String email() {
+        return email;
+    }
+
+    public String password() {
+        return password;
+    }
+
+    public PasswordEncoder passwordEncoder() {
+        return passwordEncoder;
+    }
+
+    public LocalDateTime createdAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime updatedAt() {
+        return updatedAt;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof User other)) return false;
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof User other)) {
+            return false;
+        }
         return Objects.equals(id, other.id);
     }
 
@@ -179,10 +173,10 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", email='" + email + '\'' +
-                ", isDeleted=" + isDeleted +
-                '}';
+            "id=" + id +
+            ", username='" + username + '\'' +
+            ", email='" + email + '\'' +
+            ", isDeleted=" + isDeleted +
+            '}';
     }
 }
