@@ -1,13 +1,11 @@
 package com.puppytalk.chat;
 
-import java.util.Objects;
+import com.puppytalk.support.EntityId;
 
-public class ChatRoomId {
-    
-    private final Long value;
+public class ChatRoomId extends EntityId {
     
     private ChatRoomId(Long value) {
-        this.value = value;
+        super(value);
     }
 
     /**
@@ -22,32 +20,5 @@ public class ChatRoomId {
      */
     public static ChatRoomId create() {
         return new ChatRoomId(null);
-    }
-    
-    public boolean isStored() {
-        return value != null && value > 0;
-    }
-    
-    public Long getValue() {
-        return value;
-    }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof ChatRoomId other)) return false;
-        return Objects.equals(value, other.value);
-    }
-    
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(value);
-    }
-    
-    @Override
-    public String toString() {
-        return "ChatRoomId{" +
-                "value=" + value +
-                '}';
     }
 }

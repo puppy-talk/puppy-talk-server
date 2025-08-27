@@ -1,12 +1,14 @@
 package com.puppytalk.notification;
 
+import com.puppytalk.support.EntityId;
+
 /**
  * 알림 ID 값 객체
  */
-public record NotificationId(Long value) {
+public class NotificationId extends EntityId {
     
-    public NotificationId {
-        // 생성자 검증은 of() 메서드에서 수행
+    private NotificationId(Long value) {
+        super(value);
     }
     
     /**
@@ -21,19 +23,5 @@ public record NotificationId(Long value) {
      */
     public static NotificationId create() {
         return new NotificationId(null);
-    }
-    
-    /**
-     * ID가 저장된 상태인지 확인
-     */
-    public boolean isStored() {
-        return value != null && value > 0;
-    }
-    
-    /**
-     * JPA 호환성을 위한 값 접근
-     */
-    public Long getValue() {
-        return value;
     }
 }

@@ -1,12 +1,11 @@
 package com.puppytalk.user;
 
-public record UserId(Long value) {
+import com.puppytalk.support.EntityId;
+
+public class UserId extends EntityId {
     
-    /**
-     * Get the value (alias for compatibility)
-     */
-    public Long getValue() {
-        return value;
+    private UserId(Long value) {
+        super(value);
     }
     
     /**
@@ -21,9 +20,5 @@ public record UserId(Long value) {
      */
     public static UserId create() {
         return new UserId(null);
-    }
-
-    public boolean isStored() {
-        return value != null && value > 0;
     }
 }

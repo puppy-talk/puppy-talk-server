@@ -1,9 +1,11 @@
 package com.puppytalk.pet;
 
-public record PetId(Long value) {
+import com.puppytalk.support.EntityId;
+
+public class PetId extends EntityId {
     
-    public Long getValue() {
-        return value;
+    private PetId(Long value) {
+        super(value);
     }
     
     /**
@@ -18,9 +20,5 @@ public record PetId(Long value) {
      */
     public static PetId create() {
         return new PetId(null);
-    }
-
-    public boolean isStored() {
-        return value != null && value > 0;
     }
 }
