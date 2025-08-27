@@ -24,9 +24,9 @@ public record NotificationId(Long value) {
     }
     
     /**
-     * ID가 유효한지 확인
+     * ID가 저장된 상태인지 확인
      */
-    public boolean isValid() {
+    public boolean isStored() {
         return value != null && value > 0;
     }
     

@@ -46,9 +46,9 @@ public class UserJpaEntity extends BaseEntity {
     }
     
     /**
-     * 도메인 객체로부터 JPA 엔티티 생성
+     * model -> jpa entity
      */
-    public static UserJpaEntity fromDomain(User user) {
+    public static UserJpaEntity from(User user) {
         return new UserJpaEntity(
             user.id() != null ? user.id().value() : null,
             user.username(),
@@ -61,7 +61,7 @@ public class UserJpaEntity extends BaseEntity {
     }
     
     /**
-     * JPA 엔티티를 도메인 객체로 변환
+     * jpa entity -> model
      */
     public User toDomain() {
         return User.of(
@@ -81,8 +81,11 @@ public class UserJpaEntity extends BaseEntity {
     public String getPassword() { return password; }
     public boolean isDeleted() { return isDeleted; }
     
-    // Setters for JPA updates
-    public void updateFromDomain(User user) {
+    /**
+     * updateFromDomain 패턴 - 도메인 객체로부터 일괄 업데이트
+     * 개별 setter 사용을 방지하여 불변성 보장
+     */
+    public void update(User user) {
         this.username = user.username();
         this.email = user.email();
         this.password = user.password();

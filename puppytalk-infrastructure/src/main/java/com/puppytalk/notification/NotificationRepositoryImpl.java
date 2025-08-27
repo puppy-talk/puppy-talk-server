@@ -4,6 +4,7 @@ import com.puppytalk.user.UserId;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,7 +26,9 @@ public class NotificationRepositoryImpl implements NotificationRepository {
     
     @Override
     public NotificationId save(Notification notification) {
-        NotificationJpaEntity entity = NotificationJpaEntity.fromDomain(notification);
+        Assert.notNull(notification, "Notification must not be null");
+        
+        NotificationJpaEntity entity = NotificationJpaEntity.from(notification);
         NotificationJpaEntity saved = jpaRepository.save(entity);
         return NotificationId.from(saved.getId());
     }

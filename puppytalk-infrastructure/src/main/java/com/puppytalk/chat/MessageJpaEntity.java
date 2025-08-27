@@ -40,36 +40,55 @@ public class MessageJpaEntity extends BaseEntity {
         this.content = content;
     }
     
-    // Getters and Setters
-    public Long getId() {
-        return id;
+    /**
+     * model -> jpa entity
+     */
+    public static MessageJpaEntity from(Message message) {
+        return new MessageJpaEntity(
+            message.chatRoomId().getValue(),
+            message.type(),
+            message.content()
+        );
     }
     
-    public void setId(Long id) {
-        this.id = id;
+    /**
+     * updateFromDomain 패턴 - 도메인 객체로부터 일괄 업데이트
+     * 개별 setter 사용을 방지하여 불변성 보장
+     */
+    public void update(Message message) {
+        this.chatRoomId = message.chatRoomId().getValue();
+        this.type = message.type();
+        this.content = message.content();
     }
     
+    /**
+     * jpa entity -> model
+     */
+    public Message toDomain() {
+        return Message.restore(
+            MessageId.from(this.id),
+            ChatRoomId.from(this.chatRoomId),
+            this.type,
+            this.content,
+            this.createdAt
+        );
+    }
+    
+    // getter
     public Long getChatRoomId() {
         return chatRoomId;
-    }
-    
-    public void setChatRoomId(Long chatRoomId) {
-        this.chatRoomId = chatRoomId;
     }
     
     public MessageType getType() {
         return type;
     }
     
-    public void setType(MessageType type) {
-        this.type = type;
-    }
-    
     public String getContent() {
         return content;
     }
     
-    public void setContent(String content) {
-        this.content = content;
+    @Override
+    protected Object getId() {
+        return id;
     }
 }

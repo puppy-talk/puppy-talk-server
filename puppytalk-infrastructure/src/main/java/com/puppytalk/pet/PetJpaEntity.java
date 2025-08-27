@@ -47,9 +47,12 @@ public class PetJpaEntity extends BaseEntity {
         this.updatedAt = updatedAt;
     }
     
+    /**
+     * model -> jpa entity
+     */
     public static PetJpaEntity from(Pet pet) {
         return new PetJpaEntity(
-            pet.id() != null && pet.id().isValid() ? pet.id().value() : null,
+            pet.id() != null && pet.id().isStored() ? pet.id().value() : null,
             pet.ownerId().value(),
             pet.name(),
             pet.persona(),
@@ -60,7 +63,7 @@ public class PetJpaEntity extends BaseEntity {
     }
     
     /**
-     * JPA 엔티티를 도메인 객체로 변환
+     * jpa entity -> model
      */
     public Pet toDomain() {
         return Pet.of(
@@ -73,18 +76,22 @@ public class PetJpaEntity extends BaseEntity {
         );
     }
     
-    // Getters
-    public Long getOwnerId() { return ownerId; }
-    public String getName() { return name; }
-    public String getPersona() { return persona; }
-    public PetStatus getStatus() { return status; }
-    
+    /**
+     * updateFromDomain 패턴 - 도메인 객체로부터 일괄 업데이트
+     * 개별 setter 사용을 방지하여 불변성 보장
+     */
     public void update(Pet pet) {
         this.name = pet.name();
         this.persona = pet.persona();
         this.status = pet.status();
         this.updatedAt = LocalDateTime.now();
     }
+    
+    // getter
+    public Long getOwnerId() { return ownerId; }
+    public String getName() { return name; }
+    public String getPersona() { return persona; }
+    public PetStatus getStatus() { return status; }
     
     @Override
     protected Object getId() {

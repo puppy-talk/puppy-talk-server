@@ -18,6 +18,9 @@ public class NotificationDomainService {
     private final NotificationRepository notificationRepository;
 
     public NotificationDomainService(NotificationRepository notificationRepository) {
+        if (notificationRepository == null) {
+            throw new IllegalArgumentException("NotificationRepository must not be null");
+        }
         this.notificationRepository = notificationRepository;
     }
 

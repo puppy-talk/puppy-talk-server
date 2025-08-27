@@ -20,7 +20,7 @@ public record PetId(Long value) {
         return new PetId(null);
     }
 
-    public boolean isValid() {
+    public boolean isStored() {
         return value != null && value > 0;
     }
 }

@@ -144,7 +144,7 @@ public class Notification {
                                  NotificationType type, String title, String content, NotificationStatus status,
                                  LocalDateTime scheduledAt, LocalDateTime sentAt, LocalDateTime readAt,
                                  LocalDateTime createdAt, LocalDateTime updatedAt, int retryCount, String failureReason) {
-        if (id == null || !id.isValid()) {
+        if (id == null || !id.isStored()) {
             throw new IllegalArgumentException("저장된 알림 ID가 필요합니다");
         }
         validateUserId(userId);

@@ -24,7 +24,7 @@ public class ChatRoomId {
         return new ChatRoomId(null);
     }
     
-    public boolean isValid() {
+    public boolean isStored() {
         return value != null && value > 0;
     }
     

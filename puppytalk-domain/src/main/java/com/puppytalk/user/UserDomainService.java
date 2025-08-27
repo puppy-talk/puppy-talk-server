@@ -11,6 +11,9 @@ public class UserDomainService {
     private final UserRepository userRepository;
     
     public UserDomainService(UserRepository userRepository) {
+        if (userRepository == null) {
+            throw new IllegalArgumentException("UserRepository must not be null");
+        }
         this.userRepository = userRepository;
     }
     

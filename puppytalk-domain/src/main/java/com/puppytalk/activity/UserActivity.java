@@ -78,7 +78,7 @@ public class UserActivity {
      */
     public static UserActivity of(ActivityId id, UserId userId, ChatRoomId chatRoomId,
                                  ActivityType activityType, LocalDateTime activityAt, LocalDateTime createdAt) {
-        if (id == null || !id.isValid()) {
+        if (id == null || !id.isStored()) {
             throw new IllegalArgumentException("저장된 활동 ID가 필요합니다");
         }
         validateUserId(userId);

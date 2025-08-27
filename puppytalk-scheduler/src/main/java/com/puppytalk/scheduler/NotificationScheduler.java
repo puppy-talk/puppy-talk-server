@@ -1,7 +1,7 @@
 package com.puppytalk.scheduler;
 
+import com.puppytalk.notification.InactivityNotificationFacade;
 import com.puppytalk.notification.NotificationFacade;
-import com.puppytalk.notification.dto.request.NotificationCreateCommand;
 import com.puppytalk.notification.dto.request.NotificationStatusUpdateCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +19,13 @@ public class NotificationScheduler {
     private static final int INTERVAL_5_MINUTES = 300000;
 
     private final NotificationFacade notificationFacade;
+    private final InactivityNotificationFacade inactivityNotificationFacade;
     
-    public NotificationScheduler(NotificationFacade notificationFacade) {
+    public NotificationScheduler(
+            NotificationFacade notificationFacade,
+            InactivityNotificationFacade inactivityNotificationFacade) {
         this.notificationFacade = notificationFacade;
+        this.inactivityNotificationFacade = inactivityNotificationFacade;
     }
     
     /**
@@ -157,28 +161,46 @@ public class NotificationScheduler {
     
     // === Private Helper Methods ===
     
+    /**
+     * AI 기반 개인화 비활성 알림 생성
+     * 
+     * Application 계층의 Facade를 통해 다음 단계를 수행:
+     * 1. 사용자의 반려동물 정보 조회
+     * 2. 채팅방 정보 조회  
+     * 3. 이전 대화 내역 분석
+     * 4. 반려동물 페르소나 기반 AI 메시지 생성
+     * 5. 개인화된 알림 생성
+     */
     private void createInactivityNotificationForUser(Long userId) {
-        // TODO: 실제 구현에서는 다음 단계를 수행:
-        // 1. 사용자의 반려동물 정보 조회
-        // 2. 채팅방 정보 조회  
-        // 3. 이전 대화 내역 분석
-        // 4. 반려동물 페르소나 기반 AI 메시지 생성
-        // 5. 알림 생성
-        
-        // 현재는 더미 데이터로 구현
-        Long petId = 1L; // TODO: 실제 반려동물 ID 조회
-        Long chatRoomId = 1L; // TODO: 실제 채팅방 ID 조회
-        
-        NotificationCreateCommand command = NotificationCreateCommand.forInactivity(
-            userId,
-            petId,
-            chatRoomId,
-            "멍멍이가 보고싶어해요! 🐶",
-            "안녕하세요! 오랜만이에요. 어떻게 지내고 계신가요? 저는 주인님이 그리워서 계속 기다리고 있었어요!"
-        );
-        
-        notificationFacade.createInactivityNotification(command);
-        log.info("Created inactivity notification for user {}", userId);
+        try {
+            // 사용자의 활성 반려동물 조회 (첫 번째 반려동물 선택)
+            Long petId = notificationFacade.findFirstActivePetByUserId(userId);
+            
+            if (petId == null) {
+                log.warn("No active pets found for user {}. Skipping inactivity notification.", userId);
+                return;
+            }
+            
+            log.debug("Creating AI-powered inactivity notification for user {} with pet {}", 
+                     userId, petId);
+            
+            // ✅ InactivityNotificationFacade를 통한 AI 기반 개인화 알림 생성
+            Long notificationId = inactivityNotificationFacade.createInactivityNotification(userId, petId);
+            
+            if (notificationId != null) {
+                log.info("Successfully created AI-powered inactivity notification (ID: {}) for user {} with pet {}", 
+                        notificationId, userId, petId);
+            } else {
+                log.warn("Failed to create inactivity notification for user {} with pet {}", 
+                        userId, petId);
+                throw new RuntimeException("Failed to create inactivity notification");
+            }
+            
+        } catch (Exception e) {
+            log.error("Error creating AI-powered inactivity notification for user {}: {}", 
+                     userId, e.getMessage(), e);
+            throw e; // 상위 예외 처리 로직으로 전파
+        }
     }
     
     private void simulateNotificationSending(

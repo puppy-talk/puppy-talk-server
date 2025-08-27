@@ -39,7 +39,7 @@ public class Pet {
 
     public static Pet of(PetId id, UserId ownerId, String name, String persona,
                          LocalDateTime createdAt, PetStatus status) {
-        if (id == null || !id.isValid()) {
+        if (id == null || !id.isStored()) {
             throw new IllegalArgumentException("저장된 반려동물 ID가 필요합니다");
         }
         validateOwnerId(ownerId);

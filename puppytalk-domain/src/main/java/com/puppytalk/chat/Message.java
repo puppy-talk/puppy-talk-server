@@ -50,7 +50,7 @@ public class Message {
 
     public static Message restore(MessageId id, ChatRoomId chatRoomId, MessageType type,
                                   String content, LocalDateTime createdAt) {
-        if (id == null || !id.isValid()) {
+        if (id == null || !id.isStored()) {
             throw new IllegalArgumentException("저장된 메시지 ID가 필요합니다");
         }
         validateChatRoomId(chatRoomId);
@@ -66,7 +66,7 @@ public class Message {
     }
 
     private static void validateChatRoomId(ChatRoomId chatRoomId) {
-        if (chatRoomId == null || !chatRoomId.isValid()) {
+        if (chatRoomId == null || !chatRoomId.isStored()) {
             throw new IllegalArgumentException("채팅방 ID는 필수입니다");
         }
     }

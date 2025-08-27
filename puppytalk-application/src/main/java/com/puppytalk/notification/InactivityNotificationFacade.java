@@ -46,14 +46,31 @@ public class InactivityNotificationFacade {
     }
     
     /**
-     * 비활성 사용자에게 AI 기반 개인화 알림 생성
+     * 비활성 사용자에게 AI 기반 개인화 알림 생성 (Primitive 타입 사용)
      * 
-     * @param userId 비활성 사용자 ID
-     * @param petId 반려동물 ID
-     * @return 생성된 알림 ID (실패 시 Optional.empty())
+     * @param userId 비활성 사용자 ID (Long)
+     * @param petId 반려동물 ID (Long)
+     * @return 생성된 알림 ID (실패 시 null)
      */
     @Transactional
-    public Optional<NotificationId> createInactivityNotification(UserId userId, PetId petId) {
+    public Long createInactivityNotification(Long userId, Long petId) {
+        if (userId == null || petId == null) {
+            log.warn("Invalid parameters: userId={}, petId={}", userId, petId);
+            return null;
+        }
+        
+        Optional<NotificationId> result = createInactivityNotificationInternal(
+            UserId.from(userId), 
+            PetId.from(petId)
+        );
+        
+        return result.map(NotificationId::getValue).orElse(null);
+    }
+    
+    /**
+     * 내부 구현: 도메인 타입을 사용한 실제 로직
+     */
+    private Optional<NotificationId> createInactivityNotificationInternal(UserId userId, PetId petId) {
         log.debug("Creating inactivity notification for user: {}, pet: {}", userId.getValue(), petId.getValue());
         
         // 1. 반려동물 정보 조회
@@ -116,7 +133,7 @@ public class InactivityNotificationFacade {
         
         for (UserPetPair userPet : inactiveUsers) {
             try {
-                Optional<NotificationId> result = createInactivityNotification(
+                Optional<NotificationId> result = createInactivityNotificationInternal(
                     userPet.userId(), userPet.petId());
                 
                 if (result.isPresent()) {

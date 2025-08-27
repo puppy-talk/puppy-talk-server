@@ -26,10 +26,11 @@ public class ActivityFacade {
     @Transactional
     public ActivityResult recordActivity(ActivityRecordCommand command) {
         Assert.notNull(command, "ActivityRecordCommand must not be null");
+        Assert.notNull(command.userId(), "UserId cannot be null or empty");
         Assert.hasText(command.activityType(), "ActivityType cannot be null or empty");
 
         UserId userId = UserId.from(command.userId());
-        ChatRoomId chatRoomId = command.chatRoomId() != null ? ChatRoomId.from(command.chatRoomId()) : null;
+        ChatRoomId chatRoomId = command.chatRoomId() == null ? null : ChatRoomId.from(command.chatRoomId());
         ActivityType activityType = ActivityType.valueOf(command.activityType());
         
         ActivityId activityId;

@@ -93,7 +93,10 @@ public class NotificationJpaEntity extends BaseEntity {
         if (updatedAt != null) this.updatedAt = updatedAt;
     }
     
-    public static NotificationJpaEntity fromDomain(Notification notification) {
+    /**
+     * model -> jpa entity
+     */
+    public static NotificationJpaEntity from(Notification notification) {
         return new NotificationJpaEntity(
             notification.id() != null ? notification.id().getValue() : null,
             notification.userId().getValue(),
@@ -113,6 +116,9 @@ public class NotificationJpaEntity extends BaseEntity {
         );
     }
     
+    /**
+     * jpa entity -> model
+     */
     public Notification toDomain() {
         if (id != null) {
             return Notification.of(
@@ -155,7 +161,7 @@ public class NotificationJpaEntity extends BaseEntity {
         }
     }
     
-    // Getters
+    // getter
     public Long getId() { return id; }
     public Long getUserId() { return userId; }
     public Long getPetId() { return petId; }

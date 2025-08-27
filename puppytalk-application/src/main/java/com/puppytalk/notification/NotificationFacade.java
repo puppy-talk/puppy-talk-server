@@ -6,18 +6,15 @@ import com.puppytalk.notification.dto.request.NotificationCreateCommand;
 import com.puppytalk.notification.dto.request.NotificationStatusUpdateCommand;
 import com.puppytalk.notification.dto.response.NotificationListResult;
 import com.puppytalk.notification.dto.response.NotificationResult;
+import com.puppytalk.pet.Pet;
 import com.puppytalk.pet.PetId;
+import com.puppytalk.pet.PetRepository;
 import com.puppytalk.user.UserId;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-/**
- * 알림 파사드
- * 
- * Backend 관점: 안정적인 트랜잭션 관리와 흐름 제어
- */
 @Service
 @Transactional(readOnly = true)
 public class NotificationFacade {
@@ -25,13 +22,16 @@ public class NotificationFacade {
     private static final int LAST_ACTIVITY_HOURS = 2; // 마지막 활동 시간
     private final NotificationDomainService notificationDomainService;
     private final ActivityDomainService activityDomainService;
+    private final PetRepository petRepository;
     
     public NotificationFacade(
         NotificationDomainService notificationDomainService,
-        ActivityDomainService activityDomainService
+        ActivityDomainService activityDomainService,
+        PetRepository petRepository
     ) {
         this.notificationDomainService = notificationDomainService;
         this.activityDomainService = activityDomainService;
+        this.petRepository = petRepository;
     }
     
     /**
@@ -169,5 +169,26 @@ public class NotificationFacade {
     @Transactional
     public int cleanupOldNotifications() {
         return notificationDomainService.cleanupOldNotifications();
+    }
+    
+    /**
+     * 사용자의 활성 반려동물 조회 (Primitive 타입 반환)
+     * 
+     * @param userId 사용자 ID (Long)
+     * @return 첫 번째 활성 반려동물 ID (없으면 null)
+     */
+    public Long findFirstActivePetByUserId(Long userId) {
+        if (userId == null) {
+            return null;
+        }
+        
+        List<Pet> activePets = petRepository.findActiveByOwnerId(UserId.from(userId));
+        
+        if (activePets.isEmpty()) {
+            return null;
+        }
+        
+        // 첫 번째 활성 반려동물 반환 (향후 개선: 가장 최근 대화한 반려동물)
+        return activePets.get(0).id().getValue();
     }
 }

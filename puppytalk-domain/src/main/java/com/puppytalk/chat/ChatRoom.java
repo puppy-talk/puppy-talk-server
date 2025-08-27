@@ -47,7 +47,7 @@ public class ChatRoom {
         LocalDateTime createdAt,
         LocalDateTime lastMessageAt
     ) {
-        if (id == null || !id.isValid()) {
+        if (id == null || !id.isStored()) {
             throw new IllegalArgumentException("저장된 채팅방 ID가 필요합니다");
         }
         validateUserId(userId);
@@ -69,7 +69,7 @@ public class ChatRoom {
     }
     
     private static void validatePetId(PetId petId) {
-        if (petId == null || !petId.isValid()) {
+        if (petId == null || !petId.isStored()) {
             throw new IllegalArgumentException("반려동물 ID는 필수입니다");
         }
     }

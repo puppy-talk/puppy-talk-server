@@ -1,6 +1,7 @@
 package com.puppytalk.chat;
 
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,73 +11,96 @@ public class MessageRepositoryImpl implements MessageRepository {
     private final MessageJpaRepository jpaRepository;
     
     public MessageRepositoryImpl(MessageJpaRepository jpaRepository) {
+        if (jpaRepository == null) {
+            throw new IllegalArgumentException("MessageJpaRepository must not be null");
+        }
         this.jpaRepository = jpaRepository;
     }
     
     @Override
     public void save(Message message) {
-        MessageJpaEntity entity = toJpaEntity(message);
-        MessageJpaEntity savedEntity = jpaRepository.save(entity);
+        Assert.notNull(message, "Message must not be null");
         
-        // ID가 새로 생성된 경우 도메인 객체에 반영 (필요시 별도 처리)
-        // 현재 도메인 객체는 불변이므로 저장된 ID를 반환하는 방식으로 처리할 수도 있음
+        MessageJpaEntity entity;
+        
+        if (message.id() != null && message.id().isStored()) {
+            // 기존 메시지 업데이트
+            entity = jpaRepository.findById(message.id().getValue())
+                    .orElseThrow(() -> new IllegalArgumentException("메시지를 찾을 수 없습니다"));
+            
+            // ✅ updateFromDomain 패턴 사용
+            entity.update(message);
+        } else {
+            // 새 메시지 생성
+            entity = MessageJpaEntity.from(message);
+        }
+        
+        jpaRepository.save(entity);
     }
     
     @Override
     public Optional<Message> findById(MessageId id) {
-        if (id == null || !id.isValid()) {
+        Assert.notNull(id, "MessageId must not be null");
+        
+        if (!id.isStored()) {
             return Optional.empty();
         }
         
         return jpaRepository.findById(id.getValue())
-                .map(this::toDomainEntity);
+                .map(MessageJpaEntity::toDomain);
     }
     
     @Override
     public List<Message> findByChatRoomIdOrderByCreatedAt(ChatRoomId chatRoomId) {
-        // 도메인 서비스에서 이미 검증된 파라미터로 방어적 검사 최소화
+        Assert.notNull(chatRoomId, "ChatRoomId must not be null");
         
         return jpaRepository.findByChatRoomIdOrderByCreatedAtAsc(chatRoomId.getValue())
                 .stream()
-                .map(this::toDomainEntity)
+                .map(MessageJpaEntity::toDomain)
                 .toList();
     }
     
     @Override
     @Deprecated
     public List<Message> findByChatRoomIdOrderByCreatedAtDesc(ChatRoomId chatRoomId, int limit) {
-        if (chatRoomId == null || !chatRoomId.isValid() || limit <= 0) {
+        Assert.notNull(chatRoomId, "ChatRoomId must not be null");
+        Assert.isTrue(limit > 0, "Limit must be positive");
+        
+        if (!chatRoomId.isStored()) {
             return List.of();
         }
         
         return jpaRepository.findByChatRoomIdOrderByCreatedAtDescWithLimit(chatRoomId.getValue(), limit)
                 .stream()
-                .map(this::toDomainEntity)
+                .map(MessageJpaEntity::toDomain)
                 .toList();
     }
     
     @Override
     public List<Message> findByChatRoomId(ChatRoomId chatRoomId, MessageId cursor, int size) {
-        // 도메인 서비스에서 이미 검증된 파라미터로 방어적 검사 최소화
-        Long cursorValue = (cursor != null && cursor.isValid()) ? cursor.getValue() : null;
+        Assert.notNull(chatRoomId, "ChatRoomId must not be null");
+        Assert.isTrue(size > 0, "Size must be positive");
+        Long cursorValue = (cursor != null && cursor.isStored()) ? cursor.getValue() : null;
         
         return jpaRepository.findByChatRoomIdWithCursor(chatRoomId.getValue(), cursorValue, size)
                 .stream()
-                .map(this::toDomainEntity)
+                .map(MessageJpaEntity::toDomain)
                 .toList();
     }
     
     @Override
     public Optional<Message> findLatestByChatRoomId(ChatRoomId chatRoomId) {
-        // 도메인 서비스에서 이미 검증된 파라미터로 방어적 검사 최소화
+        Assert.notNull(chatRoomId, "ChatRoomId must not be null");
         
         return jpaRepository.findLatestByChatRoomId(chatRoomId.getValue())
-                .map(this::toDomainEntity);
+                .map(MessageJpaEntity::toDomain);
     }
     
     @Override
     public long countByChatRoomId(ChatRoomId chatRoomId) {
-        if (chatRoomId == null || !chatRoomId.isValid()) {
+        Assert.notNull(chatRoomId, "ChatRoomId must not be null");
+        
+        if (!chatRoomId.isStored()) {
             return 0;
         }
         
@@ -85,7 +109,10 @@ public class MessageRepositoryImpl implements MessageRepository {
     
     @Override
     public long countByChatRoomIdAndType(ChatRoomId chatRoomId, MessageType type) {
-        if (chatRoomId == null || !chatRoomId.isValid() || type == null) {
+        Assert.notNull(chatRoomId, "ChatRoomId must not be null");
+        Assert.notNull(type, "MessageType must not be null");
+        
+        if (!chatRoomId.isStored()) {
             return 0;
         }
         
@@ -94,7 +121,9 @@ public class MessageRepositoryImpl implements MessageRepository {
     
     @Override
     public boolean existsById(MessageId id) {
-        if (id == null || !id.isValid()) {
+        Assert.notNull(id, "MessageId must not be null");
+        
+        if (!id.isStored()) {
             return false;
         }
         
@@ -103,51 +132,32 @@ public class MessageRepositoryImpl implements MessageRepository {
     
     @Override
     public List<Message> findRecentMessages(ChatRoomId chatRoomId, int limit) {
-        if (chatRoomId == null || !chatRoomId.isValid() || limit <= 0) {
+        Assert.notNull(chatRoomId, "ChatRoomId must not be null");
+        Assert.isTrue(limit > 0, "Limit must be positive");
+        
+        if (!chatRoomId.isStored()) {
             return List.of();
         }
         
         return jpaRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId.getValue(), limit)
                 .stream()
-                .map(this::toDomainEntity)
+                .map(MessageJpaEntity::toDomain)
                 .toList();
     }
 
     @Override
     public List<Message> findByChatRoomIdAndCreatedAtAfter(ChatRoomId chatRoomId, java.time.LocalDateTime since) {
-        if (chatRoomId == null || !chatRoomId.isValid() || since == null) {
+        Assert.notNull(chatRoomId, "ChatRoomId must not be null");
+        Assert.notNull(since, "Since time must not be null");
+        
+        if (!chatRoomId.isStored()) {
             return List.of();
         }
         
         return jpaRepository.findByChatRoomIdAndCreatedAtAfter(chatRoomId.getValue(), since)
                 .stream()
-                .map(this::toDomainEntity)
+                .map(MessageJpaEntity::toDomain)
                 .toList();
     }
 
-    
-    private MessageJpaEntity toJpaEntity(Message message) {
-        MessageJpaEntity entity = new MessageJpaEntity(
-            message.chatRoomId().getValue(),
-            message.type(),
-            message.content()
-        );
-        
-        // ID가 있는 경우 설정 (업데이트)
-        if (message.id() != null && message.id().isValid()) {
-            entity.setId(message.id().getValue());
-        }
-        
-        return entity;
-    }
-    
-    private Message toDomainEntity(MessageJpaEntity entity) {
-        return Message.restore(
-            MessageId.from(entity.getId()),
-            ChatRoomId.from(entity.getChatRoomId()),
-            entity.getType(),
-            entity.getContent(),
-            entity.getCreatedAt()
-        );
-    }
 }

@@ -27,7 +27,7 @@ public class MessageId {
         return new MessageId(null);
     }
     
-    public boolean isValid() {
+    public boolean isStored() {
         return value != null && value > 0;
     }
     

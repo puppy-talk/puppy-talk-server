@@ -51,7 +51,10 @@ public class UserActivityJpaEntity extends BaseEntity {
         this.activityAt = activityAt;
     }
     
-    public static UserActivityJpaEntity fromDomain(UserActivity activity) {
+    /**
+     * model -> jpa entity
+     */
+    public static UserActivityJpaEntity from(UserActivity activity) {
         return new UserActivityJpaEntity(
             activity.id() != null ? activity.id().getValue() : null,
             activity.userId().getValue(),
@@ -62,6 +65,9 @@ public class UserActivityJpaEntity extends BaseEntity {
         );
     }
     
+    /**
+     * jpa entity -> model
+     */
     public UserActivity toDomain() {
         if (id != null) {
             return UserActivity.of(
@@ -91,6 +97,7 @@ public class UserActivityJpaEntity extends BaseEntity {
         }
     }
     
+    // getter
     public Long getId() {
         return id;
     }

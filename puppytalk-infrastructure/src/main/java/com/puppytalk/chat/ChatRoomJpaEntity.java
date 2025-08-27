@@ -31,9 +31,7 @@ public class ChatRoomJpaEntity extends BaseEntity {
     @Column(name = "last_message_at", nullable = false)
     private LocalDateTime lastMessageAt;
     
-    protected ChatRoomJpaEntity() {
-        // JPA 기본 생성자
-    }
+    protected ChatRoomJpaEntity() {}
     
     public ChatRoomJpaEntity(Long userId, Long petId, LocalDateTime lastMessageAt) {
         this.userId = userId;
@@ -42,48 +40,54 @@ public class ChatRoomJpaEntity extends BaseEntity {
     }
     
     /**
-     * JPA Entity를 Domain Model로 변환하는 정적 팩토리 메서드
+     * model -> jpa entity
      */
-    public static ChatRoom toModel(ChatRoomJpaEntity entity) {
-        return ChatRoom.of(
-            ChatRoomId.from(entity.getId()),
-            UserId.from(entity.getUserId()),
-            PetId.from(entity.getPetId()),
-            entity.getCreatedAt(),
-            entity.getLastMessageAt()
+    public static ChatRoomJpaEntity from(ChatRoom chatRoom) {
+        return new ChatRoomJpaEntity(
+            chatRoom.userId().getValue(),
+            chatRoom.petId().getValue(),
+            chatRoom.lastMessageAt()
         );
     }
     
-    // Getters and Setters
-    public Long getId() {
-        return id;
+    /**
+     * updateFromDomain 패턴 - 도메인 객체로부터 일괄 업데이트
+     * 개별 setter 사용을 방지하여 불변성 보장
+     */
+    public void update(ChatRoom chatRoom) {
+        this.userId = chatRoom.userId().getValue();
+        this.petId = chatRoom.petId().getValue();
+        this.lastMessageAt = chatRoom.lastMessageAt();
     }
     
-    public void setId(Long id) {
-        this.id = id;
+    /**
+     * jpa entity -> model
+     */
+    public ChatRoom toDomain() {
+        return ChatRoom.of(
+            ChatRoomId.from(this.id),
+            UserId.from(this.userId),
+            PetId.from(this.petId),
+            this.createdAt,
+            this.lastMessageAt
+        );
     }
     
+    // getter
     public Long getUserId() {
         return userId;
-    }
-    
-    public void setUserId(Long userId) {
-        this.userId = userId;
     }
     
     public Long getPetId() {
         return petId;
     }
     
-    public void setPetId(Long petId) {
-        this.petId = petId;
-    }
-    
     public LocalDateTime getLastMessageAt() {
         return lastMessageAt;
     }
     
-    public void setLastMessageAt(LocalDateTime lastMessageAt) {
-        this.lastMessageAt = lastMessageAt;
+    @Override
+    protected Object getId() {
+        return id;
     }
 }

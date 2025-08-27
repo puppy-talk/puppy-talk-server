@@ -9,6 +9,9 @@ public class PetDomainService {
     private final PetRepository petRepository;
     
     public PetDomainService(PetRepository petRepository) {
+        if (petRepository == null) {
+            throw new IllegalArgumentException("PetRepository must not be null");
+        }
         this.petRepository = petRepository;
     }
 
@@ -34,7 +37,7 @@ public class PetDomainService {
         }
 
         if (persona == null || persona.isBlank()) {
-            throw new IllegalArgumentException("PetName cannot be null or empty");
+            throw new IllegalArgumentException("Persona cannot be null or empty");
         }
 
         Pet pet = Pet.create(ownerId, petName, persona);
