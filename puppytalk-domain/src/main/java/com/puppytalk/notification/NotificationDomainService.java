@@ -2,6 +2,7 @@ package com.puppytalk.notification;
 
 import com.puppytalk.chat.ChatRoomId;
 import com.puppytalk.pet.PetId;
+import com.puppytalk.support.validation.Preconditions;
 import com.puppytalk.user.UserId;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,6 +15,11 @@ import java.util.List;
 public class NotificationDomainService {
 
     private static final int DAILY_NOTIFICATION_LIMIT = 5;
+    private static final int NOTIFICATION_DELAY_MINUTES = 5;
+    private static final int MAX_BATCH_SIZE = 1000;
+    private static final int MAX_RETRY_BATCH_SIZE = 100;
+    private static final int NOTIFICATION_EXPIRY_HOURS = 24;
+    private static final int OLD_NOTIFICATION_CLEANUP_DAYS = 30;
 
     private final NotificationRepository notificationRepository;
 
@@ -48,7 +54,7 @@ public class NotificationDomainService {
             throw NotificationException.dailyLimitExceeded();
         }
 
-        LocalDateTime scheduledAt = LocalDateTime.now().plusMinutes(5); // 5분 후 발송
+        LocalDateTime scheduledAt = LocalDateTime.now().plusMinutes(NOTIFICATION_DELAY_MINUTES);
 
         Notification notification = Notification.createInactivityNotification(
             userId, petId, chatRoomId, aiGeneratedTitle, aiGeneratedContent, scheduledAt
@@ -71,8 +77,8 @@ public class NotificationDomainService {
      * 발송 대기 중인 알림 목록 조회 (스케줄러용)
      */
     public List<Notification> getPendingNotifications(int batchSize) {
-        if (batchSize <= 0 || batchSize > 1000) {
-            throw new IllegalArgumentException("Batch size must be between 1 and 1000");
+        if (batchSize <= 0 || batchSize > MAX_BATCH_SIZE) {
+            throw new IllegalArgumentException("Batch size must be between 1 and " + MAX_BATCH_SIZE);
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -97,9 +103,7 @@ public class NotificationDomainService {
      * 알림 발송 실패 처리 (재시도 로직 포함)
      */
     public void markAsFailed(NotificationId notificationId, String failureReason) {
-        if (notificationId == null) {
-            throw new IllegalArgumentException("NotificationId must not be null");
-        }
+        Preconditions.requireValidId(notificationId, "NotificationId");
 
         Notification notification = notificationRepository.findById(notificationId)
             .orElseThrow(() -> NotificationException.notFound(notificationId));
@@ -112,8 +116,8 @@ public class NotificationDomainService {
      * 재시도 대상 실패 알림 조회
      */
     public List<Notification> getRetryableNotifications(int batchSize) {
-        if (batchSize <= 0 || batchSize > 100) {
-            throw new IllegalArgumentException("Retry batch size must be between 1 and 100");
+        if (batchSize <= 0 || batchSize > MAX_RETRY_BATCH_SIZE) {
+            throw new IllegalArgumentException("Retry batch size must be between 1 and " + MAX_RETRY_BATCH_SIZE);
         }
 
         return notificationRepository.findRetryableFailedNotifications(batchSize);
@@ -123,9 +127,7 @@ public class NotificationDomainService {
      * 사용자 미읽은 알림 목록 조회
      */
     public List<Notification> getUnreadNotifications(UserId userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId must not be null");
-        }
+        Preconditions.requireValidId(userId, "UserId");
 
         return notificationRepository.findUnreadByUserId(userId);
     }
@@ -134,9 +136,7 @@ public class NotificationDomainService {
      * 사용자 미읽은 알림 개수 조회
      */
     public long getUnreadCount(UserId userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId must not be null");
-        }
+        Preconditions.requireValidId(userId, "UserId");
 
         return notificationRepository.countUnreadByUserId(userId);
     }
@@ -163,7 +163,7 @@ public class NotificationDomainService {
      * 만료된 알림 정리 (성능 유지)
      */
     public int cleanupExpiredNotifications() {
-        LocalDateTime cutoffDate = LocalDateTime.now().minusHours(24);
+        LocalDateTime cutoffDate = LocalDateTime.now().minusHours(NOTIFICATION_EXPIRY_HOURS);
         return notificationRepository.deleteExpiredNotifications(cutoffDate);
     }
 
@@ -171,7 +171,7 @@ public class NotificationDomainService {
      * 완료된 오래된 알림 정리 (30일 기준)
      */
     public int cleanupOldNotifications() {
-        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(30);
+        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(OLD_NOTIFICATION_CLEANUP_DAYS);
         return notificationRepository.deleteCompletedNotificationsOlderThan(cutoffDate);
     }
 
@@ -196,25 +196,15 @@ public class NotificationDomainService {
 
     private void validateNotificationInput(UserId userId, PetId petId, String title,
         String content) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId must not be null");
-        }
-        if (petId == null) {
-            throw new IllegalArgumentException("PetId must not be null");
-        }
+        Preconditions.requireValidId(userId, "UserId");
+        Preconditions.requireValidId(petId, "PetId");
         validateBasicNotificationInput(userId, title, content);
     }
 
     private void validateBasicNotificationInput(UserId userId, String title, String content) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId must not be null");
-        }
-        if (title == null || title.isBlank()) {
-            throw new IllegalArgumentException("Title must not be null or empty");
-        }
-        if (content == null || content.isBlank()) {
-            throw new IllegalArgumentException("Content must not be null or empty");
-        }
+        Preconditions.requireValidId(userId, "UserId");
+        Preconditions.requireNonBlank(title, "Title");
+        Preconditions.requireNonBlank(content, "Content");
     }
 
     private boolean isFirstInactivityNotification(UserId userId) {
@@ -242,9 +232,7 @@ public class NotificationDomainService {
 
     private void updateNotificationStatus(NotificationId notificationId,
         NotificationStatus status) {
-        if (notificationId == null) {
-            throw new IllegalArgumentException("NotificationId must not be null");
-        }
+        Preconditions.requireValidId(notificationId, "NotificationId");
         if (status == null) {
             throw new IllegalArgumentException("NotificationStatus must not be null");
         }

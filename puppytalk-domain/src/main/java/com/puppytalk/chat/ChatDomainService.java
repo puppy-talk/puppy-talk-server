@@ -4,6 +4,7 @@ import com.puppytalk.chat.exception.ChatRoomAccessDeniedException;
 import com.puppytalk.chat.exception.ChatRoomNotFoundException;
 import com.puppytalk.chat.exception.MessageNotFoundException;
 import com.puppytalk.pet.PetId;
+import com.puppytalk.support.validation.Preconditions;
 import com.puppytalk.user.UserId;
 import java.util.List;
 import java.util.Optional;
@@ -29,21 +30,16 @@ public class ChatDomainService {
      * <p>
      * 비즈니스 규칙:
      * - 사용자와 반려동물은 1:1 관계의 채팅방만 가질 수 있습니다
-     * - 채팅방 생성 시 현재 시각을 생성 시각과 마지막 메시지 시각으로 설정합니다
-     * 
+     *
      * @param userId 채팅방을 요청하는 사용자의 ID (null이면 IllegalArgumentException)
      * @param petId 채팅 대상 반려동물의 ID (null이면 IllegalArgumentException)
      * @return ChatRoomResult 채팅방과 생성 여부 정보 (isNewlyCreated로 구분)
      * @throws IllegalArgumentException userId 또는 petId가 null인 경우
      */
     public ChatRoomResult findOrCreateChatRoom(UserId userId, PetId petId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId must not be null");
-        }
-        if (petId == null) {
-            throw new IllegalArgumentException("PetId must not be null");
-        }
-
+        Preconditions.requireValidId(userId, "UserId");
+        Preconditions.requireValidId(petId, "PetId");
+        
         Optional<ChatRoom> room = chatRoomRepository.findByUserIdAndPetId(userId, petId);
 
         if (room.isPresent()) {
@@ -61,6 +57,9 @@ public class ChatDomainService {
      * 채팅방 조회
      */
     public ChatRoom findChatRoom(ChatRoomId chatRoomId, UserId userId) {
+        Preconditions.requireValidId(chatRoomId, "ChatRoomId");
+        Preconditions.requireValidId(userId, "UserId");
+        
         ChatRoom room = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new ChatRoomNotFoundException(chatRoomId));
 
@@ -75,10 +74,7 @@ public class ChatDomainService {
      * 사용자의 채팅방 목록 조회
      */
     public List<ChatRoom> findChatRoomList(UserId userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId must not be null");
-        }
-
+        Preconditions.requireValidId(userId, "UserId");
         return chatRoomRepository.findByUserId(userId);
     }
     
@@ -86,18 +82,21 @@ public class ChatDomainService {
      * 사용자 메시지 전송
      */
     public Message sendUserMessage(ChatRoomId chatRoomId, UserId userId, String content) {
-        if (content == null || content.isBlank()) {
-            throw new IllegalArgumentException("Message content must not be null or empty");
-        }
+        Preconditions.requireValidId(chatRoomId, "ChatRoomId");
+        Preconditions.requireValidId(userId, "UserId");
+        Preconditions.requireNonBlank(content, "Content");
 
+        String validContent = content.trim();
+
+        // 채팅방 존재 및 소유권 확인
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new ChatRoomNotFoundException(chatRoomId));
-
+        
         if (!chatRoom.isOwnedBy(userId)) {
             throw new ChatRoomAccessDeniedException("채팅방에 접근할 권한이 없습니다", userId, chatRoomId);
         }
         
-        Message message = Message.of(chatRoomId, content);
+        Message message = Message.create(chatRoomId, userId, validContent);
         messageRepository.save(message);
         
         ChatRoom updatedChatRoom = chatRoom.withLastMessageTime();
@@ -110,20 +109,17 @@ public class ChatDomainService {
      * 반려동물 메시지 전송 (AI 응답)
      */
     public Message sendPetMessage(ChatRoomId chatRoomId, String content) {
-        if (chatRoomId == null) {
-            throw new IllegalArgumentException("ChatRoomId must not be null");
-        }
+        Preconditions.requireValidId(chatRoomId, "ChatRoomId");
+        Preconditions.requireNonBlank(content, "Content");
 
-        if (content == null || content.isBlank()) {
-            throw new IllegalArgumentException("Message content must not be null or empty");
-        }
+        String validContent = content.trim();
 
         // 채팅방 존재 확인
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new ChatRoomNotFoundException(chatRoomId));
         
         // 메시지 생성 및 저장
-        Message message = Message.createPetMessage(chatRoomId, content);
+        Message message = Message.createPetMessage(chatRoomId, validContent);
         messageRepository.save(message);
         
         // 채팅방 마지막 메시지 시각 업데이트
@@ -168,9 +164,8 @@ public class ChatDomainService {
      * 특정 메시지 조회
      */
     public Message findMessage(MessageId messageId, UserId userId) {
-        if (messageId == null) {
-            throw new IllegalArgumentException("MessageId must not be null");
-        }
+        Preconditions.requireValidId(messageId, "MessageId");
+        Preconditions.requireValidId(userId, "UserId");
 
         Message message = messageRepository.findById(messageId)
             .orElseThrow(() -> new MessageNotFoundException(messageId));
@@ -188,9 +183,7 @@ public class ChatDomainService {
      * @return 최신 메시지부터 정렬된 리스트
      */
     public List<Message> findRecentChatHistory(ChatRoomId chatRoomId, int limit) {
-        if (chatRoomId == null) {
-            throw new IllegalArgumentException("ChatRoomId must not be null");
-        }
+        Preconditions.requireValidId(chatRoomId, "ChatRoomId");
         if (limit <= 0) {
             throw new IllegalArgumentException("Limit must be positive");
         }
@@ -199,21 +192,6 @@ public class ChatDomainService {
             .orElseThrow(() -> new ChatRoomNotFoundException(chatRoomId));
             
         return messageRepository.findRecentMessages(chatRoomId, limit);
-    }
-    
-    /**
-     * 사용자와 반려동물의 채팅방 조회 (소유권 확인 없이)
-     * AI 메시지 생성 시 시스템에서 사용
-     */
-    public Optional<ChatRoom> findChatRoomByUserAndPet(UserId userId, PetId petId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId must not be null");
-        }
-        if (petId == null) {
-            throw new IllegalArgumentException("PetId must not be null");
-        }
-        
-        return chatRoomRepository.findByUserIdAndPetId(userId, petId);
     }
     
     /**
@@ -229,17 +207,13 @@ public class ChatDomainService {
         
         return messageRepository.findByChatRoomIdAndCreatedAtAfter(chatRoomId, since);
     }
-
+    
     /**
      * 채팅방 존재 여부 및 소유권 확인
      */
     public void validateChatRoom(ChatRoomId chatRoomId, UserId userId) {
-        if (chatRoomId == null) {
-            throw new IllegalArgumentException("ChatRoomId must not be null");
-        }
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId must not be null");
-        }
+        Preconditions.requireValidId(chatRoomId, "ChatRoomId");
+        Preconditions.requireValidId(userId, "UserId");
 
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new ChatRoomNotFoundException(chatRoomId));
@@ -247,5 +221,35 @@ public class ChatDomainService {
         if (chatRoom.isOwnedBy(userId)) return;
 
         throw new ChatRoomAccessDeniedException("채팅방에 접근할 권한이 없습니다", userId, chatRoomId);
+    }
+    
+    /**
+     * 사용자와 반려동물의 채팅방 조회 (소유권 확인 없이)
+     * AI 메시지 생성 시 시스템에서 사용
+     */
+    public Optional<ChatRoom> findChatRoomByUserAndPet(UserId userId, PetId petId) {
+        Preconditions.requireValidId(userId, "UserId");
+        Preconditions.requireValidId(petId, "PetId");
+        return chatRoomRepository.findByUserIdAndPetId(userId, petId);
+    }
+    
+    /**
+     * AI 서비스를 위한 채팅방 조회 (소유권 검증 없음)
+     */
+    public ChatRoom findChatRoomForAI(ChatRoomId chatRoomId) {
+        Preconditions.requireValidId(chatRoomId, "ChatRoomId");
+        
+        return chatRoomRepository.findById(chatRoomId)
+            .orElseThrow(() -> new ChatRoomNotFoundException(chatRoomId));
+    }
+    
+    /**
+     * 채팅방에서 반려동물 ID 추출 (AI 서비스용)
+     */
+    public PetId getPetIdFromChatRoom(ChatRoomId chatRoomId) {
+        ChatRoom room = chatRoomRepository.findById(chatRoomId).orElseThrow(
+            () -> new ChatRoomNotFoundException(chatRoomId)
+        );
+        return room.petId();
     }
 }
