@@ -166,7 +166,7 @@ class MessageTest {
         LocalDateTime createdAt = LocalDateTime.now();
         
         // when
-        Message message = Message.restore(id, chatRoomId, type, content, createdAt);
+        Message message = Message.of(id, chatRoomId, null, content, type, createdAt, createdAt);
         
         // then
         assertNotNull(message);
@@ -190,7 +190,7 @@ class MessageTest {
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> Message.restore(id, chatRoomId, type, content, createdAt)
+            () -> Message.of(id, chatRoomId, null, content, type, createdAt, createdAt)
         );
         
         assertEquals("저장된 메시지 ID가 필요합니다", exception.getMessage());
@@ -240,8 +240,8 @@ class MessageTest {
     void equals_SameId_ReturnsTrue() {
         // given
         MessageId id = MessageId.from(1L);
-        Message message1 = Message.restore(id, ChatRoomId.from(1L), MessageType.USER, "content1", LocalDateTime.now());
-        Message message2 = Message.restore(id, ChatRoomId.from(2L), MessageType.PET, "content2", LocalDateTime.now());
+        Message message1 = Message.of(id, ChatRoomId.from(1L), null, "content1", MessageType.USER, LocalDateTime.now(), LocalDateTime.now());
+        Message message2 = Message.of(id, ChatRoomId.from(2L), null, "content2", MessageType.PET, LocalDateTime.now(), LocalDateTime.now());
         
         // when & then
         assertEquals(message1, message2);
@@ -251,8 +251,8 @@ class MessageTest {
     @Test
     void equals_DifferentId_ReturnsFalse() {
         // given
-        Message message1 = Message.restore(MessageId.from(1L), ChatRoomId.from(1L), MessageType.USER, "content", LocalDateTime.now());
-        Message message2 = Message.restore(MessageId.from(2L), ChatRoomId.from(1L), MessageType.USER, "content", LocalDateTime.now());
+        Message message1 = Message.of(MessageId.from(1L), ChatRoomId.from(1L), null, "content", MessageType.USER, LocalDateTime.now(), LocalDateTime.now());
+        Message message2 = Message.of(MessageId.from(2L), ChatRoomId.from(1L), null, "content", MessageType.USER, LocalDateTime.now(), LocalDateTime.now());
         
         // when & then
         assertNotEquals(message1, message2);
@@ -263,8 +263,8 @@ class MessageTest {
     void hashCode_SameId_ReturnsSameHashCode() {
         // given
         MessageId id = MessageId.from(1L);
-        Message message1 = Message.restore(id, ChatRoomId.from(1L), MessageType.USER, "content1", LocalDateTime.now());
-        Message message2 = Message.restore(id, ChatRoomId.from(2L), MessageType.PET, "content2", LocalDateTime.now());
+        Message message1 = Message.of(id, ChatRoomId.from(1L), null, "content1", MessageType.USER, LocalDateTime.now(), LocalDateTime.now());
+        Message message2 = Message.of(id, ChatRoomId.from(2L), null, "content2", MessageType.PET, LocalDateTime.now(), LocalDateTime.now());
         
         // when & then
         assertEquals(message1.hashCode(), message2.hashCode());

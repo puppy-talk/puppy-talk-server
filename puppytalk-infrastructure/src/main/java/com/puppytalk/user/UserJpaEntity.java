@@ -70,6 +70,7 @@ public class UserJpaEntity extends BaseEntity {
             this.email,
             this.password,
             this.createdAt,
+            this.updatedAt,
             this.isDeleted
         );
     }

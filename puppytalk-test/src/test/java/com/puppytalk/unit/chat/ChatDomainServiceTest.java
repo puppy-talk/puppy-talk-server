@@ -359,8 +359,8 @@ class ChatDomainServiceTest {
             LocalDateTime.now()
         );
         List<Message> expectedMessages = Arrays.asList(
-            Message.restore(MessageId.from(1L), chatRoomId, MessageType.PET, "새 메시지1", LocalDateTime.now()),
-            Message.restore(MessageId.from(2L), chatRoomId, MessageType.PET, "새 메시지2", LocalDateTime.now())
+            Message.of(MessageId.from(1L), chatRoomId, null, "새 메시지1", MessageType.PET, LocalDateTime.now(), LocalDateTime.now()),
+            Message.of(MessageId.from(2L), chatRoomId, null, "새 메시지2", MessageType.PET, LocalDateTime.now(), LocalDateTime.now())
         );
         
         mockChatRoomRepository.setFindByIdResult(Optional.of(chatRoom));

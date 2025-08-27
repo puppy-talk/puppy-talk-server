@@ -65,12 +65,14 @@ public class MessageJpaEntity extends BaseEntity {
      * jpa entity -> model
      */
     public Message toDomain() {
-        return Message.restore(
+        return Message.of(
             MessageId.from(this.id),
             ChatRoomId.from(this.chatRoomId),
-            this.type,
+            null, // senderId - PET 메시지의 경우 null
             this.content,
-            this.createdAt
+            this.type,
+            this.createdAt,
+            this.updatedAt
         );
     }
     

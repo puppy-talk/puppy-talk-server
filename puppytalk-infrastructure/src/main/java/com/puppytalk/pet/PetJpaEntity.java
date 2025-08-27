@@ -72,7 +72,7 @@ public class PetJpaEntity extends BaseEntity {
             this.name,
             this.persona,
             this.createdAt,
-            this.status
+            this.updatedAt
         );
     }
     
