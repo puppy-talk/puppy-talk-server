@@ -58,7 +58,7 @@ public class PetFacade {
         PetId petId = PetId.from(query.petId());
         UserId ownerId = UserId.from(query.ownerId());
 
-        Pet pet = petDomainService.findPet(petId, ownerId);
+        Pet pet = petDomainService.getPet(petId, ownerId);
         return PetResult.from(pet);
     }
 

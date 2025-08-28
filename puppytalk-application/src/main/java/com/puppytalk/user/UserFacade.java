@@ -34,7 +34,7 @@ public class UserFacade {
             command.password()
         );
         
-        User createdUser = userDomainService.findUserById(userId);
+        User createdUser = userDomainService.getUserById(userId);
         return UserCreateResult.from(createdUser);
     }
     
@@ -46,7 +46,7 @@ public class UserFacade {
         Assert.notNull(query.userId(), "UserId must not be null");
         
         UserId userId = UserId.from(query.userId());
-        User user = userDomainService.findUserById(userId);
+        User user = userDomainService.getUserById(userId);
         
         return UserResult.from(user);
     }

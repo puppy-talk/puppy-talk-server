@@ -53,7 +53,7 @@ public class UserDomainService {
      * @return 사용자
      * @throws UserNotFoundException 사용자가 존재하지 않는 경우
      */
-    public User findUserById(UserId userId) {
+    public User getUserById(UserId userId) {
         Preconditions.requireValidId(userId, "UserId");
         
         return userRepository.findById(userId)
@@ -67,7 +67,7 @@ public class UserDomainService {
      * @return 사용자
      * @throws UserNotFoundException 사용자가 존재하지 않는 경우
      */
-    public User findUserByUsername(String username) {
+    public User getUserByUsername(String username) {
         Preconditions.requireNonBlank(username, "Username");
         
         return userRepository.findByUsername(username.trim())
@@ -90,7 +90,7 @@ public class UserDomainService {
      * @return 사용자
      * @throws UserNotFoundException 사용자가 존재하지 않는 경우
      */
-    public User findUserByEmail(String email) {
+    public User getUserByEmail(String email) {
         Preconditions.requireNonBlank(email, "Email");
         
         return userRepository.findByEmail(email.trim().toLowerCase())
@@ -104,7 +104,7 @@ public class UserDomainService {
      * @throws UserNotFoundException 사용자가 존재하지 않는 경우
      */
     public void deleteUser(UserId userId) {
-        User user = findUserById(userId);
+        User user = getUserById(userId);
         User deletedUser = user.withDeletedStatus();
         userRepository.save(deletedUser);
     }
@@ -131,7 +131,7 @@ public class UserDomainService {
     public void changePassword(UserId userId, String newRawPassword) {
         Preconditions.requireNonBlank(newRawPassword, "Password");
         
-        User user = findUserById(userId);
+        User user = getUserById(userId);
         String newEncryptedPassword = passwordEncoder.encode(newRawPassword);
         User updatedUser = user.withPassword(newEncryptedPassword);
         userRepository.save(updatedUser);
@@ -158,7 +158,7 @@ public class UserDomainService {
      */
     private void validateUniqueEmail(String email) {
         if (userRepository.existsByEmail(email)) {
-            throw DuplicateUserException.byEmail(email);
+            throw new DuplicateUserException(email);
         }
     }
 }

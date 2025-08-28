@@ -13,7 +13,7 @@ public class PetDomainService {
         this.petRepository = petRepository;
     }
 
-    public Pet findPet(PetId petId, UserId ownerId) {
+    public Pet getPet(PetId petId, UserId ownerId) {
         Preconditions.requireValidId(petId, "PetId");
         Preconditions.requireValidId(ownerId, "OwnerId");
 
@@ -36,7 +36,7 @@ public class PetDomainService {
     }
     
     public void deletePet(PetId petId, UserId ownerId) {
-        Pet pet = findPet(petId, ownerId);
+        Pet pet = getPet(petId, ownerId);
         Pet deletedPet = pet.withDeletedStatus();
         petRepository.delete(deletedPet);
     }
