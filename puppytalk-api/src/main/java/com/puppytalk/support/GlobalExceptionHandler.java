@@ -2,10 +2,13 @@ package com.puppytalk.support;
 
 import com.puppytalk.activity.ActivityTrackingException;
 import com.puppytalk.chat.exception.ChatRoomAccessDeniedException;
-import com.puppytalk.chat.exception.ChatRoomNotFoundException;
 import com.puppytalk.chat.exception.MessageNotFoundException;
 import com.puppytalk.chat.exception.MessageValidationException;
 import com.puppytalk.notification.NotificationException;
+import com.puppytalk.support.exception.DomainException;
+import com.puppytalk.user.UserNotFoundException;
+import com.puppytalk.pet.PetNotFoundException;
+import com.puppytalk.chat.exception.ChatRoomNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -216,6 +219,51 @@ public class GlobalExceptionHandler {
 
     // === 도메인 예외 ===
 
+    /**
+     * 사용자를 찾을 수 없는 경우 처리
+     */
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFoundException(
+            UserNotFoundException ex, HttpServletRequest request) {
+        
+        String traceId = getTraceId(request);
+        log.warn("[{}] User not found: {}", traceId, ex.getMessage());
+        
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("resource", "User");
+        
+        ErrorResponse errorResponse = ErrorCode.USER_NOT_FOUND.toErrorResponseWithMetadata(
+            traceId, request.getRequestURI(), request.getMethod(), metadata
+        );
+        
+        return ResponseEntity.status(ErrorCode.USER_NOT_FOUND.getHttpStatus())
+                .body(errorResponse);
+    }
+    
+    /**
+     * 반려동물을 찾을 수 없는 경우 처리
+     */
+    @ExceptionHandler(PetNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePetNotFoundException(
+            PetNotFoundException ex, HttpServletRequest request) {
+        
+        String traceId = getTraceId(request);
+        log.warn("[{}] Pet not found: {}", traceId, ex.getMessage());
+        
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("resource", "Pet");
+        
+        ErrorResponse errorResponse = ErrorCode.PET_NOT_FOUND.toErrorResponseWithMetadata(
+            traceId, request.getRequestURI(), request.getMethod(), metadata
+        );
+        
+        return ResponseEntity.status(ErrorCode.PET_NOT_FOUND.getHttpStatus())
+                .body(errorResponse);
+    }
+    
+    /**
+     * 채팅방을 찾을 수 없는 경우 처리
+     */
     @ExceptionHandler(ChatRoomNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleChatRoomNotFoundException(
             ChatRoomNotFoundException ex, HttpServletRequest request) {

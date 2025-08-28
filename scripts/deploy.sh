@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # PuppyTalk Production Deployment Script
-# Backend 관점: 안전하고 신뢰할 수 있는 프로덕션 배포
 
 set -e
 

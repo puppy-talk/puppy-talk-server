@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# PuppyTalk Monitoring and Maintenance Script
-# Backend 관점: 프로덕션 시스템 모니터링 및 유지보수
+# PuppyTalk Monitoring Script
 
 set -e
 

@@ -12,15 +12,16 @@ public class UserDomainService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     
+    /**
+     * UserDomainService 생성자
+     * 
+     * @param userRepository 사용자 저장소 (null 불가)
+     * @param passwordEncoder 비밀번호 암호화기 (null 불가)
+     * @throws IllegalArgumentException 파라미터가 null인 경우
+     */
     public UserDomainService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        if (userRepository == null) {
-            throw new IllegalArgumentException("UserRepository must not be null");
-        }
-        if (passwordEncoder == null) {
-            throw new IllegalArgumentException("PasswordEncoder must not be null");
-        }
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.userRepository = Preconditions.requireNonNull(userRepository, "UserRepository");
+        this.passwordEncoder = Preconditions.requireNonNull(passwordEncoder, "PasswordEncoder");
     }
     
     /**
@@ -71,7 +72,7 @@ public class UserDomainService {
         Preconditions.requireNonBlank(username, "Username");
         
         return userRepository.findByUsername(username.trim())
-            .orElseThrow(() -> new UserNotFoundException(username));
+            .orElseThrow(() -> UserNotFoundException.byUsername(username));
     }
     
     /**

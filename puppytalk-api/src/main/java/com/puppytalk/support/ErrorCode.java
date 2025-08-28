@@ -101,6 +101,11 @@ public enum ErrorCode {
                        ErrorResponse.ErrorCategory.BUSINESS_ERROR),
 
     // === 알림 관련 오류 ===
+    NOTIFICATION_NOT_FOUND("NOTIFICATION_NOT_FOUND", 
+                          "알림을 찾을 수 없습니다", 
+                          HttpStatus.NOT_FOUND, 
+                          ErrorResponse.ErrorCategory.BUSINESS_ERROR),
+    
     NOTIFICATION_FAILED("NOTIFICATION_FAILED", 
                        "알림 전송에 실패했습니다", 
                        HttpStatus.INTERNAL_SERVER_ERROR, 
