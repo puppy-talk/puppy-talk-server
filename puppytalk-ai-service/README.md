@@ -16,7 +16,7 @@ puppytalk-ai-service/
 │   ├── utils/           # 유틸리티 함수
 │   └── main.py          # FastAPI 애플리케이션 진입점
 ├── requirements.txt     # Python 의존성
-├── Dockerfile          # Docker 빌드 설정
+├── Dockerfile          # Docker 빌드 설정 (멀티스테이지)
 ├── docker-compose.yml  # 로컬 개발 환경
 └── .env.example        # 환경 변수 예시
 ```
@@ -28,17 +28,19 @@ puppytalk-ai-service/
 - **기능**: 사용자 메시지를 바탕으로 반려동물의 응답 생성
 - **특징**:
   - 페르소나 기반 응답 생성
-  - 대화 히스토리 고려
+  - 대화 히스토리 고려 (최대 20개 메시지)
   - 한국어 자연스러운 대화
   - 이모지 포함 감정 표현
+  - 성능 모니터링 및 로깅
 
 ### 2. 비활성 알림 생성
 - **엔드포인트**: `POST /api/v1/chat/inactivity-notification`
 - **기능**: 사용자가 오랫동안 접속하지 않았을 때 보내는 알림 메시지
 - **특징**:
   - 시간대별 상황 고려
-  - 마지막 대화 맥락 반영
+  - 마지막 대화 맥락 반영 (최대 10개 메시지)
   - 부담스럽지 않은 귀여운 메시지
+  - 응답 시간 모니터링
 
 ### 3. 헬스체크 및 모니터링
 - **엔드포인트**: `GET /api/v1/health`
@@ -51,12 +53,12 @@ puppytalk-ai-service/
 ## 🛠️ 기술 스택
 
 - **Framework**: FastAPI 0.104+
-- **HTTP Client**: httpx (비동기)
+- **HTTP Client**: httpx (비동기, 연결 풀링)
 - **Validation**: Pydantic v2
 - **Logging**: structlog
-- **Retry**: tenacity
-- **Monitoring**: psutil
+- **Retry**: tenacity (지수 백오프)
 - **Runtime**: Python 3.11+
+- **Container**: Docker (멀티스테이지 빌드)
 
 ## 📦 설치 및 실행
 
@@ -68,7 +70,8 @@ cp .env.example .env
 
 # 필수 환경 변수 설정
 export GROK_API_KEY="your-grok-api-key"
-export SECRET_KEY="your-secret-key"
+export SECRET_KEY="your-secret-key-at-least-32-characters"
+export CORS_ORIGINS="http://localhost:3000,http://localhost:8080"
 ```
 
 ### 2. 로컬 개발 실행
@@ -89,6 +92,9 @@ docker-compose up --build
 
 # 백그라운드 실행
 docker-compose up -d
+
+# 로그 확인
+docker-compose logs -f puppytalk-ai-service
 ```
 
 ### 4. 헬스체크 확인
@@ -99,98 +105,58 @@ curl http://localhost:8001/api/v1/health
 
 ## 🔧 API 문서
 
-### 채팅 생성
+### 환경별 설정
 
-```http
-POST /api/v1/chat/generate
-Content-Type: application/json
+```bash
+# 개발 환경
+ENVIRONMENT=development
+DEBUG=true
 
-{
-  "user_id": 1,
-  "pet_id": 123,
-  "chat_room_id": 456,
-  "user_message": "안녕 멍멍이야!",
-  "pet_persona": {
-    "type": "playful",
-    "name": "멍멍이",
-    "breed": "골든리트리버",
-    "age": 3,
-    "personality_traits": ["활발한", "친근한", "장난끼많은"]
-  },
-  "conversation_history": [
-    {
-      "role": "user",
-      "content": "오늘 날씨가 좋네"
-    },
-    {
-      "role": "assistant", 
-      "content": "정말요! 산책 나가고 싶어요 🐕"
-    }
-  ],
-  "max_tokens": 150,
-  "temperature": 0.8
-}
+# 프로덕션 환경  
+ENVIRONMENT=production
+DEBUG=false
+CORS_ORIGINS=https://yourdomain.com
 ```
 
-### 응답
+### 성능 설정
 
-```json
-{
-  "success": true,
-  "message_id": "msg_123",
-  "content": "안녕하세요! 오늘도 함께 놀아요! 🐾✨",
-  "model": "grok-beta",
-  "tokens_used": 25,
-  "generation_time_ms": 847,
-  "conversation_id": "456_1703123456",
-  "timestamp": "2024-01-01T12:00:00Z"
-}
+```bash
+# Grok API 설정
+GROK_TIMEOUT=30          # API 타임아웃 (초)
+GROK_MAX_RETRIES=3       # 최대 재시도 횟수
+
+# 리소스 제한
+MAX_CONVERSATION_HISTORY=10  # 대화 히스토리 최대 개수
+MAX_PERSONALITY_TRAITS=5     # 성격 특성 최대 개수
 ```
 
-### 비활성 알림 생성
+## 🔒 보안 및 보안
 
-```http
-POST /api/v1/chat/inactivity-notification
-Content-Type: application/json
-
-{
-  "user_id": 1,
-  "pet_id": 123, 
-  "chat_room_id": 456,
-  "pet_persona": {
-    "type": "calm",
-    "name": "냥이",
-    "personality_traits": ["조용한", "다정한"]
-  },
-  "hours_since_last_activity": 6,
-  "time_of_day": "evening",
-  "last_messages": [
-    {
-      "role": "user",
-      "content": "나중에 다시 와서 놀아줄게"
-    }
-  ]
-}
-```
-
-## 🔒 보안
-
-- API 키 환경 변수로 관리
-- 요청/응답 로깅에서 민감 정보 마스킹
-- 입력 값 검증
+### 보안 기능
 - CORS 설정으로 허용된 도메인만 접근
+- 환경 변수 기반 설정 관리
+- Docker 컨테이너 보안 강화
+- 비루트 사용자 실행
 
-## 📊 로깅 및 헬스체크
+### 입력 값 검증
+- Pydantic 모델 기반 검증
+- 비즈니스 로직 검증
+- SQL 인젝션 방지
+- XSS 공격 방지
+
+## 📊 로깅 및 모니터링
 
 ### 로깅
 - 구조화된 JSON 로깅
-- 요청 추적 ID
+- 요청 추적 ID (UUID)
 - 에러 스택 트레이스
+- 성능 카테고리 분류 (fast/normal/slow)
 
 ### 헬스체크
 - Liveness Probe: `/api/v1/health/liveness`
 - Readiness Probe: `/api/v1/health/readiness`
 - 기본 헬스체크: `/api/v1/health`
+- Docker Health Check 통합
 
 ## 🔗 Java 서비스 통합
 
@@ -250,21 +216,20 @@ public class AiServiceClient {
 - Type hints 사용 필수
 - Docstring 작성 (Google 스타일)
 - 비동기 프로그래밍 패턴 활용
+- 상수 정의 및 매직 넘버 제거
 
-### 테스트
-```bash
-# 단위 테스트 (TODO: 구현 필요)
-pytest tests/
-
-# 통합 테스트 (TODO: 구현 필요)  
-pytest tests/integration/
-```
+### 성능 최적화
+- HTTP 클라이언트 연결 풀링
+- 세션 재사용
+- 백그라운드 작업 활용
+- 응답 시간 모니터링
 
 ### 배포
-- Docker 컨테이너 기반 배포
+- Docker 멀티스테이지 빌드
 - 환경별 설정 분리 (dev/staging/prod)
 - Rolling update 지원
 - Health check 기반 로드 밸런싱
+- 리소스 제한 및 보안 옵션
 
 ## 🤝 기여 가이드
 

@@ -1,6 +1,7 @@
 package com.puppytalk.unit.user;
 
 import com.puppytalk.user.DuplicateUserException;
+import com.puppytalk.user.PasswordEncoder;
 import com.puppytalk.user.User;
 import com.puppytalk.user.UserDomainService;
 import com.puppytalk.user.UserId;
@@ -23,11 +24,13 @@ class UserDomainServiceTest {
     
     private UserDomainService userDomainService;
     private MockUserRepository mockRepository;
+    private MockPasswordEncoder mockPasswordEncoder;
     
     @BeforeEach
     void setUp() {
         mockRepository = new MockUserRepository();
-        userDomainService = new UserDomainService(mockRepository);
+        mockPasswordEncoder = new MockPasswordEncoder();
+        userDomainService = new UserDomainService(mockRepository, mockPasswordEncoder);
     }
     
     @DisplayName("사용자 등록 - 성공")
@@ -58,8 +61,8 @@ class UserDomainServiceTest {
         assertNotNull(savedUser);
         assertEquals(username.trim(), savedUser.username());
         assertEquals(email.trim().toLowerCase(), savedUser.email());
-        assertTrue(savedUser.checkPassword(password.trim()));
-        assertNotEquals(password.trim(), savedUser.password());
+        assertEquals("encrypted_" + password.trim(), savedUser.password());
+        assertTrue(mockPasswordEncoder.isEncodeCalled());
     }
     
     @DisplayName("사용자 등록 - null 사용자명으로 실패")
@@ -76,7 +79,7 @@ class UserDomainServiceTest {
             () -> userDomainService.registerUser(username, email, password)
         );
         
-        assertEquals("사용자명은 필수입니다", exception.getMessage());
+        assertEquals("Username must not be null or blank", exception.getMessage());
         assertFalse(mockRepository.isSaveCalled());
         assertFalse(mockRepository.isExistsByUsernameCalled());
     }
@@ -95,7 +98,7 @@ class UserDomainServiceTest {
             () -> userDomainService.registerUser(username, email, password)
         );
         
-        assertEquals("사용자명은 필수입니다", exception.getMessage());
+        assertEquals("Username must not be null or blank", exception.getMessage());
         assertFalse(mockRepository.isSaveCalled());
     }
     
@@ -113,7 +116,7 @@ class UserDomainServiceTest {
             () -> userDomainService.registerUser(username, email, password)
         );
         
-        assertEquals("이메일은 필수입니다", exception.getMessage());
+        assertEquals("Email must not be null or blank", exception.getMessage());
         assertFalse(mockRepository.isSaveCalled());
     }
     
@@ -174,7 +177,7 @@ class UserDomainServiceTest {
             () -> userDomainService.registerUser(username, email, password)
         );
         
-        assertEquals("비밀번호는 필수입니다", exception.getMessage());
+        assertEquals("Password must not be null or blank", exception.getMessage());
         assertFalse(mockRepository.isSaveCalled());
     }
     
@@ -192,7 +195,7 @@ class UserDomainServiceTest {
             () -> userDomainService.registerUser(username, email, password)
         );
         
-        assertEquals("비밀번호는 필수입니다", exception.getMessage());
+        assertEquals("Password must not be null or blank", exception.getMessage());
         assertFalse(mockRepository.isSaveCalled());
     }
     
@@ -206,6 +209,7 @@ class UserDomainServiceTest {
             "testuser",
             "test@example.com",
             "password123",
+            LocalDateTime.now(),
             LocalDateTime.now(),
             false
         );
@@ -233,7 +237,7 @@ class UserDomainServiceTest {
             () -> userDomainService.findUserById(userId)
         );
         
-        assertEquals("UserId must not be null", exception.getMessage());
+        assertEquals("UserId must be a valid stored ID", exception.getMessage());
         assertFalse(mockRepository.isFindByIdCalled());
     }
     
@@ -265,6 +269,7 @@ class UserDomainServiceTest {
             "test@example.com",
             "password123",
             LocalDateTime.now(),
+            LocalDateTime.now(),
             false
         );
         
@@ -291,7 +296,7 @@ class UserDomainServiceTest {
             () -> userDomainService.findUserByUsername(username)
         );
         
-        assertEquals("Username must not be null or empty", exception.getMessage());
+        assertEquals("Username must not be null or blank", exception.getMessage());
         assertFalse(mockRepository.isFindByUsernameCalled());
     }
     
@@ -317,8 +322,8 @@ class UserDomainServiceTest {
     void findActiveUsers_Success() {
         // given
         List<User> expectedUsers = Arrays.asList(
-            User.of(UserId.from(1L), "user1", "user1@example.com", "password1", LocalDateTime.now(), false),
-            User.of(UserId.from(2L), "user2", "user2@example.com", "password2", LocalDateTime.now(), false)
+            User.of(UserId.from(1L), "user1", "user1@example.com", "password1", LocalDateTime.now(), LocalDateTime.now(), false),
+            User.of(UserId.from(2L), "user2", "user2@example.com", "password2", LocalDateTime.now(), LocalDateTime.now(), false)
         );
         
         mockRepository.setFindActiveUsersResult(expectedUsers);
@@ -342,6 +347,7 @@ class UserDomainServiceTest {
             "test@example.com",
             "password123",
             LocalDateTime.now(),
+            LocalDateTime.now(),
             false
         );
         
@@ -361,7 +367,7 @@ class UserDomainServiceTest {
     void deleteUser_Success() {
         // given
         UserId userId = UserId.from(1L);
-        User user = User.of(userId, "testuser", "test@example.com", "password123", LocalDateTime.now(), false);
+        User user = User.of(userId, "testuser", "test@example.com", "password123", LocalDateTime.now(), LocalDateTime.now(), false);
         
         mockRepository.setFindByIdResult(Optional.of(user));
         mockRepository.setSaveResult(userId);
@@ -382,43 +388,89 @@ class UserDomainServiceTest {
         assertEquals(user.password(), savedUser.password());
     }
     
-    @DisplayName("사용자 복구 - 성공")
+    @DisplayName("비밀번호 검증 - 성공")
     @Test
-    void restoreUser_Success() {
+    void checkPassword_Success() {
         // given
-        UserId userId = UserId.from(1L);
-        User deletedUser = User.of(userId, "testuser", "test@example.com", "password123", LocalDateTime.now(), true);
+        User user = User.create("testuser", "test@example.com", "encrypted_password123");
+        String rawPassword = "password123";
         
-        mockRepository.setFindByIdResult(Optional.of(deletedUser));
-        mockRepository.setSaveResult(userId);
+        mockPasswordEncoder.setMatchesResult(true);
         
         // when
-        userDomainService.restoreUser(userId);
+        boolean result = userDomainService.checkPassword(user, rawPassword);
+        
+        // then
+        assertTrue(result);
+        assertTrue(mockPasswordEncoder.isMatchesCalled());
+        assertEquals(rawPassword, mockPasswordEncoder.getLastMatchesRawPassword());
+        assertEquals("encrypted_password123", mockPasswordEncoder.getLastMatchesEncryptedPassword());
+    }
+    
+    @DisplayName("비밀번호 검증 - 실패")
+    @Test
+    void checkPassword_Failure() {
+        // given
+        User user = User.create("testuser", "test@example.com", "encrypted_password123");
+        String wrongPassword = "wrongpassword";
+        
+        mockPasswordEncoder.setMatchesResult(false);
+        
+        // when
+        boolean result = userDomainService.checkPassword(user, wrongPassword);
+        
+        // then
+        assertFalse(result);
+        assertTrue(mockPasswordEncoder.isMatchesCalled());
+    }
+    
+    @DisplayName("비밀번호 변경 - 성공")
+    @Test
+    void changePassword_Success() {
+        // given
+        UserId userId = UserId.from(1L);
+        User user = User.of(userId, "testuser", "test@example.com", "old_encrypted_password", LocalDateTime.now(), LocalDateTime.now(), false);
+        String newRawPassword = "newpassword123";
+        
+        mockRepository.setFindByIdResult(Optional.of(user));
+        mockRepository.setSaveResult(userId);
+        mockPasswordEncoder.setEncodeResult("encrypted_newpassword123");
+        
+        // when
+        userDomainService.changePassword(userId, newRawPassword);
         
         // then
         assertTrue(mockRepository.isFindByIdCalled());
+        assertTrue(mockPasswordEncoder.isEncodeCalled());
         assertTrue(mockRepository.isSaveCalled());
-        assertEquals(userId, mockRepository.getLastFindByIdParam());
+        assertEquals(newRawPassword, mockPasswordEncoder.getLastEncodeParam());
         
         User savedUser = mockRepository.getLastSavedUser();
-        assertNotNull(savedUser);
-        assertEquals(deletedUser.id(), savedUser.id());
-        assertEquals(deletedUser.username(), savedUser.username());
-        assertEquals(deletedUser.email(), savedUser.email());
-        assertEquals(deletedUser.password(), savedUser.password());
+        assertEquals("encrypted_newpassword123", savedUser.password());
     }
     
     @DisplayName("생성자 - null 레포지토리로 실패")
     @Test
     void constructor_NullRepository_ThrowsException() {
-        // when
-        UserDomainService service = new UserDomainService(null);
-        
-        // then - null repository로 메서드 호출시 NullPointerException 발생
-        assertThrows(
-            NullPointerException.class,
-            () -> service.findActiveUsers()
+        // when & then
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> new UserDomainService(null, mockPasswordEncoder)
         );
+        
+        assertEquals("UserRepository must not be null", exception.getMessage());
+    }
+    
+    @DisplayName("생성자 - null 패스워드 인코더로 실패")
+    @Test
+    void constructor_NullPasswordEncoder_ThrowsException() {
+        // when & then
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> new UserDomainService(mockRepository, null)
+        );
+        
+        assertEquals("PasswordEncoder must not be null", exception.getMessage());
     }
     
     /**
@@ -525,5 +577,52 @@ class UserDomainServiceTest {
         public String getLastFindByEmailParam() { return lastFindByEmailParam; }
         public String getLastExistsByUsernameParam() { return lastExistsByUsernameParam; }
         public String getLastExistsByEmailParam() { return lastExistsByEmailParam; }
+    }
+    
+    /**
+     * Mock PasswordEncoder 구현체
+     * Mockito 라이브러리 사용 금지로 직접 Mock 객체 구현
+     */
+    private static class MockPasswordEncoder implements PasswordEncoder {
+        private boolean encodeCalled = false;
+        private boolean matchesCalled = false;
+        
+        private String lastEncodeParam;
+        private String lastMatchesRawPassword;
+        private String lastMatchesEncryptedPassword;
+        
+        private String encodeResult = "encrypted_password";
+        private boolean matchesResult = true;
+        
+        @Override
+        public String encode(String rawPassword) {
+            encodeCalled = true;
+            lastEncodeParam = rawPassword;
+            return "encrypted_" + rawPassword;
+        }
+        
+        @Override
+        public boolean matches(String rawPassword, String encryptedPassword) {
+            matchesCalled = true;
+            lastMatchesRawPassword = rawPassword;
+            lastMatchesEncryptedPassword = encryptedPassword;
+            return matchesResult;
+        }
+        
+        @Override
+        public String getAlgorithm() {
+            return "MOCK";
+        }
+        
+        // Test helper methods
+        public void setEncodeResult(String result) { this.encodeResult = result; }
+        public void setMatchesResult(boolean result) { this.matchesResult = result; }
+        
+        public boolean isEncodeCalled() { return encodeCalled; }
+        public boolean isMatchesCalled() { return matchesCalled; }
+        
+        public String getLastEncodeParam() { return lastEncodeParam; }
+        public String getLastMatchesRawPassword() { return lastMatchesRawPassword; }
+        public String getLastMatchesEncryptedPassword() { return lastMatchesEncryptedPassword; }
     }
 }

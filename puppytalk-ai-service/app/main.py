@@ -3,6 +3,7 @@ PuppyTalk AI Service - FastAPI Application
 """
 
 import time
+import uuid
 from contextlib import asynccontextmanager
 from typing import Dict, Any
 
@@ -27,7 +28,7 @@ settings = get_settings()
 async def lifespan(app: FastAPI):
     """Application lifespan events"""
     # Startup
-    log_application_start(version="1.0.0", environment=settings.environment)
+    log_application_start(version=settings.app_version, environment=settings.environment)
     logger.info("PuppyTalk AI Service starting up")
     
     yield
@@ -39,10 +40,10 @@ async def lifespan(app: FastAPI):
 
 # Create FastAPI application
 app = FastAPI(
-    title="PuppyTalk AI Service",
+    title=settings.app_name,
     description="AI service for PuppyTalk pet chat application using Grok API",
-    version="1.0.0",
-    openapi_url="/api/v1/openapi.json" if settings.debug else None,
+    version=settings.app_version,
+    openapi_url=f"{settings.api_prefix}/openapi.json" if settings.debug else None,
     docs_url="/docs" if settings.debug else None,
     redoc_url="/redoc" if settings.debug else None,
     lifespan=lifespan
@@ -52,7 +53,7 @@ app = FastAPI(
 # Add middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.allowed_hosts if hasattr(settings, 'allowed_hosts') else ["*"],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
@@ -61,7 +62,7 @@ app.add_middleware(
 if not settings.debug:
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=settings.allowed_hosts if hasattr(settings, 'allowed_hosts') else ["localhost", "127.0.0.1"]
+        allowed_hosts=["localhost", "127.0.0.1"] + settings.cors_origins
     )
 
 
@@ -70,11 +71,7 @@ if not settings.debug:
 async def log_requests(request: Request, call_next):
     """Log all requests and responses"""
     start_time = time.time()
-    
-    # Generate request ID for tracing
-    request_id = f"req_{int(time.time() * 1000000)}"
-    
-    # Add request ID to request state
+    request_id = str(uuid.uuid4())
     request.state.request_id = request_id
     
     # Log request
@@ -203,7 +200,7 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
 
 
 # Include API routes
-app.include_router(api_router, prefix="/api/v1")
+app.include_router(api_router, prefix=settings.api_prefix)
 
 
 # Root endpoint
@@ -211,11 +208,11 @@ app.include_router(api_router, prefix="/api/v1")
 async def root() -> Dict[str, Any]:
     """Root endpoint with service information"""
     return {
-        "service": "PuppyTalk AI Service",
-        "version": "1.0.0",
+        "service": settings.app_name,
+        "version": settings.app_version,
         "status": "running",
         "docs_url": "/docs" if settings.debug else None,
-        "health_url": "/api/v1/health"
+        "health_url": f"{settings.api_prefix}/health"
     }
 
 
@@ -224,8 +221,8 @@ async def root() -> Dict[str, Any]:
 async def service_info() -> Dict[str, Any]:
     """Service information endpoint"""
     return {
-        "name": "PuppyTalk AI Service",
-        "version": "1.0.0",
+        "name": settings.app_name,
+        "version": settings.app_version,
         "description": "AI service for PuppyTalk pet chat application using Grok API",
         "environment": settings.environment,
         "debug": settings.debug,
@@ -238,8 +235,8 @@ if __name__ == "__main__":
     
     uvicorn.run(
         "app.main:app",
-        host="0.0.0.0",
-        port=8000,
+        host=settings.host,
+        port=settings.port,
         reload=settings.debug,
         log_config=None  # Use our custom logging configuration
     )

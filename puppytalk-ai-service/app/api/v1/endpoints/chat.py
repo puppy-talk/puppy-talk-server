@@ -19,6 +19,10 @@ logger = structlog.get_logger(__name__)
 router = APIRouter()
 settings = get_settings()
 
+# Constants
+MAX_RESPONSE_TIME_MS = 30000  # 30 seconds
+MIN_RESPONSE_TIME_MS = 100    # 100ms
+
 
 def get_grok_service() -> GrokService:
     """Dependency to get Grok service instance"""
@@ -84,6 +88,14 @@ async def generate_chat_response(
         
         generation_time = int((time.time() - start_time) * 1000)
         
+        # Validate response time
+        if generation_time > MAX_RESPONSE_TIME_MS:
+            logger.warning(
+                "Slow response time detected",
+                request_id=request_id,
+                generation_time_ms=generation_time
+            )
+        
         # Create response
         response = ChatResponse(
             success=True,
@@ -123,7 +135,9 @@ async def generate_chat_response(
             request_id=request_id,
             user_id=request.user_id,
             generation_time_ms=generation_time,
-            success=True
+            success=True,
+            model=settings.grok_model,
+            response_length=len(pet_response)
         )
         
         return response
@@ -248,6 +262,14 @@ async def generate_inactivity_notification(
         
         generation_time = int((time.time() - start_time) * 1000)
         
+        # Validate response time
+        if generation_time > MAX_RESPONSE_TIME_MS:
+            logger.warning(
+                "Slow notification generation detected",
+                request_id=request_id,
+                generation_time_ms=generation_time
+            )
+        
         response = InactivityNotificationResponse(
             success=True,
             notification_message=notification_message,
@@ -268,7 +290,8 @@ async def generate_inactivity_notification(
             request_id=request_id,
             user_id=request.user_id,
             generation_time_ms=generation_time,
-            success=True
+            success=True,
+            message_length=len(notification_message)
         )
         
         return response
@@ -323,16 +346,21 @@ async def log_generation_metrics(
     request_id: str,
     user_id: int,
     generation_time_ms: int,
-    success: bool
+    success: bool,
+    model: str,
+    response_length: int
 ) -> None:
-    """Background task to log generation metrics"""
+    """Background task to log generation metrics with enhanced information"""
     try:
         logger.info(
             "Generation metrics logged",
             request_id=request_id,
             user_id=user_id,
             generation_time_ms=generation_time_ms,
-            success=success
+            success=success,
+            model=model,
+            response_length=response_length,
+            performance_category="fast" if generation_time_ms < 1000 else "normal" if generation_time_ms < 5000 else "slow"
         )
     except Exception as e:
         logger.error(
@@ -346,16 +374,19 @@ async def log_notification_metrics(
     request_id: str,
     user_id: int,
     generation_time_ms: int,
-    success: bool
+    success: bool,
+    message_length: int
 ) -> None:
-    """Background task to log notification metrics"""
+    """Background task to log notification metrics with enhanced information"""
     try:
         logger.info(
             "Notification metrics logged",
             request_id=request_id,
             user_id=user_id,
             generation_time_ms=generation_time_ms,
-            success=success
+            success=success,
+            message_length=message_length,
+            performance_category="fast" if generation_time_ms < 1000 else "normal" if generation_time_ms < 5000 else "slow"
         )
     except Exception as e:
         logger.error(

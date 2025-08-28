@@ -3,6 +3,7 @@ package com.puppytalk.scheduler;
 import com.puppytalk.notification.InactivityNotificationFacade;
 import com.puppytalk.notification.NotificationFacade;
 import com.puppytalk.notification.dto.request.NotificationStatusUpdateCommand;
+import com.puppytalk.notification.dto.response.NotificationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -203,9 +204,7 @@ public class NotificationScheduler {
         }
     }
     
-    private void simulateNotificationSending(
-        com.puppytalk.notification.dto.response.NotificationResult notification
-    ) {
+    private void simulateNotificationSending(NotificationResult notification) {
         // TODO: 실제 구현에서는 외부 알림 서비스 호출
         // - FCM (Firebase Cloud Messaging) for push notifications
         // - SMS 게이트웨이 for text messages  

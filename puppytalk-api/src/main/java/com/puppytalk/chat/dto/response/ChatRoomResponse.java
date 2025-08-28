@@ -1,7 +1,6 @@
 package com.puppytalk.chat.dto.response;
 
 import com.puppytalk.chat.ChatRoom;
-import com.puppytalk.chat.dto.response.ChatRoomCreateResult;
 import com.puppytalk.chat.dto.response.ChatRoomResult;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
@@ -45,19 +44,6 @@ public record ChatRoomResponse(
         );
     }
     
-    /**
-     * ChatRoomCreateResult로부터 응답 생성
-     */
-    public static ChatRoomResponse from(ChatRoomCreateResult result) {
-        return new ChatRoomResponse(
-            result.chatRoomId(),
-            result.userId(),
-            result.petId(),
-            result.isNewlyCreated(),
-            null, // createdAt not available in ChatRoomCreateResult
-            null  // lastMessageAt not available in ChatRoomCreateResult
-        );
-    }
     
     /**
      * ChatRoomResult로부터 응답 생성

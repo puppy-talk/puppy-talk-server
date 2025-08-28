@@ -53,3 +53,4 @@ public abstract class EntityId {
         return getClass().getSimpleName() + "{" + value + "}";
     }
 }
+

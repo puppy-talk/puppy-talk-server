@@ -13,9 +13,18 @@ from app.core.config import get_settings
 from app.core.exceptions import GrokAPIError, MessageGenerationError
 from app.models.requests import ChatMessage, MessageRole
 
-
 logger = structlog.get_logger(__name__)
 settings = get_settings()
+
+# Constants
+MAX_CONVERSATION_HISTORY = 10
+MAX_PERSONALITY_TRAITS = 5
+DEFAULT_MAX_TOKENS = 150
+DEFAULT_TEMPERATURE = 0.8
+MAX_RETRIES = 3
+RETRY_WAIT_MULTIPLIER = 1
+RETRY_WAIT_MIN = 4
+RETRY_WAIT_MAX = 10
 
 
 class GrokAPIClient:
@@ -27,33 +36,49 @@ class GrokAPIClient:
         self.model = settings.grok_model
         self.timeout = settings.grok_timeout
         self.max_retries = settings.grok_max_retries
-        
-        # HTTP client configuration
-        self.client = httpx.AsyncClient(
-            timeout=httpx.Timeout(self.timeout),
-            headers={
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-                "User-Agent": f"PuppyTalk-AI-Service/1.0.0"
-            }
-        )
+        self._session: Optional[httpx.AsyncClient] = None
+    
+    @property
+    async def session(self) -> httpx.AsyncClient:
+        """세션 재사용을 위한 프로퍼티"""
+        if self._session is None or self._session.is_closed:
+            self._session = httpx.AsyncClient(
+                timeout=httpx.Timeout(self.timeout),
+                headers=self._get_headers(),
+                limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
+            )
+        return self._session
+    
+    def _get_headers(self) -> Dict[str, str]:
+        """Get HTTP headers for API requests"""
+        return {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+            "User-Agent": f"PuppyTalk-AI-Service/{settings.app_version}"
+        }
     
     async def __aenter__(self):
         return self
     
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        await self.client.aclose()
+        await self.close()
+    
+    async def close(self):
+        """세션 정리"""
+        if self._session and not self._session.is_closed:
+            await self._session.aclose()
+            self._session = None
     
     @retry(
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=4, max=10),
+        stop=stop_after_attempt(MAX_RETRIES),
+        wait=wait_exponential(multiplier=RETRY_WAIT_MULTIPLIER, min=RETRY_WAIT_MIN, max=RETRY_WAIT_MAX),
         reraise=True
     )
     async def generate_chat_completion(
         self,
         messages: List[Dict[str, str]],
-        max_tokens: int = 150,
-        temperature: float = 0.8,
+        max_tokens: int = DEFAULT_MAX_TOKENS,
+        temperature: float = DEFAULT_TEMPERATURE,
         **kwargs
     ) -> Dict[str, Any]:
         """
@@ -91,7 +116,8 @@ class GrokAPIClient:
                 temperature=temperature
             )
             
-            response = await self.client.post(
+            session = await self.session
+            response = await session.post(
                 f"{self.base_url}/chat/completions",
                 json=payload
             )
@@ -178,8 +204,8 @@ class GrokAPIClient:
                 "content": system_prompt
             })
         
-        # Add conversation history
-        for msg in conversation_history[-10:]:  # Keep only last 10 messages
+        # Add conversation history (keep only last N messages)
+        for msg in conversation_history[-MAX_CONVERSATION_HISTORY:]:
             messages.append({
                 "role": msg.role.value,
                 "content": msg.content
@@ -206,7 +232,8 @@ class GrokAPIClient:
                 {"role": "user", "content": "Hello"}
             ]
             
-            response = await self.client.post(
+            session = await self.session
+            response = await session.post(
                 f"{self.base_url}/chat/completions",
                 json={
                     "model": self.model,
@@ -236,8 +263,8 @@ class GrokService:
         personality_traits: List[str],
         conversation_history: List[ChatMessage],
         user_message: str,
-        max_tokens: int = 150,
-        temperature: float = 0.8
+        max_tokens: int = DEFAULT_MAX_TOKENS,
+        temperature: float = DEFAULT_TEMPERATURE
     ) -> str:
         """
         Generate pet response message
@@ -315,7 +342,9 @@ class GrokService:
         Returns:
             System prompt string
         """
-        traits_text = ", ".join(personality_traits) if personality_traits else ""
+        # Limit personality traits to maximum allowed
+        traits = personality_traits[:MAX_PERSONALITY_TRAITS] if personality_traits else []
+        traits_text = ", ".join(traits) if traits else ""
         
         prompt = f"""당신은 {pet_name}라는 이름의 반려동물입니다. 
 당신의 성격은 {pet_persona}하며, 다음과 같은 특성을 가지고 있습니다: {traits_text}
@@ -420,7 +449,9 @@ class GrokService:
     ) -> str:
         """Create system prompt for inactivity notification"""
         
-        traits_text = ", ".join(personality_traits) if personality_traits else ""
+        # Limit personality traits to maximum allowed
+        traits = personality_traits[:MAX_PERSONALITY_TRAITS] if personality_traits else []
+        traits_text = ", ".join(traits) if traits else ""
         time_context = f" 지금은 {time_of_day}입니다." if time_of_day else ""
         
         prompt = f"""당신은 {pet_name}라는 이름의 반려동물입니다.

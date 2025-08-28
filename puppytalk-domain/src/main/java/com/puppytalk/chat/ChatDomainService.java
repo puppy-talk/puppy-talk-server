@@ -81,12 +81,10 @@ public class ChatDomainService {
     /**
      * 사용자 메시지 전송
      */
-    public Message sendUserMessage(ChatRoomId chatRoomId, UserId userId, String content) {
+    public void sendUserMessage(ChatRoomId chatRoomId, UserId userId, String content) {
         Preconditions.requireValidId(chatRoomId, "ChatRoomId");
         Preconditions.requireValidId(userId, "UserId");
         Preconditions.requireNonBlank(content, "Content");
-
-        String validContent = content.trim();
 
         // 채팅방 존재 및 소유권 확인
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
@@ -96,13 +94,11 @@ public class ChatDomainService {
             throw new ChatRoomAccessDeniedException("채팅방에 접근할 권한이 없습니다", userId, chatRoomId);
         }
         
-        Message message = Message.create(chatRoomId, userId, validContent);
+        Message message = Message.create(chatRoomId, userId, content);
         messageRepository.save(message);
-        
+
         ChatRoom updatedChatRoom = chatRoom.withLastMessageTime();
         chatRoomRepository.update(updatedChatRoom);
-        
-        return message;
     }
     
     /**

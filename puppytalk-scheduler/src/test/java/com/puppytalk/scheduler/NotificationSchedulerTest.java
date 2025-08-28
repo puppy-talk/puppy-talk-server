@@ -37,13 +37,18 @@ class NotificationSchedulerTest {
         List<Long> inactiveUserIds = List.of(1L, 2L, 3L);
         when(notificationFacade.findInactiveUsersForNotification())
             .thenReturn(inactiveUserIds);
+        when(notificationFacade.findFirstActivePetByUserId(any()))
+            .thenReturn(1L); // Mock pet ID
+        when(inactivityNotificationFacade.createInactivityNotification(any(), any()))
+            .thenReturn(1L); // Mock notification ID
 
         // When
         notificationScheduler.detectInactiveUsersAndCreateNotifications();
 
         // Then
         verify(notificationFacade).findInactiveUsersForNotification();
-        verify(notificationFacade, times(3)).createInactivityNotification(any());
+        verify(notificationFacade, times(3)).findFirstActivePetByUserId(any());
+        verify(inactivityNotificationFacade, times(3)).createInactivityNotification(any(), any());
     }
 
     @Test
@@ -57,7 +62,8 @@ class NotificationSchedulerTest {
 
         // Then
         verify(notificationFacade).findInactiveUsersForNotification();
-        verify(notificationFacade, never()).createInactivityNotification(any());
+        verify(notificationFacade, never()).findFirstActivePetByUserId(any());
+        verify(inactivityNotificationFacade, never()).createInactivityNotification(any(), any());
     }
 
     @Test

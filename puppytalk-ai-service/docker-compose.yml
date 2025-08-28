@@ -12,6 +12,7 @@ services:
       - GROK_API_KEY=${GROK_API_KEY}
       - SECRET_KEY=${SECRET_KEY}
       - JAVA_SERVICE_URL=http://host.docker.internal:8080
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:8080,http://127.0.0.1:3000,http://127.0.0.1:8080
     env_file:
       - .env
     volumes:
@@ -20,7 +21,7 @@ services:
       - puppytalk-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8001/api/v1/health/liveness')"]
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8001/api/v1/health/liveness')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -32,6 +33,19 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+    read_only: false  # Allow writing to logs
 
   puppytalk-main-service:
     # Placeholder for the main Java service
@@ -43,7 +57,20 @@ services:
     command: ["java", "-version"]  # Placeholder command
     networks:
       - puppytalk-network
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
 
 networks:
   puppytalk-network:
     driver: bridge
+    # Network security
+    driver_opts:
+      com.docker.network.bridge.enable_icc: "false"
+      com.docker.network.bridge.enable_ip_masquerade: "true"

@@ -77,12 +77,13 @@ public class MessageRepositoryImpl implements MessageRepository {
     }
     
     @Override
-    public List<Message> findByChatRoomId(ChatRoomId chatRoomId, MessageId cursor, int size) {
+    public List<Message> findByChatRoomId(ChatRoomId chatRoomId, MessageId messageId, int size) {
         Assert.notNull(chatRoomId, "ChatRoomId must not be null");
         Assert.isTrue(size > 0, "Size must be positive");
-        Long cursorValue = (cursor != null && cursor.isStored()) ? cursor.getValue() : null;
+
+        Long cursor = (messageId != null && messageId.isStored()) ? messageId.getValue() : null;
         
-        return jpaRepository.findByChatRoomIdWithCursor(chatRoomId.getValue(), cursorValue, size)
+        return jpaRepository.findByChatRoomIdWithCursor(chatRoomId.getValue(), cursor, size)
                 .stream()
                 .map(MessageJpaEntity::toDomain)
                 .toList();
