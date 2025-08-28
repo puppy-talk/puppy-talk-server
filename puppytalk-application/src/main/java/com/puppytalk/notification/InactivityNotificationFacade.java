@@ -1,6 +1,6 @@
 package com.puppytalk.notification;
 
-import com.puppytalk.chat.AiMessageGenerationService;
+import com.puppytalk.ai.AiMessageGenerationService;
 import com.puppytalk.chat.ChatDomainService;
 import com.puppytalk.chat.ChatRoom;
 import com.puppytalk.chat.ChatRoomId;
@@ -98,18 +98,14 @@ public class InactivityNotificationFacade {
         
         // 4. AI 메시지 생성
         log.debug("Generating AI message for pet persona: {}", pet.persona());
-        AiMessageGenerationService.AiMessageResult aiResult = 
-            aiMessageGenerationService.generateInactivityMessage(petId, chatHistory, pet.persona());
+        String aiMessage = aiMessageGenerationService.generateInactivityNotification(
+            userId, petId, pet, 2, chatHistory);
         
-        if (aiResult.hasError()) {
-            log.error("AI message generation failed: {}", aiResult.errorMessage());
-            throw new NotificationException("AI 메시지 생성 실패: " + aiResult.errorMessage());
-        }
-        log.debug("AI message generated successfully: title='{}'", aiResult.title());
+        log.debug("AI message generated successfully");
         
         // 5. 알림 생성
         NotificationId notificationId = notificationDomainService.createInactivityNotification(
-            userId, petId, chatRoomId, aiResult.title(), aiResult.content());
+            userId, petId, chatRoomId, "반려동물 메시지", aiMessage);
         
         log.info("Successfully created inactivity notification: {} for user: {}", 
                 notificationId.getValue(), userId.getValue());

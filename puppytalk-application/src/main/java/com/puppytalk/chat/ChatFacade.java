@@ -1,5 +1,6 @@
 package com.puppytalk.chat;
 
+import com.puppytalk.ai.AiMessageGenerationService;
 import com.puppytalk.chat.dto.request.ChatRoomCreateCommand;
 import com.puppytalk.chat.dto.request.ChatRoomListQuery;
 import com.puppytalk.chat.dto.request.MessageListQuery;
@@ -9,6 +10,8 @@ import com.puppytalk.chat.dto.response.ChatRoomCreateResponse;
 import com.puppytalk.chat.dto.response.ChatRoomListResult;
 import com.puppytalk.chat.dto.response.MessageListResult;
 import com.puppytalk.chat.dto.response.NewMessageResult;
+import com.puppytalk.pet.Pet;
+import com.puppytalk.pet.PetDomainService;
 import com.puppytalk.pet.PetId;
 import com.puppytalk.user.UserId;
 import java.util.List;
@@ -25,9 +28,17 @@ public class ChatFacade {
     private static final Logger log = LoggerFactory.getLogger(ChatFacade.class);
 
     private final ChatDomainService chatDomainService;
+    private final PetDomainService petDomainService;
+    private final AiMessageGenerationService aiMessageGenerationService;
 
-    public ChatFacade(ChatDomainService chatDomainService) {
+    public ChatFacade(
+        ChatDomainService chatDomainService,
+        PetDomainService petDomainService,
+        AiMessageGenerationService aiMessageGenerationService
+    ) {
         this.chatDomainService = chatDomainService;
+        this.petDomainService = petDomainService;
+        this.aiMessageGenerationService = aiMessageGenerationService;
     }
 
     /**
@@ -62,9 +73,9 @@ public class ChatFacade {
     }
 
     /**
-     * 사용자 메시지를 전송합니다.
+     * 사용자 메시지를 전송하고 AI 응답을 생성합니다.
      * <p>
-     * 메시지 내용에 대한 기본 검증을 수행한 후 전송합니다. 기본적인 검증이 적용됩니다.
+     * 메시지 내용에 대한 기본 검증을 수행한 후 전송하고, AI 서비스를 통해 반려동물 응답을 생성합니다.
      *
      * @param command 메시지 전송 커맨드 (chatRoomId, userId, content 필수)
      * @throws IllegalArgumentException command가 null이거나 메시지 내용이 유효하지 않은 경우
@@ -76,15 +87,30 @@ public class ChatFacade {
         Assert.hasText(command.content(), "Content cannot be null or empty");
 
         log.debug("Sending user message in chat room: {} by user: {}",
-            command.chatRoomId(), command.userId());
+            command.chatRoomId(), command.userId()
+        );
 
         ChatRoomId chatRoomId = ChatRoomId.from(command.chatRoomId());
         UserId userId = UserId.from(command.userId());
 
+        // 1. 사용자 메시지 저장
         chatDomainService.sendUserMessage(chatRoomId, userId, command.content());
 
-        log.info("User message sent successfully in chat room: {} by user: {}",
-            command.chatRoomId(), command.userId());
+        // 2. AI 응답 생성 (동기 방식)
+        PetId petId = chatDomainService.getPetIdFromChatRoom(chatRoomId);
+        Pet pet = petDomainService.getPet(petId, userId);
+
+        List<Message> conversationHistory = chatDomainService.findMessageListWithCursor(
+            chatRoomId, userId, null, 10
+        );
+
+        String aiResponse = aiMessageGenerationService.generateChatResponse(
+            userId, pet.id(), pet, command.content(), conversationHistory
+        );
+
+        // 3. AI 응답 메시지 저장
+        log.info("AI response generated for chat room: {}", command.chatRoomId());
+        chatDomainService.sendPetMessage(chatRoomId, aiResponse);
     }
 
     /**
