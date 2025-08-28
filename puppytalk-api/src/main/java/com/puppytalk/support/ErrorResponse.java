@@ -2,7 +2,6 @@ package com.puppytalk.support;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.puppytalk.support.dto.ErrorDetail;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
@@ -19,7 +18,7 @@ import java.util.Map;
  * @since 1.0
  */
 @Schema(description = "표준화된 오류 응답")
-@JsonPropertyOrder({"success", "timestamp", "traceId", "error", "path", "method"})
+@JsonPropertyOrder({"success", "timestamp", "traceId", "code", "message", "category", "fieldErrors", "metadata", "path", "method"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ErrorResponse(
     
@@ -32,8 +31,20 @@ public record ErrorResponse(
     @Schema(description = "요청 추적 ID", example = "a1b2c3d4e5f6g7h8")
     String traceId,
     
-    @Schema(description = "오류 정보")
-    ErrorDetail error,
+    @Schema(description = "오류 코드", example = "VALIDATION_FAILED")
+    String code,
+    
+    @Schema(description = "오류 메시지", example = "입력값 검증에 실패했습니다")
+    String message,
+    
+    @Schema(description = "오류 카테고리", example = "CLIENT_ERROR")
+    ErrorCategory category,
+    
+    @Schema(description = "필드별 상세 오류 정보")
+    Map<String, List<String>> fieldErrors,
+    
+    @Schema(description = "추가 메타데이터")
+    Map<String, Object> metadata,
     
     @Schema(description = "요청 경로", example = "/api/chat/rooms/123/messages")
     String path,
@@ -75,7 +86,11 @@ public record ErrorResponse(
             false,
             LocalDateTime.now(),
             traceId,
-            ErrorDetail.of(code, message, category),
+            code,
+            message,
+            category,
+            null,
+            null,
             path,
             method
         );
@@ -91,7 +106,11 @@ public record ErrorResponse(
             false,
             LocalDateTime.now(),
             traceId,
-            ErrorDetail.withFieldErrors(code, message, category, fieldErrors),
+            code,
+            message,
+            category,
+            fieldErrors,
+            null,
             path,
             method
         );
@@ -107,7 +126,11 @@ public record ErrorResponse(
             false,
             LocalDateTime.now(),
             traceId,
-            ErrorDetail.withMetadata(code, message, category, metadata),
+            code,
+            message,
+            category,
+            null,
+            metadata,
             path,
             method
         );
