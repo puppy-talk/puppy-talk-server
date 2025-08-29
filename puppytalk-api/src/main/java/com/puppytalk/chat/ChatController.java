@@ -7,14 +7,14 @@ import com.puppytalk.chat.dto.request.MessageListQuery;
 import com.puppytalk.chat.dto.request.MessageSendCommand;
 import com.puppytalk.chat.dto.request.MessageSendRequest;
 import com.puppytalk.chat.dto.request.NewMessageQuery;
-import com.puppytalk.chat.dto.response.ChatRoomCreateResponse;
 import com.puppytalk.chat.dto.response.ChatRoomListResult;
 import com.puppytalk.chat.dto.response.ChatRoomResponse;
-import com.puppytalk.chat.dto.response.ChatRoomsResponse;
+import com.puppytalk.chat.dto.response.ChatRoomResult;
+import com.puppytalk.chat.dto.response.ChatRoomListResponse;
 import com.puppytalk.chat.dto.response.MessageListResult;
-import com.puppytalk.chat.dto.response.MessagesResponse;
+import com.puppytalk.chat.dto.response.MessageListResponse;
 import com.puppytalk.chat.dto.response.NewMessageResult;
-import com.puppytalk.chat.dto.response.NewMessagesResponse;
+import com.puppytalk.chat.dto.response.NewMessageListResponse;
 import com.puppytalk.support.ApiResponse;
 import com.puppytalk.support.ApiSuccessMessage;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import java.time.LocalDateTime;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +37,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import java.time.LocalDateTime;
 
 @Tag(name = "Chat", description = "채팅 관리 API")
 @RestController
@@ -52,12 +52,11 @@ public class ChatController {
 
     @Operation(summary = "채팅방 생성/조회", description = "채팅방을 생성하거나 기존 채팅방을 조회합니다.")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "새 채팅방 생성 성공"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "기존 채팅방 조회 성공"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "채팅방 생성 성공"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
     @PostMapping("/rooms")
-    public ResponseEntity<ApiResponse<ChatRoomResponse>> createOrFindChatRoom(
+    public ResponseEntity<ApiResponse<ChatRoomResponse>> createChatRoom(
         @Parameter(description = "채팅방 생성 요청 정보", required = true)
         @Valid @RequestBody ChatRoomCreateRequest request
     ) {
@@ -66,19 +65,14 @@ public class ChatController {
             request.petId()
         );
 
-        ChatRoomCreateResponse response = chatFacade.createOrFindChatRoom(command);
-
-        HttpStatus status = response.isNewlyCreated() ? HttpStatus.CREATED : HttpStatus.OK;
-
-        ChatRoomResponse chatRoomResponse = ChatRoomResponse.from(response.chatRoom());
-
-        return ResponseEntity.status(status)
-            .body(ApiResponse.success(chatRoomResponse,
-                response.isNewlyCreated() ?
-                    ApiSuccessMessage.CHAT_ROOM_CREATE_SUCCESS :
-                    ApiSuccessMessage.CHAT_ROOM_FIND_SUCCESS
-                )
-            );
+        ChatRoomResult result = chatFacade.createChatRoom(command);
+        
+        return ResponseEntity.ok(
+            ApiResponse.success(
+                ChatRoomResponse.from(result),
+                ApiSuccessMessage.CHAT_ROOM_CREATE_SUCCESS
+            )
+        );
     }
 
     @Operation(summary = "채팅방 목록 조회", description = "사용자의 모든 채팅방 목록을 조회합니다.")
@@ -87,16 +81,16 @@ public class ChatController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
     @GetMapping("/rooms")
-    public ResponseEntity<ApiResponse<ChatRoomsResponse>> getChatRoomList(
+    public ResponseEntity<ApiResponse<ChatRoomListResponse>> findChatRoomList(
         @Parameter(description = "사용자 ID", required = true, example = "1")
         @RequestParam @Positive(message = "사용자 ID는 양수여야 합니다") Long userId
     ) {
         ChatRoomListQuery query = ChatRoomListQuery.of(userId);
-        ChatRoomListResult result = chatFacade.getChatRoomList(query);
+        ChatRoomListResult result = chatFacade.findChatRoomList(query);
 
         return ResponseEntity.ok(
             ApiResponse.success(
-                ChatRoomsResponse.from(result),
+                ChatRoomListResponse.from(result),
                 ApiSuccessMessage.CHAT_ROOM_LIST_SUCCESS
             )
         );
@@ -139,7 +133,7 @@ public class ChatController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "채팅방을 찾을 수 없음")
     })
     @GetMapping("/rooms/{chatRoomId}/messages")
-    public ResponseEntity<ApiResponse<MessagesResponse>> getMessageList(
+    public ResponseEntity<ApiResponse<MessageListResponse>> findMessageList(
         @Parameter(description = "채팅방 ID", required = true, example = "1")
         @PathVariable @Positive(message = "채팅방 ID는 양수여야 합니다") Long chatRoomId,
         @Parameter(description = "사용자 ID", required = true, example = "1")
@@ -150,11 +144,11 @@ public class ChatController {
         @RequestParam(required = false) @Positive(message = "사이즈는 양수여야 합니다") Integer size
     ) {
         MessageListQuery query = MessageListQuery.of(chatRoomId, userId, cursor, size);
-        MessageListResult result = chatFacade.getMessageList(query);
+        MessageListResult result = chatFacade.findMessageList(query);
 
         return ResponseEntity.ok(
             ApiResponse.success(
-                MessagesResponse.from(result),
+                MessageListResponse.from(result),
                 ApiSuccessMessage.MESSAGE_LIST_SUCCESS)
         );
     }
@@ -167,7 +161,7 @@ public class ChatController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "채팅방을 찾을 수 없음")
     })
     @GetMapping("/rooms/{chatRoomId}/messages/new")
-    public ResponseEntity<ApiResponse<NewMessagesResponse>> getNewMessages(
+    public ResponseEntity<ApiResponse<NewMessageListResponse>> findNewMessages( // TODO: MessagesResponse로 하면 안 되나?
         @Parameter(description = "채팅방 ID", required = true, example = "1")
         @PathVariable @Positive(message = "채팅방 ID는 양수여야 합니다") Long chatRoomId,
 
@@ -179,11 +173,11 @@ public class ChatController {
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime since
     ) {
         NewMessageQuery query = NewMessageQuery.of(chatRoomId, userId, since);
-        NewMessageResult result = chatFacade.getNewMessages(query);
+        NewMessageResult result = chatFacade.findNewMessages(query);
 
         return ResponseEntity.ok(
             ApiResponse.success(
-                NewMessagesResponse.from(result),
+                NewMessageListResponse.from(result),
                 result.hasNewMessages() ? ApiSuccessMessage.NEW_MESSAGE_FOUND_SUCCESS :
                     ApiSuccessMessage.NO_NEW_MESSAGE_FOUND_SUCCESS
             )
