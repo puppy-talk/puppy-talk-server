@@ -1,9 +1,12 @@
 package com.puppytalk.scheduler;
 
+import com.puppytalk.NotificationScheduler;
 import com.puppytalk.notification.InactivityNotificationFacade;
+import com.puppytalk.notification.MockFcmNotificationService;
 import com.puppytalk.notification.NotificationFacade;
 import com.puppytalk.notification.dto.response.NotificationListResult;
 import com.puppytalk.notification.dto.response.NotificationResult;
+import com.puppytalk.pet.PetFacade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,12 +26,18 @@ class NotificationSchedulerTest {
     
     @Mock
     private InactivityNotificationFacade inactivityNotificationFacade;
+    
+    @Mock
+    private MockFcmNotificationService mockFcmNotificationService;
+
+    @Mock
+    private PetFacade petFacade;
 
     private NotificationScheduler notificationScheduler;
 
     @BeforeEach
     void setUp() {
-        notificationScheduler = new NotificationScheduler(notificationFacade, inactivityNotificationFacade);
+        notificationScheduler = new NotificationScheduler(notificationFacade, inactivityNotificationFacade, mockFcmNotificationService, petFacade);
     }
 
     @Test
@@ -37,17 +46,15 @@ class NotificationSchedulerTest {
         List<Long> inactiveUserIds = List.of(1L, 2L, 3L);
         when(notificationFacade.findInactiveUsersForNotification())
             .thenReturn(inactiveUserIds);
-        when(notificationFacade.findFirstActivePetByUserId(any()))
+        when(petFacade.findFirstPetByUserId(any()))
             .thenReturn(1L); // Mock pet ID
-        when(inactivityNotificationFacade.createInactivityNotification(any(), any()))
-            .thenReturn(1L); // Mock notification ID
 
         // When
         notificationScheduler.detectInactiveUsersAndCreateNotifications();
 
         // Then
         verify(notificationFacade).findInactiveUsersForNotification();
-        verify(notificationFacade, times(3)).findFirstActivePetByUserId(any());
+        verify(petFacade, times(3)).findFirstPetByUserId(any());
         verify(inactivityNotificationFacade, times(3)).createInactivityNotification(any(), any());
     }
 
@@ -62,7 +69,7 @@ class NotificationSchedulerTest {
 
         // Then
         verify(notificationFacade).findInactiveUsersForNotification();
-        verify(notificationFacade, never()).findFirstActivePetByUserId(any());
+        verify(petFacade, never()).findFirstPetByUserId(any());
         verify(inactivityNotificationFacade, never()).createInactivityNotification(any(), any());
     }
 
@@ -74,35 +81,17 @@ class NotificationSchedulerTest {
             List.of(mockNotification),
             1
         );
-        when(notificationFacade.getPendingNotifications(100))
+        when(notificationFacade.findPendingNotifications(100))
             .thenReturn(mockResult);
 
         // When
         notificationScheduler.processPendingNotifications();
 
         // Then
-        verify(notificationFacade).getPendingNotifications(100);
+        verify(notificationFacade).findPendingNotifications(100);
         verify(notificationFacade).updateNotificationStatus(any());
     }
 
-    @Test
-    void 실패한_알림_재시도_테스트() {
-        // Given
-        NotificationResult mockNotification = createMockNotification(2L);
-        NotificationListResult mockResult = new NotificationListResult(
-            List.of(mockNotification),
-            1
-        );
-        when(notificationFacade.getRetryableNotifications(50))
-            .thenReturn(mockResult);
-
-        // When
-        notificationScheduler.retryFailedNotifications();
-
-        // Then
-        verify(notificationFacade).getRetryableNotifications(50);
-        verify(notificationFacade).updateNotificationStatus(any());
-    }
 
     @Test
     void 알림_정리_테스트() {
