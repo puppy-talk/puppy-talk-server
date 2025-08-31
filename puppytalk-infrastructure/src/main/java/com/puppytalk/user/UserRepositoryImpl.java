@@ -2,6 +2,7 @@ package com.puppytalk.user;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,8 +25,8 @@ public class UserRepositoryImpl implements UserRepository {
     public UserId save(User user) {
         if (user.id() != null && user.id().isStored()) {
             // 기존 사용자 업데이트
-            UserJpaEntity existingEntity = userJpaRepository.findById(user.id().value())
-                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다: " + user.id().value()));
+            UserJpaEntity existingEntity = userJpaRepository.findById(user.id().getValue())
+                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다: " + user.id().getValue()));
             
             existingEntity.update(user);
             userJpaRepository.save(existingEntity);
@@ -46,7 +47,7 @@ public class UserRepositoryImpl implements UserRepository {
             return Optional.empty();
         }
         
-        return userJpaRepository.findById(userId.value())
+        return userJpaRepository.findById(userId.getValue())
             .map(UserJpaEntity::toDomain);
     }
     
@@ -92,5 +93,14 @@ public class UserRepositoryImpl implements UserRepository {
         Assert.hasText(email, "Email must not be null or empty");
         
         return userJpaRepository.existsByEmail(email);
+    }
+    
+    @Override
+    public List<Long> findInactiveUsers(LocalDateTime cutoffTime) {
+        Assert.notNull(cutoffTime, "Cutoff time must not be null");
+        
+        // For now, return empty list as we don't have lastActiveAt field in the database
+        // This would need to be implemented when we add proper user activity tracking
+        return List.of();
     }
 }

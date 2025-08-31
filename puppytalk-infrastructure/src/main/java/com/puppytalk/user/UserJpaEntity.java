@@ -50,7 +50,7 @@ public class UserJpaEntity extends BaseEntity {
      */
     public static UserJpaEntity from(User user) {
         return new UserJpaEntity(
-            user.id() != null ? user.id().value() : null,
+            user.id() != null ? user.id().getValue() : null,
             user.username(),
             user.email(),
             user.password(),
@@ -71,6 +71,7 @@ public class UserJpaEntity extends BaseEntity {
             this.password,
             this.createdAt,
             this.updatedAt,
+            this.createdAt, // using createdAt as lastActiveAt since we don't have it stored
             this.isDeleted
         );
     }
