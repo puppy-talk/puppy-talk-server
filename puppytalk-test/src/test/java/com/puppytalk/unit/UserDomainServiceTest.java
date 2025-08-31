@@ -199,255 +199,6 @@ class UserDomainServiceTest {
         assertFalse(mockRepository.isSaveCalled());
     }
     
-    @DisplayName("사용자 ID로 조회 - 성공")
-    @Test
-    void findUserById_Success() {
-        // given
-        UserId userId = UserId.from(1L);
-        User expectedUser = User.of(
-            userId,
-            "testuser",
-            "test@example.com",
-            "password123",
-            LocalDateTime.now(),
-            LocalDateTime.now(),
-            false
-        );
-        
-        mockRepository.setFindByIdResult(Optional.of(expectedUser));
-        
-        // when
-        User result = userDomainService.findUserById(userId);
-        
-        // then
-        assertEquals(expectedUser, result);
-        assertTrue(mockRepository.isFindByIdCalled());
-        assertEquals(userId, mockRepository.getLastFindByIdParam());
-    }
-    
-    @DisplayName("사용자 ID로 조회 - null ID로 실패")
-    @Test
-    void findUserById_NullId_ThrowsException() {
-        // given
-        UserId userId = null;
-        
-        // when & then
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> userDomainService.findUserById(userId)
-        );
-        
-        assertEquals("UserId must be a valid stored ID", exception.getMessage());
-        assertFalse(mockRepository.isFindByIdCalled());
-    }
-    
-    @DisplayName("사용자 ID로 조회 - 존재하지 않는 사용자로 실패")
-    @Test
-    void findUserById_UserNotFound_ThrowsException() {
-        // given
-        UserId userId = UserId.from(1L);
-        mockRepository.setFindByIdResult(Optional.empty());
-        
-        // when & then
-        UserNotFoundException exception = assertThrows(
-            UserNotFoundException.class,
-            () -> userDomainService.findUserById(userId)
-        );
-        
-        assertTrue(exception.getMessage().contains("1"));
-        assertTrue(mockRepository.isFindByIdCalled());
-    }
-    
-    @DisplayName("사용자명으로 조회 - 성공")
-    @Test
-    void findUserByUsername_Success() {
-        // given
-        String username = "testuser";
-        User expectedUser = User.of(
-            UserId.from(1L),
-            username,
-            "test@example.com",
-            "password123",
-            LocalDateTime.now(),
-            LocalDateTime.now(),
-            false
-        );
-        
-        mockRepository.setFindByUsernameResult(Optional.of(expectedUser));
-        
-        // when
-        User result = userDomainService.findUserByUsername(username);
-        
-        // then
-        assertEquals(expectedUser, result);
-        assertTrue(mockRepository.isFindByUsernameCalled());
-        assertEquals(username.trim(), mockRepository.getLastFindByUsernameParam());
-    }
-    
-    @DisplayName("사용자명으로 조회 - null 사용자명으로 실패")
-    @Test
-    void findUserByUsername_NullUsername_ThrowsException() {
-        // given
-        String username = null;
-        
-        // when & then
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> userDomainService.findUserByUsername(username)
-        );
-        
-        assertEquals("Username must not be null or blank", exception.getMessage());
-        assertFalse(mockRepository.isFindByUsernameCalled());
-    }
-    
-    @DisplayName("사용자명으로 조회 - 존재하지 않는 사용자로 실패")
-    @Test
-    void findUserByUsername_UserNotFound_ThrowsException() {
-        // given
-        String username = "nonexistent";
-        mockRepository.setFindByUsernameResult(Optional.empty());
-        
-        // when & then
-        UserNotFoundException exception = assertThrows(
-            UserNotFoundException.class,
-            () -> userDomainService.findUserByUsername(username)
-        );
-        
-        assertTrue(exception.getMessage().contains("nonexistent"));
-        assertTrue(mockRepository.isFindByUsernameCalled());
-    }
-    
-    @DisplayName("활성 사용자 조회 - 성공")
-    @Test
-    void findActiveUsers_Success() {
-        // given
-        List<User> expectedUsers = Arrays.asList(
-            User.of(UserId.from(1L), "user1", "user1@example.com", "password1", LocalDateTime.now(), LocalDateTime.now(), false),
-            User.of(UserId.from(2L), "user2", "user2@example.com", "password2", LocalDateTime.now(), LocalDateTime.now(), false)
-        );
-        
-        mockRepository.setFindActiveUsersResult(expectedUsers);
-        
-        // when
-        List<User> result = userDomainService.findActiveUsers();
-        
-        // then
-        assertEquals(expectedUsers, result);
-        assertTrue(mockRepository.isFindActiveUsersCalled());
-    }
-    
-    @DisplayName("이메일로 조회 - 성공")
-    @Test
-    void findUserByEmail_Success() {
-        // given
-        String email = "Test@EXAMPLE.COM";
-        User expectedUser = User.of(
-            UserId.from(1L),
-            "testuser",
-            "test@example.com",
-            "password123",
-            LocalDateTime.now(),
-            LocalDateTime.now(),
-            false
-        );
-        
-        mockRepository.setFindByEmailResult(Optional.of(expectedUser));
-        
-        // when
-        User result = userDomainService.findUserByEmail(email);
-        
-        // then
-        assertEquals(expectedUser, result);
-        assertTrue(mockRepository.isFindByEmailCalled());
-        assertEquals("test@example.com", mockRepository.getLastFindByEmailParam());
-    }
-    
-    @DisplayName("사용자 삭제 - 성공")
-    @Test
-    void deleteUser_Success() {
-        // given
-        UserId userId = UserId.from(1L);
-        User user = User.of(userId, "testuser", "test@example.com", "password123", LocalDateTime.now(), LocalDateTime.now(), false);
-        
-        mockRepository.setFindByIdResult(Optional.of(user));
-        mockRepository.setSaveResult(userId);
-        
-        // when
-        userDomainService.deleteUser(userId);
-        
-        // then
-        assertTrue(mockRepository.isFindByIdCalled());
-        assertTrue(mockRepository.isSaveCalled());
-        assertEquals(userId, mockRepository.getLastFindByIdParam());
-        
-        User savedUser = mockRepository.getLastSavedUser();
-        assertNotNull(savedUser);
-        assertEquals(user.id(), savedUser.id());
-        assertEquals(user.username(), savedUser.username());
-        assertEquals(user.email(), savedUser.email());
-        assertEquals(user.password(), savedUser.password());
-    }
-    
-    @DisplayName("비밀번호 검증 - 성공")
-    @Test
-    void checkPassword_Success() {
-        // given
-        User user = User.create("testuser", "test@example.com", "encrypted_password123");
-        String rawPassword = "password123";
-        
-        mockPasswordEncoder.setMatchesResult(true);
-        
-        // when
-        boolean result = userDomainService.checkPassword(user, rawPassword);
-        
-        // then
-        assertTrue(result);
-        assertTrue(mockPasswordEncoder.isMatchesCalled());
-        assertEquals(rawPassword, mockPasswordEncoder.getLastMatchesRawPassword());
-        assertEquals("encrypted_password123", mockPasswordEncoder.getLastMatchesEncryptedPassword());
-    }
-    
-    @DisplayName("비밀번호 검증 - 실패")
-    @Test
-    void checkPassword_Failure() {
-        // given
-        User user = User.create("testuser", "test@example.com", "encrypted_password123");
-        String wrongPassword = "wrongpassword";
-        
-        mockPasswordEncoder.setMatchesResult(false);
-        
-        // when
-        boolean result = userDomainService.checkPassword(user, wrongPassword);
-        
-        // then
-        assertFalse(result);
-        assertTrue(mockPasswordEncoder.isMatchesCalled());
-    }
-    
-    @DisplayName("비밀번호 변경 - 성공")
-    @Test
-    void changePassword_Success() {
-        // given
-        UserId userId = UserId.from(1L);
-        User user = User.of(userId, "testuser", "test@example.com", "old_encrypted_password", LocalDateTime.now(), LocalDateTime.now(), false);
-        String newRawPassword = "newpassword123";
-        
-        mockRepository.setFindByIdResult(Optional.of(user));
-        mockRepository.setSaveResult(userId);
-        mockPasswordEncoder.setEncodeResult("encrypted_newpassword123");
-        
-        // when
-        userDomainService.changePassword(userId, newRawPassword);
-        
-        // then
-        assertTrue(mockRepository.isFindByIdCalled());
-        assertTrue(mockPasswordEncoder.isEncodeCalled());
-        assertTrue(mockRepository.isSaveCalled());
-        assertEquals(newRawPassword, mockPasswordEncoder.getLastEncodeParam());
-        
-        User savedUser = mockRepository.getLastSavedUser();
-        assertEquals("encrypted_newpassword123", savedUser.password());
-    }
     
     @DisplayName("생성자 - null 레포지토리로 실패")
     @Test
@@ -471,6 +222,204 @@ class UserDomainServiceTest {
         );
         
         assertEquals("PasswordEncoder must not be null", exception.getMessage());
+    }
+    
+    @DisplayName("사용자 ID로 조회 - 성공")
+    @Test
+    void getUserById_Success() {
+        // given
+        UserId userId = UserId.from(1L);
+        User expectedUser = User.create("testuser", "test@example.com", "encrypted_password");
+        mockRepository.setFindByIdResult(Optional.of(expectedUser));
+        
+        // when
+        User result = userDomainService.getUserById(userId);
+        
+        // then
+        assertEquals(expectedUser, result);
+        assertTrue(mockRepository.isFindByIdCalled());
+        assertEquals(userId, mockRepository.getLastFindByIdParam());
+    }
+    
+    @DisplayName("사용자 ID로 조회 - 사용자 없음으로 실패")
+    @Test
+    void getUserById_UserNotFound_ThrowsException() {
+        // given
+        UserId userId = UserId.from(1L);
+        mockRepository.setFindByIdResult(Optional.empty());
+        
+        // when & then
+        UserNotFoundException exception = assertThrows(
+            UserNotFoundException.class,
+            () -> userDomainService.getUserById(userId)
+        );
+        
+        assertTrue(exception.getMessage().contains("1"));
+        assertTrue(mockRepository.isFindByIdCalled());
+    }
+    
+    @DisplayName("사용자명으로 조회 - 성공")
+    @Test
+    void getUserByUsername_Success() {
+        // given
+        String username = "testuser";
+        User expectedUser = User.create("testuser", "test@example.com", "encrypted_password");
+        mockRepository.setFindByUsernameResult(Optional.of(expectedUser));
+        
+        // when
+        User result = userDomainService.getUserByUsername(username);
+        
+        // then
+        assertEquals(expectedUser, result);
+        assertTrue(mockRepository.isFindByUsernameCalled());
+        assertEquals(username, mockRepository.getLastFindByUsernameParam());
+    }
+    
+    @DisplayName("사용자명으로 조회 - 사용자 없음으로 실패")
+    @Test
+    void getUserByUsername_UserNotFound_ThrowsException() {
+        // given
+        String username = "nonexistent";
+        mockRepository.setFindByUsernameResult(Optional.empty());
+        
+        // when & then
+        UserNotFoundException exception = assertThrows(
+            UserNotFoundException.class,
+            () -> userDomainService.getUserByUsername(username)
+        );
+        
+        assertTrue(exception.getMessage().contains("nonexistent"));
+        assertTrue(mockRepository.isFindByUsernameCalled());
+    }
+    
+    @DisplayName("이메일로 조회 - 성공")
+    @Test
+    void getUserByEmail_Success() {
+        // given
+        String email = "test@example.com";
+        User expectedUser = User.create("testuser", "test@example.com", "encrypted_password");
+        mockRepository.setFindByEmailResult(Optional.of(expectedUser));
+        
+        // when
+        User result = userDomainService.getUserByEmail(email);
+        
+        // then
+        assertEquals(expectedUser, result);
+        assertTrue(mockRepository.isFindByEmailCalled());
+        assertEquals(email.trim().toLowerCase(), mockRepository.getLastFindByEmailParam());
+    }
+    
+    @DisplayName("이메일로 조회 - 사용자 없음으로 실패")
+    @Test
+    void getUserByEmail_UserNotFound_ThrowsException() {
+        // given
+        String email = "nonexistent@example.com";
+        mockRepository.setFindByEmailResult(Optional.empty());
+        
+        // when & then
+        UserNotFoundException exception = assertThrows(
+            UserNotFoundException.class,
+            () -> userDomainService.getUserByEmail(email)
+        );
+        
+        assertTrue(exception.getMessage().contains("nonexistent@example.com"));
+        assertTrue(mockRepository.isFindByEmailCalled());
+    }
+    
+    @DisplayName("활성 사용자 목록 조회 - 성공")
+    @Test
+    void findActiveUsers_Success() {
+        // given
+        List<User> expectedUsers = Arrays.asList(
+            User.create("user1", "user1@example.com", "encrypted_password1"),
+            User.create("user2", "user2@example.com", "encrypted_password2")
+        );
+        mockRepository.setFindActiveUsersResult(expectedUsers);
+        
+        // when
+        List<User> result = userDomainService.findActiveUsers();
+        
+        // then
+        assertEquals(expectedUsers, result);
+        assertTrue(mockRepository.isFindActiveUsersCalled());
+    }
+    
+    @DisplayName("사용자 삭제 - 성공")
+    @Test
+    void deleteUser_Success() {
+        // given
+        UserId userId = UserId.from(1L);
+        User user = User.create("testuser", "test@example.com", "encrypted_password");
+        mockRepository.setFindByIdResult(Optional.of(user));
+        mockRepository.setSaveResult(userId);
+        
+        // when
+        userDomainService.deleteUser(userId);
+        
+        // then
+        assertTrue(mockRepository.isFindByIdCalled());
+        assertTrue(mockRepository.isSaveCalled());
+        User savedUser = mockRepository.getLastSavedUser();
+        assertNotNull(savedUser);
+        assertTrue(savedUser.isDeleted());
+    }
+    
+    @DisplayName("비밀번호 검증 - 성공")
+    @Test
+    void checkPassword_Success() {
+        // given
+        User user = User.create("testuser", "test@example.com", "encrypted_password");
+        String rawPassword = "password123";
+        mockPasswordEncoder.setMatchesResult(true);
+        
+        // when
+        boolean result = userDomainService.checkPassword(user, rawPassword);
+        
+        // then
+        assertTrue(result);
+        assertTrue(mockPasswordEncoder.isMatchesCalled());
+        assertEquals(rawPassword, mockPasswordEncoder.getLastMatchesRawPassword());
+        assertEquals("encrypted_password", mockPasswordEncoder.getLastMatchesEncryptedPassword());
+    }
+    
+    @DisplayName("비밀번호 검증 - 실패")
+    @Test
+    void checkPassword_Failure() {
+        // given
+        User user = User.create("testuser", "test@example.com", "encrypted_password");
+        String rawPassword = "wrong_password";
+        mockPasswordEncoder.setMatchesResult(false);
+        
+        // when
+        boolean result = userDomainService.checkPassword(user, rawPassword);
+        
+        // then
+        assertFalse(result);
+        assertTrue(mockPasswordEncoder.isMatchesCalled());
+    }
+    
+    @DisplayName("비밀번호 변경 - 성공")
+    @Test
+    void changePassword_Success() {
+        // given
+        UserId userId = UserId.from(1L);
+        String newRawPassword = "newpassword123";
+        User user = User.create("testuser", "test@example.com", "encrypted_password");
+        mockRepository.setFindByIdResult(Optional.of(user));
+        mockRepository.setSaveResult(userId);
+        
+        // when
+        userDomainService.changePassword(userId, newRawPassword);
+        
+        // then
+        assertTrue(mockRepository.isFindByIdCalled());
+        assertTrue(mockRepository.isSaveCalled());
+        assertTrue(mockPasswordEncoder.isEncodeCalled());
+        assertEquals(newRawPassword, mockPasswordEncoder.getLastEncodeParam());
+        
+        User savedUser = mockRepository.getLastSavedUser();
+        assertNotNull(savedUser);
+        assertEquals("encrypted_" + newRawPassword, savedUser.password());
     }
     
     /**
