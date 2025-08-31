@@ -4,14 +4,11 @@ import com.puppytalk.infrastructure.common.BaseEntity;
 import com.puppytalk.user.UserId;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity
 @Table(name = "pets")
@@ -30,19 +27,18 @@ public class PetJpaEntity extends BaseEntity {
     @Column(name = "persona", nullable = false, length = 500)
     private String persona;
     
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private PetStatus status;
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted;
     
     protected PetJpaEntity() {}
     
-    private PetJpaEntity(Long id, Long ownerId, String name, String persona, PetStatus status, 
+    private PetJpaEntity(Long id, Long ownerId, String name, String persona, boolean isDeleted, 
                         LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.ownerId = ownerId;
         this.name = name;
         this.persona = persona;
-        this.status = status;
+        this.isDeleted = isDeleted;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -56,7 +52,7 @@ public class PetJpaEntity extends BaseEntity {
             pet.ownerId().value(),
             pet.name(),
             pet.persona(),
-            pet.status(),
+            pet.isDeleted(),
             pet.createdAt(),
             LocalDateTime.now()
         );
@@ -72,7 +68,7 @@ public class PetJpaEntity extends BaseEntity {
             this.name,
             this.persona,
             this.createdAt,
-            this.updatedAt
+            this.isDeleted
         );
     }
     
@@ -83,7 +79,7 @@ public class PetJpaEntity extends BaseEntity {
     public void update(Pet pet) {
         this.name = pet.name();
         this.persona = pet.persona();
-        this.status = pet.status();
+        this.isDeleted = pet.isDeleted();
         this.updatedAt = LocalDateTime.now();
     }
     
@@ -91,7 +87,7 @@ public class PetJpaEntity extends BaseEntity {
     public Long getOwnerId() { return ownerId; }
     public String getName() { return name; }
     public String getPersona() { return persona; }
-    public PetStatus getStatus() { return status; }
+    public boolean isDeleted() { return isDeleted; }
     
     @Override
     protected Object getId() {

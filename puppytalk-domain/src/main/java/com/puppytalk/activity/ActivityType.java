@@ -13,19 +13,9 @@ public enum ActivityType {
     LOGIN("로그인"),
     
     /**
-     * 로그아웃 활동  
-     */
-    LOGOUT("로그아웃"),
-    
-    /**
      * 메시지 전송 활동
      */
     MESSAGE_SENT("메시지 전송"),
-    
-    /**
-     * 메시지 읽기 활동
-     */
-    MESSAGE_READ("메시지 읽기"),
     
     /**
      * 채팅방 진입 활동
@@ -47,12 +37,5 @@ public enum ActivityType {
      */
     public boolean isCriticalActivity() {
         return this == LOGIN || this == MESSAGE_SENT || this == CHAT_OPENED;
-    }
-    
-    /**
-     * 읽기 전용 활동인지 판단
-     */
-    public boolean isReadOnlyActivity() {
-        return this == MESSAGE_READ;
     }
 }

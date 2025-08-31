@@ -49,7 +49,7 @@ public class UserActivity {
     }
     
     /**
-     * 채팅방 없는 활동 생성 (LOGIN/LOGOUT)
+     * 채팅방 없는 활동 생성 (LOGIN)
      */
     public static UserActivity createGlobalActivity(
         UserId userId,
@@ -60,8 +60,8 @@ public class UserActivity {
         validateActivityType(activityType);
         validateActivityAt(activityAt);
         
-        if (!activityType.equals(ActivityType.LOGIN) && !activityType.equals(ActivityType.LOGOUT)) {
-            throw new IllegalArgumentException("Global activity is only allowed for LOGIN/LOGOUT");
+        if (!activityType.equals(ActivityType.LOGIN)) {
+            throw new IllegalArgumentException("Global activity is only allowed for LOGIN");
         }
         
         return new UserActivity(

@@ -149,12 +149,6 @@ public class NotificationJpaEntity extends BaseEntity {
                     content,
                     scheduledAt
                 );
-            } else if (type == NotificationType.SYSTEM_NOTIFICATION) {
-                return Notification.createSystemNotification(
-                    com.puppytalk.user.UserId.from(userId),
-                    title,
-                    content
-                );
             } else {
                 throw new IllegalStateException("알 수 없는 알림 타입: " + type);
             }

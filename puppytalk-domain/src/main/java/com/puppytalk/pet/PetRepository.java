@@ -30,10 +30,6 @@ public interface PetRepository {
      */
     List<Pet> findByOwnerId(UserId ownerId);
     
-    /**
-     * 소유자의 활성 반려동물 조회
-     */
-    List<Pet> findActiveByOwnerId(UserId ownerId);
     
     /**
      * 반려동물 존재 여부 확인

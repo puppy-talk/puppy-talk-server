@@ -28,7 +28,7 @@ public class UserActivityJpaEntity extends BaseEntity {
     private Long userId;
     
     @Column(name = "chat_room_id")
-    private Long chatRoomId; // null 가능 (LOGIN/LOGOUT 시)
+    private Long chatRoomId; // null 가능 (LOGIN 시)
     
     @Enumerated(EnumType.STRING)
     @Column(name = "activity_type", nullable = false, length = 20)

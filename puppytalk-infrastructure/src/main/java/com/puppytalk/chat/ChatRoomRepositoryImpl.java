@@ -1,5 +1,6 @@
 package com.puppytalk.chat;
 
+import com.puppytalk.chat.exception.ChatRoomNotFoundException;
 import com.puppytalk.pet.PetId;
 import com.puppytalk.user.UserId;
 import java.util.List;
@@ -33,7 +34,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
         Assert.isTrue(chatRoom.id().isStored(), "ChatRoom ID must be stored");
         
         ChatRoomJpaEntity entity = jpaRepository.findById(chatRoom.id().getValue())
-                .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다: " + chatRoom.id()));
+                .orElseThrow(() -> new ChatRoomNotFoundException(chatRoom.id()));
         
         entity.update(chatRoom);
         

@@ -33,7 +33,7 @@ public class ActivityDomainService {
     }
 
     /**
-     * 전역 사용자 활동 기록 (LOGIN/LOGOUT)
+     * 전역 사용자 활동 기록 (LOGIN)
      */
     public ActivityId recordGlobalActivity(UserId userId, ActivityType activityType) {
         if (userId == null) {
@@ -42,9 +42,9 @@ public class ActivityDomainService {
         if (activityType == null) {
             throw new IllegalArgumentException("ActivityType must not be null");
         }
-        if (!activityType.equals(ActivityType.LOGIN) && !activityType.equals(ActivityType.LOGOUT)) {
+        if (!activityType.equals(ActivityType.LOGIN)) {
             throw new IllegalArgumentException(
-                "Only LOGIN and LOGOUT are allowed for global activities");
+                "Only LOGIN is allowed for global activities");
         }
 
         LocalDateTime now = LocalDateTime.now();

@@ -147,7 +147,7 @@ public class UserDomainService {
      */
     private void validateUniqueUsername(String username) {
         if (userRepository.existsByUsername(username)) {
-            throw new DuplicateUserException(username);
+            throw new DuplicateUserException("이미 존재하는 사용자명입니다: " + username);
         }
     }
     
@@ -159,7 +159,7 @@ public class UserDomainService {
      */
     private void validateUniqueEmail(String email) {
         if (userRepository.existsByEmail(email)) {
-            throw new DuplicateUserException(email);
+            throw new DuplicateUserException("이미 존재하는 이메일입니다: " + email);
         }
     }
 }

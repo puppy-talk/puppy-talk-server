@@ -29,15 +29,7 @@ public interface NotificationRepository {
      */
     List<Notification> findPendingNotifications(LocalDateTime now, int limit);
     
-    /**
-     * 재시도 대상 실패 알림 조회
-     */
-    List<Notification> findRetryableFailedNotifications(int limit);
     
-    /**
-     * 사용자별 미읽은 알림 목록 조회
-     */
-    List<Notification> findUnreadByUserId(UserId userId);
     
     /**
      * 사용자별 알림 목록 조회 (페이징)

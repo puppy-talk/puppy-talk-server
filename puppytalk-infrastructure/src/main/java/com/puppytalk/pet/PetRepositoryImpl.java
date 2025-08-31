@@ -79,25 +79,12 @@ public class PetRepositoryImpl implements PetRepository {
             return List.of();
         }
         
-        return petJpaRepository.findByOwnerIdAndStatusNot(ownerId.value(), PetStatus.DELETED)
+        return petJpaRepository.findByOwnerIdAndIsDeleted(ownerId.value(), false)
             .stream()
             .map(PetJpaEntity::toDomain)
             .toList();
     }
 
-    @Override
-    public List<Pet> findActiveByOwnerId(UserId ownerId) {
-        Assert.notNull(ownerId, "OwnerId must not be null");
-        
-        if (!ownerId.isStored()) {
-            return List.of();
-        }
-        
-        return petJpaRepository.findByOwnerIdAndStatus(ownerId.value(), PetStatus.ACTIVE)
-            .stream()
-            .map(PetJpaEntity::toDomain)
-            .toList();
-    }
 
     @Override
     public boolean existsById(PetId id) {
@@ -118,6 +105,6 @@ public class PetRepositoryImpl implements PetRepository {
             return 0;
         }
         
-        return petJpaRepository.countByOwnerIdAndStatusNot(ownerId.value(), PetStatus.DELETED);
+        return petJpaRepository.countByOwnerIdAndIsDeleted(ownerId.value(), false);
     }
 }

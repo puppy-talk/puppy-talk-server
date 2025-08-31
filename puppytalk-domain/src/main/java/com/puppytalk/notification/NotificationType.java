@@ -12,10 +12,6 @@ public enum NotificationType {
      */
     INACTIVITY_MESSAGE("비활성 사용자 메시지"),
     
-    /**
-     * 시스템 알림
-     */
-    SYSTEM_NOTIFICATION("시스템 알림"),
     
     /**
      * 채팅 알림 (실시간 메시지)
@@ -41,7 +37,7 @@ public enum NotificationType {
      * 즉시 발송이 필요한 알림인지 판단
      */
     public boolean isUrgent() {
-        return this == CHAT_MESSAGE || this == SYSTEM_NOTIFICATION;
+        return this == CHAT_MESSAGE;
     }
     
     /**

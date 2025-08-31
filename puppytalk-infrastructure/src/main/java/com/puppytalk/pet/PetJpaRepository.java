@@ -16,21 +16,12 @@ public interface PetJpaRepository extends JpaRepository<PetJpaEntity, Long> {
     /**
      * 소유자의 모든 반려동물 조회 (삭제된 것 제외)
      */
-    List<PetJpaEntity> findByOwnerIdAndStatusNot(Long ownerId, PetStatus status);
+    List<PetJpaEntity> findByOwnerIdAndIsDeleted(Long ownerId, boolean isDeleted);
     
-    /**
-     * 소유자의 활성 반려동물 조회
-     */
-    List<PetJpaEntity> findByOwnerIdAndStatus(Long ownerId, PetStatus status);
     
     /**
      * 소유자의 반려동물 개수 조회 (삭제된 것 제외)
      */
-    @Query("SELECT COUNT(p) FROM PetJpaEntity p WHERE p.ownerId = :ownerId AND p.status != :excludeStatus")
-    long countByOwnerIdAndStatusNot(@Param("ownerId") Long ownerId, @Param("excludeStatus") PetStatus excludeStatus);
+    long countByOwnerIdAndIsDeleted(Long ownerId, boolean isDeleted);
     
-    /**
-     * 소유자별 반려동물 개수 조회 (활성 상태만)
-     */
-    long countByOwnerIdAndStatus(Long ownerId, PetStatus status);
 }

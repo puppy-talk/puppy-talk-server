@@ -48,22 +48,7 @@ public class NotificationRepositoryImpl implements NotificationRepository {
             .toList();
     }
     
-    @Override
-    public List<Notification> findRetryableFailedNotifications(int limit) {
-        Pageable pageable = PageRequest.of(0, limit);
-        return jpaRepository.findRetryableFailedNotifications(pageable)
-            .stream()
-            .map(NotificationJpaEntity::toDomain)
-            .toList();
-    }
     
-    @Override
-    public List<Notification> findUnreadByUserId(UserId userId) {
-        return jpaRepository.findUnreadByUserId(userId.getValue())
-            .stream()
-            .map(NotificationJpaEntity::toDomain)
-            .toList();
-    }
     
     @Override
     public List<Notification> findByUserIdOrderByCreatedAtDesc(UserId userId, int offset, int limit) {

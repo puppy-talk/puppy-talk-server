@@ -29,25 +29,7 @@ public interface NotificationJpaRepository extends JpaRepository<NotificationJpa
         org.springframework.data.domain.Pageable pageable
     );
     
-    /**
-     * 재시도 대상 실패 알림 조회
-     */
-    @Query("SELECT n FROM NotificationJpaEntity n " +
-           "WHERE n.status = 'FAILED' " +
-           "AND n.retryCount < 3 " +
-           "ORDER BY n.updatedAt ASC")
-    List<NotificationJpaEntity> findRetryableFailedNotifications(
-        org.springframework.data.domain.Pageable pageable
-    );
     
-    /**
-     * 사용자별 미읽은 알림 목록 조회
-     */
-    @Query("SELECT n FROM NotificationJpaEntity n " +
-           "WHERE n.userId = :userId " +
-           "AND n.status NOT IN ('READ') " +
-           "ORDER BY n.createdAt DESC")
-    List<NotificationJpaEntity> findUnreadByUserId(@Param("userId") Long userId);
     
     /**
      * 사용자별 알림 목록 조회 (페이징)
