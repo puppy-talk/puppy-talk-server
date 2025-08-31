@@ -6,9 +6,6 @@ import com.puppytalk.user.UserId;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-/**
- * 채팅 메시지 도메인 모델
- */
 public class Message {
     public static final int MAX_CONTENT_LENGTH = 1000;
     
@@ -75,14 +72,14 @@ public class Message {
         return new Message(id, chatRoomId, senderId, validContent, type, createdAt, updatedAt);
     }
 
-    // Getters
-    public MessageId getId() { return id; }
-    public ChatRoomId getChatRoomId() { return chatRoomId; }
-    public UserId getSenderId() { return senderId; }
-    public String getContent() { return content; }
-    public MessageType getType() { return type; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    // Getters (record 스타일)
+    public MessageId id() { return id; }
+    public ChatRoomId chatRoomId() { return chatRoomId; }
+    public UserId senderId() { return senderId; }
+    public String content() { return content; }
+    public MessageType type() { return type; }
+    public LocalDateTime createdAt() { return createdAt; }
+    public LocalDateTime updatedAt() { return updatedAt; }
 
     // Business methods
     public boolean isUserMessage() {
@@ -97,35 +94,25 @@ public class Message {
         return isUserMessage() && Objects.equals(senderId, userId);
     }
 
-    // 기존 호환성을 위한 메서드들
-    public MessageId id() { return id; }
-    public ChatRoomId chatRoomId() { return chatRoomId; }
-    public MessageType type() { return type; }
-    public String content() { return content; }
-    public LocalDateTime createdAt() { return createdAt; }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Message message = (Message) o;
-        return Objects.equals(id, message.id);
+        return Objects.equals(id(), message.id()) && Objects.equals(
+            chatRoomId(), message.chatRoomId()) && Objects.equals(senderId(),
+            message.senderId()) && Objects.equals(content(), message.content())
+            && type() == message.type() && Objects.equals(createdAt(),
+            message.createdAt()) && Objects.equals(updatedAt(), message.updatedAt());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return "Message{" +
-                "id=" + id +
-                ", chatRoomId=" + chatRoomId +
-                ", senderId=" + senderId +
-                ", content='" + content + '\'' +
-                ", type=" + type +
-                ", createdAt=" + createdAt +
-                '}';
+        return Objects.hash(id(), chatRoomId(), senderId(), content(), type(),
+            createdAt(), updatedAt());
     }
 }

@@ -1,4 +1,4 @@
-package com.puppytalk.scheduler;
+package com.puppytalk;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -16,6 +16,7 @@ public class SchedulerConfig {
     // Spring Boot의 기본 TaskScheduler를 사용
     // 필요시 커스텀 ThreadPoolTaskScheduler 빈을 추가로 설정 가능
 }
+
 
 
 

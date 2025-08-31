@@ -1,6 +1,5 @@
 package com.puppytalk.chat.dto.response;
 
-import com.puppytalk.chat.dto.response.MessageListResult;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
@@ -8,7 +7,7 @@ import java.util.List;
  * 메시지 목록 응답 (커서 기반 페이징)
  */
 @Schema(description = "메시지 목록 응답")
-public record MessagesResponse(
+public record MessageListResponse(
     
     @Schema(description = "메시지 목록")
     List<MessageResponse> messageList,
@@ -23,12 +22,12 @@ public record MessagesResponse(
     boolean hasNext
 ) {
     
-    public static MessagesResponse from(MessageListResult result) {
+    public static MessageListResponse from(MessageListResult result) {
         List<MessageResponse> responses = result.messageList().stream()
                 .map(MessageResponse::from)
                 .toList();
                 
-        return new MessagesResponse(
+        return new MessageListResponse(
             responses, 
             result.count(), 
             result.nextCursor(), 

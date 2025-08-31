@@ -6,17 +6,17 @@ import java.util.List;
 /**
  * 새 메시지 폴링 응답
  */
-public record NewMessagesResponse(
+public record NewMessageListResponse(
     List<MessageResponse> messages,
     boolean hasNewMessages,
     LocalDateTime polledAt
 ) {
-    public static NewMessagesResponse from(NewMessageResult result) {
+    public static NewMessageListResponse from(NewMessageResult result) {
         List<MessageResponse> messages = result.messages().stream()
             .map(MessageResponse::from)
             .toList();
         
-        return new NewMessagesResponse(
+        return new NewMessageListResponse(
             messages,
             result.hasNewMessages(),
             result.polledAt()

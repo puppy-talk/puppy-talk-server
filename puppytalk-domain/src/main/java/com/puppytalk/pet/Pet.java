@@ -46,13 +46,13 @@ public class Pet {
     }
 
     public static Pet of(PetId id, UserId ownerId, String name, String persona,
-        LocalDateTime createdAt) {
+        LocalDateTime createdAt, boolean isDeleted) {
         Preconditions.requireValidId(id, "PetId");
         Preconditions.requireValidId(ownerId, "OwnerId");
         Preconditions.requireNonBlank(name, "Name", MAX_NAME_LENGTH);
         Preconditions.requireNonBlank(persona, "Persona");
 
-        return new Pet(id, ownerId, name, persona, false, createdAt);
+        return new Pet(id, ownerId, name, persona, isDeleted, createdAt);
     }
 
     /**
@@ -61,7 +61,7 @@ public class Pet {
     public Pet withName(String newName) {
         Preconditions.requireNonBlank(newName, "Name", MAX_NAME_LENGTH);
 
-        return new Pet(this.id, this.ownerId, name, this.persona, this.isDeleted, this.createdAt);
+        return new Pet(this.id, this.ownerId, newName, this.persona, this.isDeleted, this.createdAt);
     }
 
 
@@ -80,28 +80,37 @@ public class Pet {
         return Objects.equals(this.ownerId, userId);
     }
 
-    public PetId getId() {
+
+    public PetId id() {
         return id;
     }
 
-    public UserId getOwnerId() {
+    public UserId ownerId() {
         return ownerId;
     }
 
-    public String getName() {
+    public String name() {
         return name;
     }
 
-    public String getPersona() {
+    public String persona() {
         return persona;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public LocalDateTime createdAt() {
         return createdAt;
     }
 
     public boolean isDeleted() {
         return isDeleted;
+    }
+
+    public LocalDateTime updatedAt() {
+        return createdAt; // 현재 구조에서는 updatedAt이 없으므로 createdAt 반환
+    }
+
+    public PetStatus status() {
+        return isDeleted ? PetStatus.DELETED : PetStatus.ACTIVE;
     }
 
     @Override

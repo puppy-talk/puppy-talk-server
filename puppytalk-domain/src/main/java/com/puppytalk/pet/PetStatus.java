@@ -1,41 +1,16 @@
 package com.puppytalk.pet;
 
 /**
- * 반려동물 상태 열거형
+ * 반려동물 상태
  */
 public enum PetStatus {
+    /**
+     * 활성 상태
+     */
+    ACTIVE,
     
     /**
-     * 활성 상태 - 채팅 가능
+     * 삭제된 상태
      */
-    ACTIVE("활성"),
-    
-    /**
-     * 삭제 상태 - 소프트 삭제됨
-     */
-    DELETED("삭제됨");
-    
-    private final String description;
-    
-    PetStatus(String description) {
-        this.description = description;
-    }
-    
-    public String getDescription() {
-        return description;
-    }
-    
-    /**
-     * 활성 상태인지 확인
-     */
-    public boolean isActive() {
-        return this == ACTIVE;
-    }
-    
-    /**
-     * 삭제된 상태인지 확인
-     */
-    public boolean isDeleted() {
-        return this == DELETED;
-    }
+    DELETED
 }
