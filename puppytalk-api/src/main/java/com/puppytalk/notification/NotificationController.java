@@ -4,7 +4,6 @@ import com.puppytalk.notification.dto.request.InactivityNotificationRequest;
 import com.puppytalk.notification.dto.request.NotificationCreateCommand;
 import com.puppytalk.notification.dto.request.NotificationStatusRequest;
 import com.puppytalk.notification.dto.request.NotificationStatusUpdateCommand;
-import com.puppytalk.notification.dto.request.SystemNotificationRequest;
 import com.puppytalk.notification.dto.response.NotificationListResponse;
 import com.puppytalk.notification.dto.response.NotificationListResult;
 import com.puppytalk.notification.dto.response.NotificationResponse;
@@ -63,28 +62,6 @@ public class NotificationController {
             .body(ApiResponse.success(response, ApiSuccessMessage.NOTIFICATION_CREATE_SUCCESS));
     }
     
-    @Operation(summary = "시스템 알림 생성", description = "시스템 알림을 생성합니다.")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "시스템 알림 생성 성공"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청")
-    })
-    @PostMapping("/system")
-    public ResponseEntity<ApiResponse<NotificationResponse>> createSystemNotification(
-        @Parameter(description = "시스템 알림 생성 요청", required = true)
-        @Valid @RequestBody SystemNotificationRequest request
-    ) {
-        NotificationCreateCommand command = NotificationCreateCommand.forSystem(
-            request.userId(),
-            request.title(),
-            request.content()
-        );
-        
-        NotificationResult result = notificationFacade.createSystemNotification(command);
-        NotificationResponse response = NotificationResponse.from(result);
-        
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.success(response, ApiSuccessMessage.NOTIFICATION_CREATE_SUCCESS));
-    }
     
     @Operation(summary = "발송 대기 중인 알림 목록 조회", description = "스케줄러용 발송 대기 알림 목록을 조회합니다.")
     @ApiResponses(value = {
@@ -96,7 +73,7 @@ public class NotificationController {
         @Parameter(description = "배치 크기", example = "100")
         @RequestParam(defaultValue = "100") int batchSize
     ) {
-        NotificationListResult result = notificationFacade.getPendingNotifications(batchSize);
+        NotificationListResult result = notificationFacade.findPendingNotifications(batchSize);
         NotificationListResponse response = NotificationListResponse.from(result);
         
         return ResponseEntity.ok(ApiResponse.success(response, ApiSuccessMessage.NOTIFICATION_LIST_SUCCESS));
@@ -126,37 +103,6 @@ public class NotificationController {
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessMessage.NOTIFICATION_STATUS_UPDATE_SUCCESS));
     }
     
-    @Operation(summary = "재시도 대상 알림 목록 조회", description = "발송 실패한 재시도 가능 알림 목록을 조회합니다.")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "재시도 대상 알림 목록 조회 성공"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청")
-    })
-    @GetMapping("/retryable")
-    public ResponseEntity<ApiResponse<NotificationListResponse>> getRetryableNotifications(
-        @Parameter(description = "배치 크기", example = "50")
-        @RequestParam(defaultValue = "50") int batchSize
-    ) {
-        NotificationListResult result = notificationFacade.getRetryableNotifications(batchSize);
-        NotificationListResponse response = NotificationListResponse.from(result);
-        
-        return ResponseEntity.ok(ApiResponse.success(response, ApiSuccessMessage.NOTIFICATION_LIST_SUCCESS));
-    }
-    
-    @Operation(summary = "사용자 미읽은 알림 목록 조회", description = "사용자의 미읽은 알림 목록을 조회합니다.")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "미읽은 알림 목록 조회 성공"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청")
-    })
-    @GetMapping("/users/{userId}/unread")
-    public ResponseEntity<ApiResponse<NotificationListResponse>> getUnreadNotifications(
-        @Parameter(description = "사용자 ID", required = true, example = "1")
-        @PathVariable Long userId
-    ) {
-        NotificationListResult result = notificationFacade.getUnreadNotifications(userId);
-        NotificationListResponse response = NotificationListResponse.from(result);
-        
-        return ResponseEntity.ok(ApiResponse.success(response, ApiSuccessMessage.NOTIFICATION_LIST_SUCCESS));
-    }
     
     @Operation(summary = "사용자 미읽은 알림 개수 조회", description = "사용자의 미읽은 알림 개수를 조회합니다.")
     @ApiResponses(value = {

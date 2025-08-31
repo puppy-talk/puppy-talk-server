@@ -36,14 +36,4 @@ public record NotificationCreateCommand(
         return new NotificationCreateCommand(userId, petId, chatRoomId, title, content);
     }
     
-    /**
-     * 시스템 알림 생성용
-     */
-    public static NotificationCreateCommand forSystem(
-        Long userId,
-        String title,
-        String content
-    ) {
-        return new NotificationCreateCommand(userId, null, null, title, content);
-    }
 }

@@ -10,7 +10,6 @@ import com.puppytalk.pet.PetId;
 import com.puppytalk.pet.PetRepository;
 import com.puppytalk.user.UserId;
 import java.util.List;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class InactivityNotificationFacade {
     
     private static final Logger log = LoggerFactory.getLogger(InactivityNotificationFacade.class);
-    private static final int CHAT_HISTORY_LIMIT = 10;
+    private static final int CHAT_HISTORY_LIMIT = 20;
     
     private final NotificationDomainService notificationDomainService;
     private final ChatDomainService chatDomainService;
@@ -53,64 +52,37 @@ public class InactivityNotificationFacade {
      * @return 생성된 알림 ID (실패 시 null)
      */
     @Transactional
-    public Long createInactivityNotification(Long userId, Long petId) {
+    public void createInactivityNotification(Long userId, Long petId) {
         if (userId == null || petId == null) {
             log.warn("Invalid parameters: userId={}, petId={}", userId, petId);
-            return null;
+            return;
         }
-        
-        Optional<NotificationId> result = createInactivityNotificationInternal(
-            UserId.from(userId), 
-            PetId.from(petId)
-        );
-        
-        return result.map(NotificationId::getValue).orElse(null);
-    }
-    
-    /**
-     * 내부 구현: 도메인 타입을 사용한 실제 로직
-     */
-    private Optional<NotificationId> createInactivityNotificationInternal(UserId userId, PetId petId) {
-        log.debug("Creating inactivity notification for user: {}, pet: {}", userId.getValue(), petId.getValue());
-        
+
         // 1. 반려동물 정보 조회
-        Pet pet = petRepository.findById(petId)
-            .orElseThrow(() -> {
-                log.warn("Pet not found: {}", petId.getValue());
-                return new IllegalArgumentException("Pet not found: " + petId);
-            });
-        log.debug("Found pet: {} with persona: {}", pet.name(), pet.persona());
-        
+        Pet pet = petRepository.findById(PetId.from(petId))
+            .orElseThrow(() -> new IllegalArgumentException("Pet not found: " + petId));
+
         // 2. 채팅방 조회
-        Optional<ChatRoom> chatRoom = chatDomainService.findChatRoomByUserAndPet(userId, petId);
-        if (chatRoom.isEmpty()) {
-            log.info("No chat room found for user: {} and pet: {}, skipping notification", 
-                    userId.getValue(), petId.getValue());
-            return Optional.empty();
-        }
-        
-        ChatRoomId chatRoomId = chatRoom.get().id();
-        log.debug("Found chat room: {}", chatRoomId.getValue());
-        
+        ChatRoom chatRoom = chatDomainService.findChatRoomByUserIdAndPetId(
+            UserId.from(userId),
+            PetId.from(petId)
+        ).orElseThrow(() -> new IllegalArgumentException("ChatRoom not found"));
+
         // 3. 최근 채팅 히스토리 조회
+        ChatRoomId chatRoomId = chatRoom.id();
         List<Message> chatHistory = chatDomainService.findRecentChatHistory(chatRoomId, CHAT_HISTORY_LIMIT);
-        log.debug("Retrieved {} recent messages for context", chatHistory.size());
-        
+
         // 4. AI 메시지 생성
-        log.debug("Generating AI message for pet persona: {}", pet.persona());
         String aiMessage = aiMessageGenerationService.generateInactivityNotification(
-            userId, petId, pet, 2, chatHistory);
-        
-        log.debug("AI message generated successfully");
-        
+            chatRoom,
+            pet,
+            2,
+            chatHistory
+        );
+
         // 5. 알림 생성
-        NotificationId notificationId = notificationDomainService.createInactivityNotification(
-            userId, petId, chatRoomId, "반려동물 메시지", aiMessage);
-        
-        log.info("Successfully created inactivity notification: {} for user: {}", 
-                notificationId.getValue(), userId.getValue());
-        return Optional.of(notificationId);
+        notificationDomainService.createInactivityNotification(
+            UserId.from(userId), PetId.from(petId), chatRoomId, "반려동물 메시지", aiMessage
+        );
     }
-    
-    
 }

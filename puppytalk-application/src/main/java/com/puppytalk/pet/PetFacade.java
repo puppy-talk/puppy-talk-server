@@ -76,4 +76,18 @@ public class PetFacade {
             UserId.from(command.ownerId())
         );
     }
+
+    /**
+     * 사용자의 첫 번째 반려동물 ID 조회 (스케줄러용)
+     *
+     * @param userId 사용자 ID (Long)
+     * @return 첫 번째 반려동물 ID (없으면 null)
+     */
+    public Long findFirstPetByUserId(Long userId) {
+        if (userId == null) {
+            return null;
+        }
+
+        return petDomainService.findFirstPetId(UserId.from(userId));
+    }
 }

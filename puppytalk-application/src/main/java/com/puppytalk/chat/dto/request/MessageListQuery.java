@@ -22,7 +22,8 @@ public record MessageListQuery(
     public static MessageListQuery of(Long chatRoomId, Long userId, Long cursor, Integer size) {
         return new MessageListQuery(chatRoomId, userId, cursor, size);
     }
-    
+
+    // TODO: 아래 메서드는 호출하는 곳이 없는데, 어디서 사용되는 거지?
     /**
      * 첫 페이지 메시지 조회 쿼리 생성
      */

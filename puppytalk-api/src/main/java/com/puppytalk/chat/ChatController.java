@@ -50,7 +50,7 @@ public class ChatController {
         this.chatFacade = chatFacade;
     }
 
-    @Operation(summary = "채팅방 생성/조회", description = "채팅방을 생성하거나 기존 채팅방을 조회합니다.")
+    @Operation(summary = "채팅방 생성", description = "채팅방을 생성하거나 기존 채팅방을 반환합니다.")
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "채팅방 생성 성공"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청")
