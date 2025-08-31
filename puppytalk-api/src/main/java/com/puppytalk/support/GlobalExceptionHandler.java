@@ -1,6 +1,5 @@
 package com.puppytalk.support;
 
-import com.puppytalk.activity.ActivityTrackingException;
 import com.puppytalk.chat.exception.ChatRoomAccessDeniedException;
 import com.puppytalk.chat.exception.MessageNotFoundException;
 import com.puppytalk.chat.exception.MessageValidationException;
@@ -314,20 +313,6 @@ public class GlobalExceptionHandler {
 
     // === 외부 서비스 예외 ===
 
-    @ExceptionHandler(ActivityTrackingException.class)
-    public ResponseEntity<ErrorResponse> handleActivityTrackingException(
-            ActivityTrackingException ex, HttpServletRequest request) {
-        
-        String traceId = getTraceId(request);
-        log.error("[{}] Activity tracking failed: {}", traceId, ex.getMessage(), ex);
-        
-        ErrorResponse errorResponse = ErrorCode.ACTIVITY_TRACKING_FAILED.toErrorResponse(
-            traceId, request.getRequestURI(), request.getMethod()
-        );
-        
-        return ResponseEntity.status(ErrorCode.ACTIVITY_TRACKING_FAILED.getHttpStatus())
-                .body(errorResponse);
-    }
 
     @ExceptionHandler(NotificationException.class)
     public ResponseEntity<ErrorResponse> handleNotificationException(
