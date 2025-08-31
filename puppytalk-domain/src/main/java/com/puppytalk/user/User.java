@@ -16,16 +16,18 @@ public class User {
     private final String password;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
+    private final LocalDateTime lastActiveAt;
     private final boolean isDeleted;
 
     private User(UserId id, String username, String email, String password,
-        LocalDateTime createdAt, LocalDateTime updatedAt, boolean isDeleted) {
+        LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime lastActiveAt, boolean isDeleted) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.lastActiveAt = lastActiveAt;
         this.isDeleted = isDeleted;
     }
 
@@ -40,14 +42,14 @@ public class User {
         String validUsername = username.trim();
         String validEmail = email.trim();
         LocalDateTime now = LocalDateTime.now();
-        return new User(null, validUsername, validEmail, encryptedPassword, now, now, false);
+        return new User(null, validUsername, validEmail, encryptedPassword, now, now, now, false);
     }
 
     /**
      * 기존 사용자 데이터로부터 객체 생성
      */
     public static User of(UserId id, String username, String email, String encryptedPassword,
-        LocalDateTime createdAt, LocalDateTime updatedAt, boolean isDeleted) {
+        LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime lastActiveAt, boolean isDeleted) {
         Preconditions.requireValidId(id, "UserId");
         Preconditions.requireNonBlank(username, "Username", MAX_USERNAME_LENGTH);
         Preconditions.requireNonBlank(email, "Email", MAX_EMAIL_LENGTH);
@@ -58,7 +60,7 @@ public class User {
 
         String validUsername = username.trim();
         String validEmail = email.trim();
-        return new User(id, validUsername, validEmail, encryptedPassword, createdAt, updatedAt, isDeleted);
+        return new User(id, validUsername, validEmail, encryptedPassword, createdAt, updatedAt, lastActiveAt, isDeleted);
     }
 
 
@@ -69,7 +71,7 @@ public class User {
         Preconditions.requireNonBlank(newEmail, "Email", MAX_EMAIL_LENGTH);
         String validEmail = newEmail.trim();
         return new User(this.id, this.username, validEmail, this.password,
-            this.createdAt, LocalDateTime.now(), this.isDeleted);
+            this.createdAt, LocalDateTime.now(), this.lastActiveAt, this.isDeleted);
     }
 
     /**
@@ -78,14 +80,21 @@ public class User {
     public User withPassword(String newEncryptedPassword) {
         Preconditions.requireNonBlank(newEncryptedPassword, "Encrypted Password");
         return new User(id, username, email, newEncryptedPassword, createdAt,
-            LocalDateTime.now(), isDeleted);
+            LocalDateTime.now(), lastActiveAt, isDeleted);
     }
 
     /**
      * 사용자 삭제
      */
     public User withDeletedStatus() {
-        return new User(id, username, email, password, createdAt, LocalDateTime.now(), true);
+        return new User(id, username, email, password, createdAt, LocalDateTime.now(), lastActiveAt, true);
+    }
+
+    /**
+     * 사용자 활동 시간 업데이트
+     */
+    public User updateLastActiveTime() {
+        return new User(id, username, email, password, createdAt, LocalDateTime.now(), LocalDateTime.now(), isDeleted);
     }
 
 
@@ -113,6 +122,10 @@ public class User {
 
     public LocalDateTime updatedAt() {
         return updatedAt;
+    }
+
+    public LocalDateTime lastActiveAt() {
+        return lastActiveAt;
     }
 
     public boolean isDeleted() {

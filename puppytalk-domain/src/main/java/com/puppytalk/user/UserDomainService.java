@@ -1,6 +1,7 @@
 package com.puppytalk.user;
 
 import com.puppytalk.support.validation.Preconditions;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -136,6 +137,29 @@ public class UserDomainService {
         String newEncryptedPassword = passwordEncoder.encode(newRawPassword);
         User updatedUser = user.withPassword(newEncryptedPassword);
         userRepository.save(updatedUser);
+    }
+    
+    /**
+     * 사용자 활동시간을 현재 시간으로 업데이트한다.
+     * 
+     * @param userId 사용자 ID
+     * @throws UserNotFoundException 사용자가 존재하지 않는 경우
+     */
+    public void updateLastActiveTime(UserId userId) {
+        User user = getUserById(userId);
+        User updatedUser = user.updateLastActiveTime();
+        userRepository.save(updatedUser);
+    }
+    
+    /**
+     * 비활성 사용자 목록을 조회한다.
+     * 
+     * @param cutoffTime 기준 시간 (이 시간 이전에 활동한 사용자들을 비활성으로 간주)
+     * @return 비활성 사용자 ID 목록
+     */
+    public List<Long> findInactiveUsers(LocalDateTime cutoffTime) {
+        Preconditions.requireNonNull(cutoffTime, "CutoffTime");
+        return userRepository.findInactiveUsers(cutoffTime);
     }
     
     

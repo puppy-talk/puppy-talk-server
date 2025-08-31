@@ -1,5 +1,6 @@
 package com.puppytalk.user;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -83,4 +84,13 @@ public interface UserRepository {
      * @throws IllegalArgumentException email이 null이거나 공백인 경우
      */
     boolean existsByEmail(String email);
+    
+    /**
+     * 특정 시간 이전에 활동한 비활성 사용자 ID 목록을 조회한다.
+     * 
+     * @param cutoffTime 기준 시간 (이 시간 이전에 활동한 사용자들을 비활성으로 간주)
+     * @return 비활성 사용자 ID 목록
+     * @throws IllegalArgumentException cutoffTime이 null인 경우
+     */
+    List<Long> findInactiveUsers(LocalDateTime cutoffTime);
 }
