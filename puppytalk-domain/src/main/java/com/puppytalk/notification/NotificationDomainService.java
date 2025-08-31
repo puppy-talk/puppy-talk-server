@@ -80,21 +80,6 @@ public class NotificationDomainService {
     }
 
     /**
-     * 알림 발송 실패 처리 (재시도 로직 포함)
-     */
-    public void markAsFailed(NotificationId notificationId, String failureReason) {
-        Preconditions.requireValidId(notificationId, "NotificationId");
-
-        Notification notification = notificationRepository.findById(notificationId)
-            .orElseThrow(() -> NotificationException.notFound(notificationId));
-            
-        Notification updatedNotification = notification.incrementRetry(failureReason);
-        notificationRepository.save(updatedNotification);
-    }
-
-
-
-    /**
      * 사용자 미읽은 알림 개수 조회
      */
     public long getUnreadCount(UserId userId) {

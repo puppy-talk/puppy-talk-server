@@ -74,19 +74,18 @@ public class PetDomainService {
      * 사용자의 첫 번째 반려동물 ID를 조회한다.
      * 
      * @param ownerId 소유자 ID (null 불가, 저장된 ID)
-     * @return 첫 번째 반려동물 ID (없으면 null)
+     * @return 첫 번째 반려동물 ID (Optional)
      * @throws IllegalArgumentException ownerId가 유효하지 않은 경우
      */
     public Long findFirstPetId(UserId ownerId) {
         Preconditions.requireValidId(ownerId, "OwnerId");
         
         List<Pet> pets = petRepository.findByOwnerId(ownerId);
-        
+
         if (pets.isEmpty()) {
-            return null;
+            throw new PetNotFoundException(ownerId);
         }
-        
-        // 첫 번째 반려동물 반환 (향후 개선: 가장 최근 대화한 반려동물)
+
         return pets.get(0).id().getValue();
     }
     

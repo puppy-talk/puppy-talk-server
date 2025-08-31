@@ -127,8 +127,12 @@ public class ChatDomainService {
      * @param size       조회할 메시지 개수
      * @return 메시지 목록 (오래된 순서부터)
      */
-    public List<Message> findMessageListWithCursor(ChatRoomId chatRoomId, UserId userId,
-        MessageId cursor, int size) {
+    public List<Message> findMessageListWithCursor(
+        ChatRoomId chatRoomId,
+        UserId userId,
+        MessageId cursor,
+        int size
+    ) {
         if (size <= 0) {
             throw new IllegalArgumentException("Size must be positive");
         }
@@ -148,7 +152,7 @@ public class ChatDomainService {
         Message message = messageRepository.findById(messageId)
             .orElseThrow(() -> new MessageNotFoundException(messageId));
 
-        validateChatRoomAccess(message.chatRoomId(), userId);
+        validateChatRoomAccess(message.getChatRoomId(), userId);
         return message;
     }
 
