@@ -11,14 +11,10 @@ public interface AiMessageGenerationService {
     /**
      * 채팅 응답 생성
      * 
-     * @param chatRoom 채팅방 정보
-     * @param pet 반려동물 정보
-     * @param userMessage 사용자 메시지
-     * @param conversationHistory 대화 히스토리
+     * @param context 채팅 컨텍스트 정보 (사용자ID, 반려동물ID, 페르소나, 사용자 메시지, 대화 히스토리)
      * @return 생성된 AI 응답
      */
-    String generateChatResponse(ChatRoom chatRoom, Pet pet, String userMessage,
-                               List<Message> conversationHistory);
+    String generateChatResponse(ChatContext context);
 
     /**
      * 비활성 알림 생성

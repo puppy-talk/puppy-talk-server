@@ -37,7 +37,7 @@ public class PetRepositoryImpl implements PetRepository {
         Assert.notNull(pet.id(), "Pet ID must not be null for deletion");
         Assert.isTrue(pet.id().isStored(), "Pet ID must be stored for deletion");
         
-        PetJpaEntity petEntity = petJpaRepository.findById(pet.id().value())
+        PetJpaEntity petEntity = petJpaRepository.findById(pet.id().getValue())
             .orElseThrow(() -> new IllegalArgumentException("반려동물을 찾을 수 없습니다: " + pet.id()));
 
         petEntity.update(pet);
@@ -54,7 +54,7 @@ public class PetRepositoryImpl implements PetRepository {
             return Optional.empty();
         }
         
-        return petJpaRepository.findById(id.value())
+        return petJpaRepository.findById(id.getValue())
             .map(PetJpaEntity::toDomain);
     }
 
@@ -67,7 +67,7 @@ public class PetRepositoryImpl implements PetRepository {
             return Optional.empty();
         }
         
-        return petJpaRepository.findByIdAndOwnerId(id.value(), ownerId.value())
+        return petJpaRepository.findByIdAndOwnerId(id.getValue(), ownerId.getValue())
             .map(PetJpaEntity::toDomain);
     }
 
@@ -79,7 +79,7 @@ public class PetRepositoryImpl implements PetRepository {
             return List.of();
         }
         
-        return petJpaRepository.findByOwnerIdAndIsDeleted(ownerId.value(), false)
+        return petJpaRepository.findByOwnerIdAndIsDeleted(ownerId.getValue(), false)
             .stream()
             .map(PetJpaEntity::toDomain)
             .toList();
@@ -94,7 +94,7 @@ public class PetRepositoryImpl implements PetRepository {
             return false;
         }
         
-        return petJpaRepository.existsById(id.value());
+        return petJpaRepository.existsById(id.getValue());
     }
 
     @Override
@@ -105,6 +105,6 @@ public class PetRepositoryImpl implements PetRepository {
             return 0;
         }
         
-        return petJpaRepository.countByOwnerIdAndIsDeleted(ownerId.value(), false);
+        return petJpaRepository.countByOwnerIdAndIsDeleted(ownerId.getValue(), false);
     }
 }

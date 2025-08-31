@@ -29,21 +29,21 @@ class MessageTest {
 
         // then
         assertNotNull(message);
-        assertNull(message.id()); // 아직 저장되지 않음
-        assertEquals(chatRoomId, message.chatRoomId());
-        assertEquals(senderId, message.senderId());
-        assertEquals(content.trim(), message.content());
-        assertEquals(MessageType.USER, message.type());
-        assertNotNull(message.createdAt());
-        assertNotNull(message.updatedAt());
-        assertEquals(message.createdAt(), message.updatedAt());
+        assertNull(message.getId()); // 아직 저장되지 않음
+        assertEquals(chatRoomId, message.getChatRoomId());
+        assertEquals(senderId, message.getSenderId());
+        assertEquals(content.trim(), message.getContent());
+        assertEquals(MessageType.USER, message.getType());
+        assertNotNull(message.getCreatedAt());
+        assertNotNull(message.getUpdatedAt());
+        assertEquals(message.getCreatedAt(), message.getUpdatedAt());
         assertTrue(message.isUserMessage());
         assertFalse(message.isPetMessage());
     }
 
     @DisplayName("사용자 메시지 생성 - null ChatRoomId로 실패")
     @Test
-    void create_UserMessage_NullChatRoomId_ThrowsException() {
+    void create_UserMessage_NullChatRoomGetId_ThrowsException() {
         // given
         ChatRoomId chatRoomId = null;
         UserId senderId = UserId.from(1L);
@@ -60,7 +60,7 @@ class MessageTest {
 
     @DisplayName("사용자 메시지 생성 - null SenderId로 실패")
     @Test
-    void create_UserMessage_NullSenderId_ThrowsException() {
+    void create_UserMessage_NullSenderGetId_ThrowsException() {
         // given
         ChatRoomId chatRoomId = ChatRoomId.from(1L);
         UserId senderId = null;
@@ -77,7 +77,7 @@ class MessageTest {
 
     @DisplayName("사용자 메시지 생성 - null 내용으로 실패")
     @Test
-    void create_UserMessage_NullContent_ThrowsException() {
+    void create_UserMessage_NullGetContent_ThrowsException() {
         // given
         ChatRoomId chatRoomId = ChatRoomId.from(1L);
         UserId senderId = UserId.from(1L);
@@ -94,7 +94,7 @@ class MessageTest {
 
     @DisplayName("사용자 메시지 생성 - 빈 내용으로 실패")
     @Test
-    void create_UserMessage_BlankContent_ThrowsException() {
+    void create_UserMessage_BlankGetContent_ThrowsException() {
         // given
         ChatRoomId chatRoomId = ChatRoomId.from(1L);
         UserId senderId = UserId.from(1L);
@@ -111,7 +111,7 @@ class MessageTest {
 
     @DisplayName("사용자 메시지 생성 - 내용 길이 초과로 실패")
     @Test
-    void create_UserMessage_ContentTooLong_ThrowsException() {
+    void create_UserMessage_getContentTooLong_ThrowsException() {
         // given
         ChatRoomId chatRoomId = ChatRoomId.from(1L);
         UserId senderId = UserId.from(1L);
@@ -138,20 +138,20 @@ class MessageTest {
 
         // then
         assertNotNull(message);
-        assertNull(message.id()); // 아직 저장되지 않음
-        assertEquals(chatRoomId, message.chatRoomId());
-        assertNull(message.senderId()); // AI 메시지는 senderId가 null
-        assertEquals(content.trim(), message.content());
-        assertEquals(MessageType.PET, message.type());
-        assertNotNull(message.createdAt());
-        assertNotNull(message.updatedAt());
+        assertNull(message.getId()); // 아직 저장되지 않음
+        assertEquals(chatRoomId, message.getChatRoomId());
+        assertNull(message.getSenderId()); // AI 메시지는 senderId가 null
+        assertEquals(content.trim(), message.getContent());
+        assertEquals(MessageType.PET, message.getType());
+        assertNotNull(message.getCreatedAt());
+        assertNotNull(message.getUpdatedAt());
         assertFalse(message.isUserMessage());
         assertTrue(message.isPetMessage());
     }
 
     @DisplayName("반려동물 메시지 생성 - null ChatRoomId로 실패")
     @Test
-    void createPetMessage_NullChatRoomId_ThrowsException() {
+    void createPetMessage_NullChatRoomGetId_ThrowsException() {
         // given
         ChatRoomId chatRoomId = null;
         String content = "안녕!";
@@ -167,7 +167,7 @@ class MessageTest {
 
     @DisplayName("반려동물 메시지 생성 - null 내용으로 실패")
     @Test
-    void createPetMessage_NullContent_ThrowsException() {
+    void createPetMessage_NullGetContent_ThrowsException() {
         // given
         ChatRoomId chatRoomId = ChatRoomId.from(1L);
         String content = null;
@@ -197,18 +197,18 @@ class MessageTest {
         Message message = Message.of(messageId, chatRoomId, senderId, content, type, createdAt, updatedAt);
 
         // then
-        assertEquals(messageId, message.id());
-        assertEquals(chatRoomId, message.chatRoomId());
-        assertEquals(senderId, message.senderId());
-        assertEquals(content.trim(), message.content());
-        assertEquals(type, message.type());
-        assertEquals(createdAt, message.createdAt());
-        assertEquals(updatedAt, message.updatedAt());
+        assertEquals(messageId, message.getId());
+        assertEquals(chatRoomId, message.getChatRoomId());
+        assertEquals(senderId, message.getSenderId());
+        assertEquals(content.trim(), message.getContent());
+        assertEquals(type, message.getType());
+        assertEquals(createdAt, message.getCreatedAt());
+        assertEquals(updatedAt, message.getUpdatedAt());
     }
 
     @DisplayName("Message.of 생성자 - null MessageId로 실패")
     @Test
-    void of_NullMessageId_ThrowsException() {
+    void of_NullMessageGetId_ThrowsException() {
         // given
         MessageId messageId = null;
         ChatRoomId chatRoomId = ChatRoomId.from(1L);
@@ -229,7 +229,7 @@ class MessageTest {
 
     @DisplayName("Message.of 생성자 - null MessageType으로 실패")
     @Test
-    void of_NullMessageType_ThrowsException() {
+    void of_NullMessageGetType_ThrowsException() {
         // given
         MessageId messageId = MessageId.from(1L);
         ChatRoomId chatRoomId = ChatRoomId.from(1L);
@@ -250,7 +250,7 @@ class MessageTest {
 
     @DisplayName("Message.of 생성자 - null CreatedAt으로 실패")
     @Test
-    void of_NullCreatedAt_ThrowsException() {
+    void of_NullGetCreatedAt_ThrowsException() {
         // given
         MessageId messageId = MessageId.from(1L);
         ChatRoomId chatRoomId = ChatRoomId.from(1L);
@@ -271,7 +271,7 @@ class MessageTest {
 
     @DisplayName("메시지 타입 확인 - USER 메시지")
     @Test
-    void isUserMessage_UserType_ReturnsTrue() {
+    void isUserMessage_UserGetType_ReturnsTrue() {
         // given
         ChatRoomId chatRoomId = ChatRoomId.from(1L);
         UserId senderId = UserId.from(1L);
@@ -284,7 +284,7 @@ class MessageTest {
 
     @DisplayName("메시지 타입 확인 - PET 메시지")
     @Test
-    void isPetMessage_PetType_ReturnsTrue() {
+    void isPetMessage_PetGetType_ReturnsTrue() {
         // given
         ChatRoomId chatRoomId = ChatRoomId.from(1L);
         Message petMessage = Message.createPetMessage(chatRoomId, "반려동물 메시지");
@@ -333,7 +333,7 @@ class MessageTest {
 
     @DisplayName("내용 공백 제거 확인")
     @Test
-    void create_TrimsContent() {
+    void create_TrimsGetContent() {
         // given
         ChatRoomId chatRoomId = ChatRoomId.from(1L);
         UserId senderId = UserId.from(1L);
@@ -343,12 +343,12 @@ class MessageTest {
         Message message = Message.create(chatRoomId, senderId, content);
 
         // then
-        assertEquals("안녕하세요!", message.content());
+        assertEquals("안녕하세요!", message.getContent());
     }
 
     @DisplayName("equals 메서드 - 같은 ID")
     @Test
-    void equals_SameId_ReturnsTrue() {
+    void equals_SameGetId_ReturnsTrue() {
         // given
         MessageId messageId = MessageId.from(1L);
         Message message1 = Message.of(messageId, ChatRoomId.from(1L), UserId.from(1L), 
@@ -363,7 +363,7 @@ class MessageTest {
 
     @DisplayName("equals 메서드 - 다른 ID")
     @Test
-    void equals_DifferentId_ReturnsFalse() {
+    void equals_DifferentGetId_ReturnsFalse() {
         // given
         MessageId messageId1 = MessageId.from(1L);
         MessageId messageId2 = MessageId.from(2L);
@@ -412,10 +412,10 @@ class MessageTest {
         Message message = Message.of(messageId, chatRoomId, senderId, content, type, createdAt, LocalDateTime.now());
 
         // when & then - 기존 호환성 메서드들이 새로운 메서드와 동일한 값을 반환하는지 확인
-        assertEquals(message.id(), message.id());
-        assertEquals(message.chatRoomId(), message.chatRoomId());
-        assertEquals(message.type(), message.type());
-        assertEquals(message.content(), message.content());
-        assertEquals(message.createdAt(), message.createdAt());
+        assertEquals(message.getId(), message.getId());
+        assertEquals(message.getChatRoomId(), message.getChatRoomId());
+        assertEquals(message.getType(), message.getType());
+        assertEquals(message.getContent(), message.getContent());
+        assertEquals(message.getCreatedAt(), message.getCreatedAt());
     }
 }

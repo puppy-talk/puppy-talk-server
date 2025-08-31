@@ -69,7 +69,7 @@ public class InactivityNotificationFacade {
         ).orElseThrow(() -> new IllegalArgumentException("ChatRoom not found"));
 
         // 3. 최근 채팅 히스토리 조회
-        ChatRoomId chatRoomId = chatRoom.id();
+        ChatRoomId chatRoomId = chatRoom.getId();
         List<Message> chatHistory = chatDomainService.findRecentChatHistory(chatRoomId, CHAT_HISTORY_LIMIT);
 
         // 4. AI 메시지 생성

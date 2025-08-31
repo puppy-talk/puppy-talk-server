@@ -17,7 +17,7 @@ public record PetResult(
             pet.ownerId().value(),
             pet.name(),
             pet.createdAt(),
-            pet.status().name()
+            pet.getStatusName()
         );
     }
 }

@@ -1,6 +1,7 @@
 package com.puppytalk.ai.service;
 
 import com.puppytalk.ai.AiMessageGenerationService;
+import com.puppytalk.ai.ChatContext;
 import com.puppytalk.ai.client.AiServiceClient;
 import com.puppytalk.ai.client.dto.ChatMessage;
 import com.puppytalk.ai.client.dto.ChatRequest;
@@ -28,16 +29,15 @@ public class AiMessageGenerationServiceImpl implements AiMessageGenerationServic
     }
 
     @Override
-    public String generateChatResponse(ChatRoom chatRoom, Pet pet, String userMessage,
-                                     List<Message> conversationHistory) {
-        log.info("Generating chat response for userId: {}, petId: {}", chatRoom.userId(), pet.id());
+    public String generateChatResponse(ChatContext context) {
+        log.info("Generating chat response for userId: {}, petId: {}", context.userId(), context.petId());
 
         ChatRequest request = new ChatRequest(
-            chatRoom.userId().getValue().intValue(),
-            pet.id().getValue().intValue(),
-            userMessage,
-            pet.persona(),
-            convertMessages(conversationHistory)
+            context.userId().intValue(),
+            context.petId().intValue(),
+            context.userMessage(),
+            context.petPersona(),
+            convertToAiChatMessage(context.conversationHistory())
         );
 
         ChatResponse response = aiServiceClient.generateChatResponse(request);
@@ -52,13 +52,13 @@ public class AiMessageGenerationServiceImpl implements AiMessageGenerationServic
     @Override
     public String generateInactivityNotification(ChatRoom chatRoom, Pet pet,
                                                int hoursSinceLastActivity, List<Message> lastMessages) {
-        log.info("Generating inactivity notification for userId: {}, petId: {}", chatRoom.userId(), pet.id());
+        log.info("Generating inactivity notification for userId: {}, petId: {}", chatRoom.getUserId(), pet.id());
 
         InactivityNotificationRequest request = new InactivityNotificationRequest(
-            chatRoom.userId().getValue().intValue(),
+            chatRoom.getUserId().getValue().intValue(),
             pet.id().getValue().intValue(),
             pet.persona(),
-            convertMessages(lastMessages),
+            convertToAiChatMessage(lastMessages),
             hoursSinceLastActivity,
             getCurrentTimeOfDay()
         );
@@ -73,14 +73,14 @@ public class AiMessageGenerationServiceImpl implements AiMessageGenerationServic
     }
 
 
-    private List<ChatMessage> convertMessages(List<Message> messages) {
+    private List<ChatMessage> convertToAiChatMessage(List<Message> messages) {
         if (messages == null) return List.of();
         
         return messages.stream()
             .map(message -> new ChatMessage(
-                message.type().isUserMessage() ? MessageRole.USER : MessageRole.ASSISTANT,
-                message.content(),
-                message.createdAt().toString()
+                message.isUserMessage() ? MessageRole.USER : MessageRole.ASSISTANT,
+                message.getContent(),
+                message.getCreatedAt().toString()
             ))
             .toList();
     }

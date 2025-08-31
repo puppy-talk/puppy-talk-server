@@ -35,12 +35,12 @@ public record ChatRoomResponse(
      */
     public static ChatRoomResponse from(ChatRoom chatRoom) {
         return new ChatRoomResponse(
-            chatRoom.id().getValue(),
-            chatRoom.userId().getValue(),
-            chatRoom.petId().getValue(),
+            chatRoom.getId().getValue(),
+            chatRoom.getUserId().getValue(),
+            chatRoom.getPetId().getValue(),
             null, // isNewlyCreated는 Application Layer에서 결정
-            chatRoom.createdAt(),
-            chatRoom.lastMessageAt()
+            chatRoom.getCreatedAt(),
+            chatRoom.getLastMessageAt()
         );
     }
     

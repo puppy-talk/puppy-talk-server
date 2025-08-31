@@ -28,10 +28,10 @@ public class MessageRepositoryImpl implements MessageRepository {
     @Override
     public Message update(Message message) {
         Assert.notNull(message, "Message must not be null");
-        Assert.notNull(message.id(), "Message ID must not be null for update");
-        Assert.isTrue(message.id().isStored(), "Message must be stored for update");
+        Assert.notNull(message.getId(), "Message ID must not be null for update");
+        Assert.isTrue(message.getId().isStored(), "Message must be stored for update");
 
-        MessageJpaEntity entity = jpaRepository.findById(message.id().getValue())
+        MessageJpaEntity entity = jpaRepository.findById(message.getId().getValue())
             .orElseThrow(() -> new IllegalArgumentException("메시지를 찾을 수 없습니다"));
 
         entity.update(message);
@@ -92,7 +92,8 @@ public class MessageRepositoryImpl implements MessageRepository {
     }
 
     @Override
-    public List<Message> findByChatRoomIdAndCreatedAtAfter(ChatRoomId chatRoomId, LocalDateTime since) {
+    public List<Message> findByChatRoomIdAndCreatedAtAfter(ChatRoomId chatRoomId,
+        LocalDateTime since) {
         Assert.notNull(chatRoomId, "ChatRoomId must not be null");
         Assert.notNull(since, "Since time must not be null");
 

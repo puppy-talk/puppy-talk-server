@@ -44,9 +44,9 @@ public class ChatRoomJpaEntity extends BaseEntity {
      */
     public static ChatRoomJpaEntity from(ChatRoom chatRoom) {
         return new ChatRoomJpaEntity(
-            chatRoom.userId().getValue(),
-            chatRoom.petId().getValue(),
-            chatRoom.lastMessageAt()
+            chatRoom.getUserId().getValue(),
+            chatRoom.getPetId().getValue(),
+            chatRoom.getLastMessageAt()
         );
     }
     
@@ -55,9 +55,9 @@ public class ChatRoomJpaEntity extends BaseEntity {
      * 개별 setter 사용을 방지하여 불변성 보장
      */
     public void update(ChatRoom chatRoom) {
-        this.userId = chatRoom.userId().getValue();
-        this.petId = chatRoom.petId().getValue();
-        this.lastMessageAt = chatRoom.lastMessageAt();
+        this.userId = chatRoom.getUserId().getValue();
+        this.petId = chatRoom.getPetId().getValue();
+        this.lastMessageAt = chatRoom.getLastMessageAt();
     }
     
     /**

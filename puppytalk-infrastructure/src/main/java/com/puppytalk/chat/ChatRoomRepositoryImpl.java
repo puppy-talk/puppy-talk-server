@@ -30,11 +30,11 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
     @Override
     public ChatRoom update(ChatRoom chatRoom) {
         Assert.notNull(chatRoom, "ChatRoom must not be null");
-        Assert.notNull(chatRoom.id(), "ChatRoom ID must not be null");
-        Assert.isTrue(chatRoom.id().isStored(), "ChatRoom ID must be stored");
+        Assert.notNull(chatRoom.getId(), "ChatRoom ID must not be null");
+        Assert.isTrue(chatRoom.getId().isStored(), "ChatRoom ID must be stored");
         
-        ChatRoomJpaEntity entity = jpaRepository.findById(chatRoom.id().getValue())
-                .orElseThrow(() -> new ChatRoomNotFoundException(chatRoom.id()));
+        ChatRoomJpaEntity entity = jpaRepository.findById(chatRoom.getId().getValue())
+                .orElseThrow(() -> new ChatRoomNotFoundException(chatRoom.getId()));
         
         entity.update(chatRoom);
         
@@ -64,7 +64,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
             return Optional.empty();
         }
         
-        return jpaRepository.findByUserIdAndPetId(userId.value(), petId.value())
+        return jpaRepository.findByUserIdAndPetId(userId.getValue(), petId.getValue())
                 .map(ChatRoomJpaEntity::toDomain);
     }
     
@@ -76,7 +76,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
             return List.of();
         }
         
-        return jpaRepository.findByUserIdOrderByLastMessageAtDesc(userId.value())
+        return jpaRepository.findByUserIdOrderByLastMessageAtDesc(userId.getValue())
                 .stream()
                 .map(ChatRoomJpaEntity::toDomain)
                 .toList();
@@ -90,7 +90,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
             return Optional.empty();
         }
         
-        return jpaRepository.findByPetId(petId.value())
+        return jpaRepository.findByPetId(petId.getValue())
                 .map(ChatRoomJpaEntity::toDomain);
     }
     
@@ -114,7 +114,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
             return false;
         }
         
-        return jpaRepository.existsByUserIdAndPetId(userId.value(), petId.value());
+        return jpaRepository.existsByUserIdAndPetId(userId.getValue(), petId.getValue());
     }
     
     @Override
@@ -125,7 +125,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
             return 0;
         }
         
-        return jpaRepository.countByUserId(userId.value());
+        return jpaRepository.countByUserId(userId.getValue());
     }
     
     

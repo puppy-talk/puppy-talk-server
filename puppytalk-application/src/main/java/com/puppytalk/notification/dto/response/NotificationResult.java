@@ -27,20 +27,20 @@ public record NotificationResult(
     
     public static NotificationResult from(Notification notification) {
         return new NotificationResult(
-            notification.id() != null ? notification.id().getValue() : null,
-            notification.userId().getValue(),
-            notification.petId() != null ? notification.petId().getValue() : null,
-            notification.chatRoomId() != null ? notification.chatRoomId().getValue() : null,
-            notification.type().name(),
-            notification.title(),
-            notification.content(),
-            notification.status().name(),
-            notification.scheduledAt(),
-            notification.sentAt(),
-            notification.readAt(),
-            notification.createdAt(),
-            notification.retryCount(),
-            notification.failureReason(),
+            notification.getId() != null ? notification.getId().getValue() : null,
+            notification.getUserId().getValue(),
+            notification.getPetId() != null ? notification.getPetId().getValue() : null,
+            notification.getChatRoomId() != null ? notification.getChatRoomId().getValue() : null,
+            notification.getType().name(),
+            notification.getTitle(),
+            notification.getContent(),
+            notification.getStatus().name(),
+            notification.getScheduledAt(),
+            notification.getSentAt(),
+            notification.getReadAt(),
+            notification.getCreatedAt(),
+            0, // retryCount - not available in domain
+            null, // failureReason - not available in domain  
             true
         );
     }

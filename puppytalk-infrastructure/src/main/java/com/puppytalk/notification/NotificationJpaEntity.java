@@ -98,21 +98,21 @@ public class NotificationJpaEntity extends BaseEntity {
      */
     public static NotificationJpaEntity from(Notification notification) {
         return new NotificationJpaEntity(
-            notification.id() != null ? notification.id().getValue() : null,
-            notification.userId().getValue(),
-            notification.petId() != null ? notification.petId().getValue() : null,
-            notification.chatRoomId() != null ? notification.chatRoomId().getValue() : null,
-            notification.type(),
-            notification.title(),
-            notification.content(),
-            notification.status(),
-            notification.scheduledAt(),
-            notification.sentAt(),
-            notification.readAt(),
-            notification.createdAt(),
-            notification.updatedAt(),
-            notification.retryCount(),
-            notification.failureReason()
+            notification.getId() != null ? notification.getId().getValue() : null,
+            notification.getUserId().getValue(),
+            notification.getPetId() != null ? notification.getPetId().getValue() : null,
+            notification.getChatRoomId() != null ? notification.getChatRoomId().getValue() : null,
+            notification.getType(),
+            notification.getTitle(),
+            notification.getContent(),
+            notification.getStatus(),
+            notification.getScheduledAt(),
+            notification.getSentAt(),
+            notification.getReadAt(),
+            notification.getCreatedAt(),
+            notification.getUpdatedAt(),
+            0, // default retry count
+            null // default failure reason
         );
     }
     
@@ -134,9 +134,7 @@ public class NotificationJpaEntity extends BaseEntity {
                 sentAt,
                 readAt,
                 getCreatedAt(),
-                getUpdatedAt(),
-                retryCount,
-                failureReason
+                getUpdatedAt()
             );
         } else {
             // 새로운 알림 생성 (ID가 없는 경우)

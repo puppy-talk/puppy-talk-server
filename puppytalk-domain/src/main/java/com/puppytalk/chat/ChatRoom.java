@@ -28,8 +28,8 @@ public class ChatRoom {
     }
 
     public static ChatRoom create(UserId userId, PetId petId) {
-        validateUserId(userId);
-        validatePetId(petId);
+        Preconditions.requireValidId(userId, "UserId");
+        Preconditions.requireValidId(petId, "PetId");
         
         LocalDateTime now = LocalDateTime.now();
         return new ChatRoom(
@@ -49,8 +49,9 @@ public class ChatRoom {
         LocalDateTime lastMessageAt
     ) {
         Preconditions.requireValidId(id, "ChatRoomId");
-        validateUserId(userId);
-        validatePetId(petId);
+        Preconditions.requireValidId(userId, "UserId");
+        Preconditions.requireValidId(petId, "PetId");
+
         if (createdAt == null) {
             throw new IllegalArgumentException("생성 시각은 필수입니다");
         }
@@ -59,14 +60,6 @@ public class ChatRoom {
         }
 
         return new ChatRoom(id, userId, petId, createdAt, lastMessageAt);
-    }
-
-    private static void validateUserId(UserId userId) {
-        Preconditions.requireValidId(userId, "UserId");
-    }
-    
-    private static void validatePetId(PetId petId) {
-        Preconditions.requireValidId(petId, "PetId");
     }
 
     /**
@@ -83,33 +76,44 @@ public class ChatRoom {
         return Objects.equals(this.userId, userId);
     }
 
-    // getter
-    public ChatRoomId id() { return id; }
-    public UserId userId() { return userId; }
-    public PetId petId() { return petId; }
-    public LocalDateTime createdAt() { return createdAt; }
-    public LocalDateTime lastMessageAt() { return lastMessageAt; }
+    // getters
+    public ChatRoomId getId() {
+        return id;
+    }
+
+    public UserId getUserId() {
+        return userId;
+    }
+
+    public PetId getPetId() {
+        return petId;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getLastMessageAt() {
+        return lastMessageAt;
+    }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof ChatRoom other)) return false;
-        return Objects.equals(id, other.id);
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChatRoom room = (ChatRoom) o;
+        return Objects.equals(getId(), room.getId()) && Objects.equals(getUserId(),
+            room.getUserId()) && Objects.equals(getPetId(), room.getPetId())
+            && Objects.equals(getCreatedAt(), room.getCreatedAt())
+            && Objects.equals(getLastMessageAt(), room.getLastMessageAt());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
-    }
-
-    @Override
-    public String toString() {
-        return "ChatRoom{" +
-                "id=" + id +
-                ", userId=" + userId +
-                ", petId=" + petId +
-                ", createdAt=" + createdAt +
-                ", lastMessageAt=" + lastMessageAt +
-                '}';
+        return Objects.hash(getId(), getUserId(), getPetId(), getCreatedAt(), getLastMessageAt());
     }
 }

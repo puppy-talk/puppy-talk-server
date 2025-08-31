@@ -17,9 +17,6 @@ public record UsersResponse(
     int totalCount
 ) {
     
-    public static UsersResponse from(List<UserResponse> users) {
-        return new UsersResponse(users, users.size());
-    }
     
     /**
      * 사용자 생성 결과로부터 단일 사용자 목록 생성

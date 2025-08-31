@@ -1,14 +1,14 @@
 package com.puppytalk.pet.dto.request;
 
-import org.springframework.util.Assert;
+import com.puppytalk.support.validation.Preconditions;
 
 public record PetGetQuery(
     Long petId,
     Long ownerId
 ) {
     public PetGetQuery {
-        Assert.notNull(petId, "PetId cannot be null");
-        Assert.notNull(ownerId, "OwnerId cannot be null");
+        Preconditions.requireNonNull(petId, "PetId");
+        Preconditions.requireNonNull(ownerId, "OwnerId");
     }
     
     public static PetGetQuery of(Long petId, Long ownerId) {

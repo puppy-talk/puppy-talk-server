@@ -23,34 +23,6 @@ public record MessageListQuery(
         return new MessageListQuery(chatRoomId, userId, cursor, size);
     }
 
-    // TODO: 아래 메서드는 호출하는 곳이 없는데, 어디서 사용되는 거지?
-    /**
-     * 첫 페이지 메시지 조회 쿼리 생성
-     */
-    public static MessageListQuery firstPage(Long chatRoomId, Long userId, int size) {
-        return new MessageListQuery(chatRoomId, userId, null, size);
-    }
-    
-    /**
-     * 기본 크기로 첫 페이지 메시지 조회 쿼리 생성
-     */
-    public static MessageListQuery firstPage(Long chatRoomId, Long userId) {
-        return new MessageListQuery(chatRoomId, userId, null, null);
-    }
-    
-    /**
-     * 다음 페이지 메시지 조회 쿼리 생성 (커서 기반)
-     */
-    public static MessageListQuery nextPage(Long chatRoomId, Long userId, Long cursor, int size) {
-        return new MessageListQuery(chatRoomId, userId, cursor, size);
-    }
-    
-    /**
-     * 첫 페이지인지 확인
-     */
-    public boolean isFirstPage() {
-        return cursor == null;
-    }
     
     /**
      * 실제 페이지 크기 반환
