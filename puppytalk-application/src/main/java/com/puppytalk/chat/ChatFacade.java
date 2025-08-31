@@ -1,6 +1,7 @@
 package com.puppytalk.chat;
 
 import com.puppytalk.ai.AiMessageGenerationService;
+import com.puppytalk.ai.ChatContext;
 import com.puppytalk.chat.dto.request.ChatRoomCreateCommand;
 import com.puppytalk.chat.dto.request.ChatRoomListQuery;
 import com.puppytalk.chat.dto.request.MessageListQuery;
@@ -14,6 +15,7 @@ import com.puppytalk.pet.Pet;
 import com.puppytalk.pet.PetDomainService;
 import com.puppytalk.pet.PetId;
 import com.puppytalk.user.UserId;
+import com.puppytalk.user.UserDomainService;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,15 +31,18 @@ public class ChatFacade {
 
     private final ChatDomainService chatDomainService;
     private final PetDomainService petDomainService;
+    private final UserDomainService userDomainService;
     private final AiMessageGenerationService aiMessageGenerationService;
 
     public ChatFacade(
         ChatDomainService chatDomainService,
         PetDomainService petDomainService,
+        UserDomainService userDomainService,
         AiMessageGenerationService aiMessageGenerationService
     ) {
         this.chatDomainService = chatDomainService;
         this.petDomainService = petDomainService;
+        this.userDomainService = userDomainService;
         this.aiMessageGenerationService = aiMessageGenerationService;
     }
 
@@ -85,17 +90,26 @@ public class ChatFacade {
         // 1. 채팅방 조회 및 사용자 메시지 저장
         ChatRoom chatRoom = chatDomainService.findChatRoom(chatRoomId, userId);
         chatDomainService.sendUserMessage(chatRoomId, userId, command.content());
+        
+        // 2. 사용자 활동시간 업데이트
+        userDomainService.updateLastActiveTime(userId);
 
-        // 2. AI 응답 생성을 위한 정보 수집
-        Pet pet = petDomainService.getPet(chatRoom.petId(), userId);
+        // 3. AI 응답 생성을 위한 정보 수집
+        Pet pet = petDomainService.getPet(chatRoom.getPetId(), userId);
         List<Message> conversationHistory = chatDomainService.findMessageListWithCursor(
             chatRoomId, userId, null, 20
-        );
+        ); // 최근 20개의 메시지 조회
 
         // 3. AI 응답 생성 및 저장
-        String aiResponse = aiMessageGenerationService.generateChatResponse(
-            chatRoom, pet, command.content(), conversationHistory
+        ChatContext chatContext = new ChatContext(
+            chatRoom.getUserId().getValue(),
+            pet.id().getValue(),
+            pet.persona(),
+            command.content(),
+            conversationHistory
         );
+
+        String aiResponse = aiMessageGenerationService.generateChatResponse(chatContext);
 
         chatDomainService.sendPetMessage(chatRoomId, aiResponse);
     }

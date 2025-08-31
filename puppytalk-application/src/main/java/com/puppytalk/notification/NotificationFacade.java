@@ -1,6 +1,6 @@
 package com.puppytalk.notification;
 
-import com.puppytalk.activity.ActivityDomainService;
+import com.puppytalk.user.UserDomainService;
 import com.puppytalk.chat.ChatRoomId;
 import com.puppytalk.pet.PetId;
 import com.puppytalk.notification.dto.request.NotificationCreateCommand;
@@ -8,6 +8,7 @@ import com.puppytalk.notification.dto.request.NotificationStatusUpdateCommand;
 import com.puppytalk.notification.dto.response.NotificationListResult;
 import com.puppytalk.notification.dto.response.NotificationResult;
 import com.puppytalk.user.UserId;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,14 +22,14 @@ public class NotificationFacade {
     private static final int DEFAULT_BATCH_SIZE = 100;
 
     private final NotificationDomainService notificationDomainService;
-    private final ActivityDomainService activityDomainService;
+    private final UserDomainService userDomainService;
 
     public NotificationFacade(
         NotificationDomainService notificationDomainService,
-        ActivityDomainService activityDomainService
+        UserDomainService userDomainService
     ) {
         this.notificationDomainService = notificationDomainService;
-        this.activityDomainService = activityDomainService;
+        this.userDomainService = userDomainService;
     }
 
     /**
@@ -77,8 +78,6 @@ public class NotificationFacade {
         switch (command.status().toUpperCase()) {
             case "SENT" -> notificationDomainService.markAsSent(notificationId);
             case "READ" -> notificationDomainService.markAsRead(notificationId);
-            case "FAILED" ->
-                notificationDomainService.markAsFailed(notificationId, command.failureReason());
             default ->
                 throw new IllegalArgumentException("Unsupported status: " + command.status());
         }
@@ -102,7 +101,13 @@ public class NotificationFacade {
      */
     @Transactional(readOnly = true)
     public List<Long> findInactiveUsersForNotification() {
-        List<UserId> inactiveUsers = activityDomainService.findInactiveUsers(LAST_ACTIVITY_HOURS);
+        LocalDateTime twoHoursAgo = LocalDateTime.now().minusHours(LAST_ACTIVITY_HOURS);
+        List<Long> inactiveUserIds = userDomainService.findInactiveUsers(twoHoursAgo);
+
+        // UserId 리스트로 변환하여 필터링
+        List<UserId> inactiveUsers = inactiveUserIds.stream()
+            .map(UserId::from)
+            .toList();
 
         // 알림 가능 사용자 필터링
         List<UserId> targetUserList = notificationDomainService.filterUsersForNotification(
