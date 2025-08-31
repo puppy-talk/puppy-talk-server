@@ -109,8 +109,8 @@ public class Pet {
         return createdAt; // 현재 구조에서는 updatedAt이 없으므로 createdAt 반환
     }
 
-    public PetStatus status() {
-        return isDeleted ? PetStatus.DELETED : PetStatus.ACTIVE;
+    public String getStatusName() {
+        return isDeleted ? "DELETED" : "ACTIVE";
     }
 
     @Override

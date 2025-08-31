@@ -72,14 +72,14 @@ public class Message {
         return new Message(id, chatRoomId, senderId, validContent, type, createdAt, updatedAt);
     }
 
-    // Getters (record 스타일)
-    public MessageId id() { return id; }
-    public ChatRoomId chatRoomId() { return chatRoomId; }
-    public UserId senderId() { return senderId; }
-    public String content() { return content; }
-    public MessageType type() { return type; }
-    public LocalDateTime createdAt() { return createdAt; }
-    public LocalDateTime updatedAt() { return updatedAt; }
+    // getters
+    public MessageId getId() { return id; }
+    public ChatRoomId getChatRoomId() { return chatRoomId; }
+    public UserId getSenderId() { return senderId; }
+    public String getContent() { return content; }
+    public MessageType getType() { return type; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
 
     // Business methods
     public boolean isUserMessage() {
@@ -103,16 +103,16 @@ public class Message {
             return false;
         }
         Message message = (Message) o;
-        return Objects.equals(id(), message.id()) && Objects.equals(
-            chatRoomId(), message.chatRoomId()) && Objects.equals(senderId(),
-            message.senderId()) && Objects.equals(content(), message.content())
-            && type() == message.type() && Objects.equals(createdAt(),
-            message.createdAt()) && Objects.equals(updatedAt(), message.updatedAt());
+        return Objects.equals(getId(), message.getId()) && Objects.equals(
+            getChatRoomId(), message.getChatRoomId()) && Objects.equals(getSenderId(),
+            message.getSenderId()) && Objects.equals(getContent(), message.getContent())
+            && getType() == message.getType() && Objects.equals(getCreatedAt(),
+            message.getCreatedAt()) && Objects.equals(getUpdatedAt(), message.getUpdatedAt());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id(), chatRoomId(), senderId(), content(), type(),
-            createdAt(), updatedAt());
+        return Objects.hash(getId(), getChatRoomId(), getSenderId(), getContent(), getType(),
+            getCreatedAt(), getUpdatedAt());
     }
 }
