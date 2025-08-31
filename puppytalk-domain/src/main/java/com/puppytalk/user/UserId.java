@@ -15,10 +15,4 @@ public class UserId extends EntityId {
         return new UserId(value);
     }
     
-    /**
-     * 항상 새로운 인스턴스를 생성해 반환 (신규 생성용)
-     */
-    public static UserId create() {
-        return new UserId(null);
-    }
 }

@@ -18,10 +18,4 @@ public class MessageId extends EntityId {
         return new MessageId(value);
     }
     
-    /**
-     * 항상 새로운 인스턴스를 생성해 반환 (신규 생성용)
-     */
-    public static MessageId create() {
-        return new MessageId(null);
-    }
 }
