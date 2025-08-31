@@ -57,18 +57,37 @@ class Settings(BaseSettings):
     def validate_grok_api_key(cls, v):
         if not v or len(v.strip()) < 10:
             raise ValueError('GROK_API_KEY must be at least 10 characters')
-        return v
+        return v.strip()
     
     @validator('secret_key')
     def validate_secret_key(cls, v):
         if not v or len(v.strip()) < 32:
             raise ValueError('SECRET_KEY must be at least 32 characters')
-        return v
+        return v.strip()
     
     @validator('cors_origins', pre=True)
     def parse_cors_origins(cls, v):
         if isinstance(v, str):
-            return [origin.strip() for origin in v.split(',')]
+            origins = [origin.strip() for origin in v.split(',') if origin.strip()]
+            if not origins:
+                raise ValueError('CORS_ORIGINS cannot be empty')
+            return origins
+        return v
+    
+    @validator('grok_timeout')
+    def validate_grok_timeout(cls, v):
+        if v <= 0:
+            raise ValueError('GROK timeout must be positive')
+        if v > 300:  # 5분 제한
+            raise ValueError('GROK timeout cannot exceed 300 seconds')
+        return v
+    
+    @validator('grok_max_retries')
+    def validate_grok_max_retries(cls, v):
+        if v < 0:
+            raise ValueError('GROK max retries cannot be negative')
+        if v > 10:
+            raise ValueError('GROK max retries cannot exceed 10')
         return v
     
     # Environment properties

@@ -12,6 +12,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 from app.core.config import get_settings
 from app.core.exceptions import GrokAPIError, MessageGenerationError
 from app.models.requests import ChatMessage, MessageRole
+from app.utils.cache import get_prompt_cache
 
 logger = structlog.get_logger(__name__)
 settings = get_settings()
@@ -69,9 +70,21 @@ class GrokAPIClient:
             await self._session.aclose()
             self._session = None
     
+    def _should_retry_error(self, error: Exception) -> bool:
+        """Determine if error should trigger a retry"""
+        if isinstance(error, GrokAPIError):
+            return error.is_retryable
+        if isinstance(error, httpx.TimeoutException):
+            return True
+        if isinstance(error, httpx.RequestError):
+            return True
+        return False
+
     @retry(
         stop=stop_after_attempt(MAX_RETRIES),
         wait=wait_exponential(multiplier=RETRY_WAIT_MULTIPLIER, min=RETRY_WAIT_MIN, max=RETRY_WAIT_MAX),
+        retry=lambda retry_state: retry_state.outcome.exception() and 
+              isinstance(retry_state.outcome.exception(), (GrokAPIError, httpx.TimeoutException, httpx.RequestError)),
         reraise=True
     )
     async def generate_chat_completion(
@@ -108,12 +121,13 @@ class GrokAPIClient:
         }
         
         try:
-            logger.info(
+            logger.debug(
                 "Sending request to Grok API",
                 model=self.model,
                 messages_count=len(messages),
                 max_tokens=max_tokens,
-                temperature=temperature
+                temperature=temperature,
+                total_chars=sum(len(msg.get("content", "")) for msg in messages)
             )
             
             session = await self.session
@@ -151,10 +165,21 @@ class GrokAPIClient:
                     processing_time_ms=processing_time
                 )
                 
+                # Extract retry-after header if present
+                retry_after = None
+                if response.status_code == 429:
+                    retry_after = response.headers.get('retry-after')
+                    if retry_after:
+                        try:
+                            retry_after = int(retry_after)
+                        except ValueError:
+                            retry_after = None
+                
                 raise GrokAPIError(
                     message=f"Grok API request failed: {response.status_code}",
                     status_code=response.status_code,
-                    response_data=error_data
+                    response_data=error_data,
+                    retry_after=retry_after
                 )
                 
         except httpx.TimeoutException:
@@ -195,29 +220,54 @@ class GrokAPIClient:
         Returns:
             List of formatted messages
         """
+        # Calculate estimated token count and trim if necessary
         messages = []
+        total_tokens_estimate = 0
+        MAX_TOTAL_TOKENS = 3000  # Leave room for response
         
-        # Add system prompt
+        # Add system prompt (always included)
         if system_prompt:
+            system_tokens = len(system_prompt) // 4  # Rough token estimation
             messages.append({
                 "role": "system",
                 "content": system_prompt
             })
+            total_tokens_estimate += system_tokens
         
-        # Add conversation history (keep only last N messages)
-        for msg in conversation_history[-MAX_CONVERSATION_HISTORY:]:
-            messages.append({
+        # Add current user message (always included)
+        user_tokens = len(user_message) // 4
+        user_msg = {
+            "role": "user",
+            "content": user_message
+        }
+        total_tokens_estimate += user_tokens
+        
+        # Add conversation history (newest first, trim if needed)
+        remaining_tokens = MAX_TOTAL_TOKENS - total_tokens_estimate - 500  # Buffer
+        history_messages = []
+        
+        for msg in reversed(conversation_history[-MAX_CONVERSATION_HISTORY:]):
+            msg_tokens = len(msg.content) // 4
+            if total_tokens_estimate + msg_tokens > remaining_tokens:
+                break
+            
+            history_messages.insert(0, {
                 "role": msg.role.value,
                 "content": msg.content
             })
+            total_tokens_estimate += msg_tokens
         
-        # Add current user message
-        messages.append({
-            "role": "user",
-            "content": user_message
-        })
+        # Combine all messages
+        result = messages + history_messages + [user_msg]
         
-        return messages
+        logger.debug(
+            "Prepared messages",
+            total_messages=len(result),
+            estimated_tokens=total_tokens_estimate,
+            history_included=len(history_messages)
+        )
+        
+        return result
     
     async def health_check(self) -> bool:
         """
@@ -227,21 +277,23 @@ class GrokAPIClient:
             True if API is healthy, False otherwise
         """
         try:
-            # Simple test request
+            # Simple test request with minimal timeout
             test_messages = [
                 {"role": "user", "content": "Hello"}
             ]
             
-            session = await self.session
-            response = await session.post(
-                f"{self.base_url}/chat/completions",
-                json={
-                    "model": self.model,
-                    "messages": test_messages,
-                    "max_tokens": 5,
-                    "temperature": 0.1
-                }
-            )
+            # Use shorter timeout for health check
+            async with httpx.AsyncClient(timeout=httpx.Timeout(5.0)) as session:
+                response = await session.post(
+                    f"{self.base_url}/chat/completions",
+                    json={
+                        "model": self.model,
+                        "messages": test_messages,
+                        "max_tokens": 5,
+                        "temperature": 0.1
+                    },
+                    headers=self._get_headers()
+                )
             
             return response.status_code == 200
             
@@ -255,6 +307,7 @@ class GrokService:
     
     def __init__(self):
         self.client = GrokAPIClient()
+        self.cache = get_prompt_cache()
     
     async def generate_pet_response(
         self,
@@ -285,8 +338,8 @@ class GrokService:
             MessageGenerationError: If generation fails
         """
         try:
-            # Create system prompt based on persona
-            system_prompt = self._create_system_prompt(
+            # Create system prompt based on persona (with caching)
+            system_prompt = self._get_cached_system_prompt(
                 pet_name, pet_persona, personality_traits
             )
             
@@ -324,6 +377,32 @@ class GrokService:
                     "user_message_length": len(user_message)
                 }
             )
+    
+    def _get_cached_system_prompt(
+        self,
+        pet_name: str,
+        pet_persona: str,
+        personality_traits: List[str]
+    ) -> str:
+        """Get system prompt with caching"""
+        cache_key = self.cache.cache_key_for_persona(
+            pet_name, pet_persona, personality_traits
+        )
+        
+        # Try to get from cache
+        cached_prompt = self.cache.get(cache_key)
+        if cached_prompt:
+            logger.debug("Using cached system prompt", cache_key=cache_key[:8])
+            return cached_prompt
+        
+        # Generate new prompt
+        prompt = self._create_system_prompt(pet_name, pet_persona, personality_traits)
+        
+        # Cache the result
+        self.cache.set(cache_key, prompt, ttl=1800)  # 30 minutes
+        logger.debug("Generated and cached system prompt", cache_key=cache_key[:8])
+        
+        return prompt
     
     def _create_system_prompt(
         self,

@@ -27,18 +27,30 @@ class GrokAPIError(AIServiceError):
         self, 
         message: str, 
         status_code: Optional[int] = None,
-        response_data: Optional[Dict[str, Any]] = None
+        response_data: Optional[Dict[str, Any]] = None,
+        retry_after: Optional[int] = None
     ):
         self.status_code = status_code
         self.response_data = response_data or {}
+        self.retry_after = retry_after
         super().__init__(
             message=message,
             error_code="GROK_API_ERROR",
             details={
                 "status_code": status_code,
-                "response_data": response_data
+                "response_data": response_data,
+                "retry_after": retry_after
             }
         )
+    
+    @property
+    def is_retryable(self) -> bool:
+        """Check if this error is retryable"""
+        if not self.status_code:
+            return True  # Network errors are usually retryable
+        
+        # 429 (Too Many Requests), 5xx (Server Errors) are retryable
+        return self.status_code == 429 or (500 <= self.status_code < 600)
 
 
 

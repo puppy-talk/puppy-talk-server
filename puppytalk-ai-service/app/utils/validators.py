@@ -94,12 +94,19 @@ def validate_pet_name(name: str) -> bool:
     if not name or not name.strip():
         return False
     
-    if len(name.strip()) > 50:
+    name = name.strip()
+    
+    if len(name) > 50:
         return False
     
-    # Allow letters, numbers, spaces, and common pet name characters
-    allowed_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 -'.")
-    return all(c in allowed_chars for c in name)
+    if len(name) < 2:
+        return False
+    
+    # Allow letters, numbers, spaces, and common pet name characters (including Korean)
+    import re
+    # Korean characters, Latin letters, numbers, spaces, and common pet name characters
+    pattern = r'^[\u3131-\uD79D\uAC00-\uD7AFa-zA-Z0-9\s\-\'\.\u4e00-\u9fff]+$'
+    return re.match(pattern, name) is not None
 
 
 def validate_personality_traits(traits: List[str]) -> bool:

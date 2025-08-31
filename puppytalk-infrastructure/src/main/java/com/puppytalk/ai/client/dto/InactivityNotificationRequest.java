@@ -5,8 +5,7 @@ import java.util.List;
 public record InactivityNotificationRequest(
     int userId,
     int petId,
-    int chatRoomId,
-    PetPersona petPersona,
+    String petPersona,
     List<ChatMessage> lastMessages,
     int hoursSinceLastActivity,
     String timeOfDay
@@ -18,11 +17,8 @@ public record InactivityNotificationRequest(
         if (petId <= 0) {
             throw new IllegalArgumentException("PetId must be positive");
         }
-        if (chatRoomId <= 0) {
-            throw new IllegalArgumentException("ChatRoomId must be positive");
-        }
-        if (petPersona == null) {
-            throw new IllegalArgumentException("PetPersona cannot be null");
+        if (petPersona == null || petPersona.trim().isEmpty()) {
+            throw new IllegalArgumentException("PetPersona cannot be null or empty");
         }
         if (hoursSinceLastActivity < 2 || hoursSinceLastActivity > 72) {
             throw new IllegalArgumentException("HoursSinceLastActivity must be between 2 and 72");
