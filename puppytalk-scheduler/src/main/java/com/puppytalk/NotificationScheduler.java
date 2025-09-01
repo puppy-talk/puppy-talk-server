@@ -1,10 +1,7 @@
 package com.puppytalk;
 
 import com.puppytalk.notification.InactivityNotificationFacade;
-import com.puppytalk.notification.MockFcmNotificationService;
 import com.puppytalk.notification.NotificationFacade;
-import com.puppytalk.notification.dto.request.NotificationStatusUpdateCommand;
-import com.puppytalk.notification.dto.response.NotificationResult;
 import com.puppytalk.pet.PetFacade;
 import java.util.List;
 import org.slf4j.Logger;
@@ -21,18 +18,15 @@ public class NotificationScheduler {
 
     private final NotificationFacade notificationFacade;
     private final InactivityNotificationFacade inactivityNotificationFacade;
-    private final MockFcmNotificationService fcmNotificationService;
     private final PetFacade petFacade;
 
     public NotificationScheduler(
         NotificationFacade notificationFacade,
         InactivityNotificationFacade inactivityNotificationFacade,
-        MockFcmNotificationService fcmNotificationService,
         PetFacade petFacade
     ) {
         this.notificationFacade = notificationFacade;
         this.inactivityNotificationFacade = inactivityNotificationFacade;
-        this.fcmNotificationService = fcmNotificationService;
         this.petFacade = petFacade;
     }
 
@@ -71,25 +65,8 @@ public class NotificationScheduler {
         log.debug("Processing pending notifications");
 
         try {
-            var pendingResult = notificationFacade.findPendingNotifications(100);
-
-            if (pendingResult.totalCount() == 0) {
-                log.debug("No pending notifications found");
-                return;
-            }
-
-            log.info("Found {} pending notifications for processing", pendingResult.totalCount());
-
-            // FCM을 통한 실제 알림 발송
-            for (var notification : pendingResult.notifications()) {
-                try {
-                    sendNotificationViaFcm(notification);
-                } catch (Exception e) {
-                    log.error("Failed to send notification {}: {}",
-                        notification.notificationId(), e.getMessage());
-                }
-            }
-
+            // NotificationFacade에 위임하여 처리
+            notificationFacade.processPendingNotifications(100);
         } catch (Exception e) {
             log.error("Error during pending notification processing: {}", e.getMessage(), e);
         }
@@ -140,47 +117,4 @@ public class NotificationScheduler {
         inactivityNotificationFacade.createInactivityNotification(userId, petId);
     }
 
-    /**
-     * FCM을 통한 실제 알림 발송
-     */
-    private void sendNotificationViaFcm(NotificationResult notification) {
-        log.info("Sending notification via FCM: ID={}, Title={}", 
-            notification.notificationId(), notification.title());
-
-        // FCM 서비스 상태 확인
-        if (!fcmNotificationService.isAvailable()) {
-            log.error("FCM service is not available for notification {}", notification.notificationId());
-            updateNotificationStatus(notification.notificationId(), false);
-            return;
-        }
-
-        // FCM을 통한 푸시 알림 발송
-        boolean success = fcmNotificationService.sendPushNotification(
-            notification.userId(),
-            notification.title(),
-            notification.content(),
-            notification.notificationId()
-        );
-
-        // 발송 결과에 따른 상태 업데이트
-        updateNotificationStatus(notification.notificationId(), success);
-    }
-
-    /**
-     * 알림 상태 업데이트 헬퍼 메서드
-     */
-    private void updateNotificationStatus(Long notificationId, boolean success) {
-        try {
-            NotificationStatusUpdateCommand statusCommand = success
-                ? NotificationStatusUpdateCommand.sent(notificationId)
-                : NotificationStatusUpdateCommand.failed(notificationId, "FCM 발송 실패");
-
-            notificationFacade.updateNotificationStatus(statusCommand);
-            
-            log.info("Updated notification {} status to: {}", 
-                notificationId, success ? "SENT" : "FAILED");
-        } catch (Exception e) {
-            log.error("Failed to update notification {} status: {}", notificationId, e.getMessage());
-        }
-    }
 }
