@@ -77,27 +77,27 @@ public class Pet {
     }
 
     public boolean isOwnedBy(UserId userId) {
-        return Objects.equals(this.ownerId, userId);
+        return Objects.equals(this.getOwnerId(), userId);
     }
 
 
-    public PetId id() {
+    public PetId getId() {
         return id;
     }
 
-    public UserId ownerId() {
+    public UserId getOwnerId() {
         return ownerId;
     }
 
-    public String name() {
+    public String getName() {
         return name;
     }
 
-    public String persona() {
+    public String getPersona() {
         return persona;
     }
 
-    public LocalDateTime createdAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
@@ -105,7 +105,7 @@ public class Pet {
         return isDeleted;
     }
 
-    public LocalDateTime updatedAt() {
+    public LocalDateTime getUpdatedAt() {
         return createdAt; // 현재 구조에서는 updatedAt이 없으므로 createdAt 반환
     }
 
@@ -122,14 +122,14 @@ public class Pet {
             return false;
         }
         Pet pet = (Pet) o;
-        return isDeleted == pet.isDeleted && Objects.equals(id, pet.id)
-            && Objects.equals(ownerId, pet.ownerId) && Objects.equals(name,
-            pet.name) && Objects.equals(persona, pet.persona) && Objects.equals(
-            createdAt, pet.createdAt);
+        return isDeleted() == pet.isDeleted() && Objects.equals(getId(), pet.getId())
+            && Objects.equals(getOwnerId(), pet.getOwnerId()) && Objects.equals(getName(),
+            pet.getName()) && Objects.equals(getPersona(), pet.getPersona()) && Objects.equals(
+            getCreatedAt(), pet.getCreatedAt());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, ownerId, name, persona, createdAt, isDeleted);
+        return Objects.hash(getId(), getOwnerId(), getName(), getPersona(), getCreatedAt(), isDeleted());
     }
 }

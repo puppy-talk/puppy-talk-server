@@ -51,11 +51,11 @@ class NotificationDomainServiceTest {
         assertTrue(mockRepository.isSaveCalled());
         Notification savedNotification = mockRepository.getLastSavedNotification();
         assertNotNull(savedNotification);
-        assertEquals(userId, savedNotification.userId());
-        assertEquals(title.trim(), savedNotification.title());
-        assertEquals(content.trim(), savedNotification.content());
-        assertEquals(NotificationType.INACTIVITY_MESSAGE, savedNotification.type());
-        assertEquals(NotificationStatus.CREATED, savedNotification.status());
+        assertEquals(userId, savedNotification.getUserId());
+        assertEquals(title.trim(), savedNotification.getTitle());
+        assertEquals(content.trim(), savedNotification.getContent());
+        assertEquals(NotificationType.INACTIVITY_MESSAGE, savedNotification.getType());
+        assertEquals(NotificationStatus.CREATED, savedNotification.getStatus());
     }
     
     @DisplayName("비활성 사용자 알림 생성 - null UserId로 실패")
@@ -119,9 +119,7 @@ class NotificationDomainServiceTest {
                 null,
                 null,
                 now,
-                now,
-                0,
-                null
+                now
             ),
             Notification.of(
                 NotificationId.from(2L),
@@ -136,9 +134,7 @@ class NotificationDomainServiceTest {
                 null,
                 null,
                 now,
-                now,
-                0,
-                null
+                now
             )
         );
         
@@ -256,8 +252,6 @@ class NotificationDomainServiceTest {
         @Override
         public Optional<Notification> findById(NotificationId id) { return Optional.empty(); }
         
-        @Override
-        public List<Notification> findRetryableFailedNotifications(int limit) { return Arrays.asList(); }
         
         
         @Override

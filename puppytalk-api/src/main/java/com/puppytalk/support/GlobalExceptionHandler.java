@@ -1,5 +1,8 @@
 package com.puppytalk.support;
 
+import com.puppytalk.auth.InvalidCredentialsException;
+import com.puppytalk.auth.InvalidTokenException;
+
 import com.puppytalk.chat.exception.ChatRoomAccessDeniedException;
 import com.puppytalk.chat.exception.MessageNotFoundException;
 import com.puppytalk.chat.exception.MessageValidationException;
@@ -216,6 +219,54 @@ public class GlobalExceptionHandler {
                 .body(errorResponse);
     }
 
+    // === 인증 관련 예외 ===
+
+    /**
+     * JWT 토큰이 유효하지 않은 경우 처리
+     */
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidTokenException(
+            InvalidTokenException ex, HttpServletRequest request) {
+        
+        String traceId = getTraceId(request);
+        log.warn("[{}] Invalid token: {}", traceId, ex.getMessage());
+        
+        Map<String, Object> metadata = Map.of(
+            "tokenType", "JWT",
+            "validationFailed", true
+        );
+        
+        ErrorResponse errorResponse = ErrorCode.UNAUTHORIZED.toErrorResponseWithMetadata(
+            traceId, request.getRequestURI(), request.getMethod(), metadata
+        );
+        
+        return ResponseEntity.status(ErrorCode.UNAUTHORIZED.getHttpStatus())
+                .body(errorResponse);
+    }
+
+    /**
+     * 인증 정보가 올바르지 않은 경우 처리
+     */
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidCredentialsException(
+            InvalidCredentialsException ex, HttpServletRequest request) {
+        
+        String traceId = getTraceId(request);
+        log.warn("[{}] Invalid credentials: {}", traceId, ex.getMessage());
+        
+        Map<String, Object> metadata = Map.of(
+            "authenticationType", "USERNAME_PASSWORD",
+            "credentialsValid", false
+        );
+        
+        ErrorResponse errorResponse = ErrorCode.UNAUTHORIZED.toErrorResponseWithMetadata(
+            traceId, request.getRequestURI(), request.getMethod(), metadata
+        );
+        
+        return ResponseEntity.status(ErrorCode.UNAUTHORIZED.getHttpStatus())
+                .body(errorResponse);
+    }
+
     // === 도메인 예외 ===
 
     /**
@@ -401,20 +452,24 @@ public class GlobalExceptionHandler {
      * 요청에서 추적 ID를 추출하거나 생성합니다.
      */
     private String getTraceId(HttpServletRequest request) {
-        // MDC에서 먼저 확인
+        // 1) Try MDC (set by logging filter or prior components)
         String traceId = MDC.get("traceId");
-        if (traceId != null && !traceId.isBlank()) {
-            log.error("Trace ID: {}", traceId);
-        }
-        
-        // 헤더에서 확인
-        traceId = request.getHeader(TRACE_ID_HEADER);
         if (traceId != null && !traceId.isBlank()) {
             return traceId;
         }
-        
-        // 새로 생성
-        return java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+
+        // 2) Try header propagated from client or upstream
+        traceId = request.getHeader(TRACE_ID_HEADER);
+        if (traceId != null && !traceId.isBlank()) {
+            // Optionally mirror into MDC for downstream logging
+            MDC.put("traceId", traceId);
+            return traceId;
+        }
+
+        // 3) Generate a new one and populate MDC
+        traceId = java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+        MDC.put("traceId", traceId);
+        return traceId;
     }
 
     /**

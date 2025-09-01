@@ -59,9 +59,9 @@ class UserDomainServiceTest {
         
         User savedUser = mockRepository.getLastSavedUser();
         assertNotNull(savedUser);
-        assertEquals(username.trim(), savedUser.username());
-        assertEquals(email.trim().toLowerCase(), savedUser.email());
-        assertEquals("encrypted_" + password.trim(), savedUser.password());
+        assertEquals(username.trim(), savedUser.getUsername());
+        assertEquals(email.trim().toLowerCase(), savedUser.getEmail());
+        assertEquals("encrypted_" + password.trim(), savedUser.getPassword());
         assertTrue(mockPasswordEncoder.isEncodeCalled());
     }
     
@@ -419,7 +419,7 @@ class UserDomainServiceTest {
         
         User savedUser = mockRepository.getLastSavedUser();
         assertNotNull(savedUser);
-        assertEquals("encrypted_" + newRawPassword, savedUser.password());
+        assertEquals("encrypted_" + newRawPassword, savedUser.getPassword());
     }
     
     /**

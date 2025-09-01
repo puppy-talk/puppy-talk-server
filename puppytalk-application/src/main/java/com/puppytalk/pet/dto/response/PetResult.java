@@ -13,10 +13,10 @@ public record PetResult(
     
     public static PetResult from(Pet pet) {
         return new PetResult(
-            pet.id().value(),
-            pet.ownerId().value(),
-            pet.name(),
-            pet.createdAt(),
+            pet.getId().value(),
+            pet.getOwnerId().value(),
+            pet.getName(),
+            pet.getCreatedAt(),
             pet.getStatusName()
         );
     }

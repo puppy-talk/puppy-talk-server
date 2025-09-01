@@ -48,12 +48,12 @@ public class PetJpaEntity extends BaseEntity {
      */
     public static PetJpaEntity from(Pet pet) {
         return new PetJpaEntity(
-            pet.id() != null && pet.id().isStored() ? pet.id().getValue() : null,
-            pet.ownerId().getValue(),
-            pet.name(),
-            pet.persona(),
+            pet.getId() != null && pet.getId().isStored() ? pet.getId().getValue() : null,
+            pet.getOwnerId().getValue(),
+            pet.getName(),
+            pet.getPersona(),
             pet.isDeleted(),
-            pet.createdAt(),
+            pet.getCreatedAt(),
             LocalDateTime.now()
         );
     }
@@ -77,8 +77,8 @@ public class PetJpaEntity extends BaseEntity {
      * 개별 setter 사용을 방지하여 불변성 보장
      */
     public void update(Pet pet) {
-        this.name = pet.name();
-        this.persona = pet.persona();
+        this.name = pet.getName();
+        this.persona = pet.getPersona();
         this.isDeleted = pet.isDeleted();
         this.updatedAt = LocalDateTime.now();
     }

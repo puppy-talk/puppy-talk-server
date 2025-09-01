@@ -32,6 +32,20 @@ spring:
     init:
       mode: never
 
+  # Redis Configuration
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 3000
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1
+          max-idle: 8
+          min-idle: 0
+
 server:
   port: 8080
 
@@ -39,6 +53,12 @@ logging:
   level:
     com.puppytalk: DEBUG
     org.springframework.web: DEBUG
+
+# JWT Configuration
+app:
+  jwt:
+    secret: ${JWT_SECRET:puppytalk-super-secret-key-for-jwt-token-generation-minimum-256-bits}
+    access-token-validity: 86400000  # 24시간 (밀리초)
 
 
 
@@ -91,7 +111,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
@@ -100,7 +120,7 @@ spring:
         
   # Flyway configuration for Docker
   flyway:
-    enabled: true
+    enabled: false
     locations: classpath:db/migration
     validate-on-migrate: true
 

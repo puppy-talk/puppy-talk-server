@@ -26,14 +26,14 @@ class UserTest {
 
         // then
         assertNotNull(user);
-        assertNull(user.id()); // 아직 저장되지 않음
-        assertEquals(username.trim(), user.username());
-        assertEquals(email.trim(), user.email());
-        assertEquals(encryptedPassword, user.password());
+        assertNull(user.getId()); // 아직 저장되지 않음
+        assertEquals(username.trim(), user.getUsername());
+        assertEquals(email.trim(), user.getEmail());
+        assertEquals(encryptedPassword, user.getPassword());
         assertFalse(user.isDeleted());
-        assertNotNull(user.createdAt());
-        assertNotNull(user.updatedAt());
-        assertEquals(user.createdAt(), user.updatedAt()); // 생성 시점에는 동일
+        assertNotNull(user.getCreatedAt());
+        assertNotNull(user.getUpdatedAt());
+        assertEquals(user.getCreatedAt(), user.getUpdatedAt()); // 생성 시점에는 동일
     }
 
     @DisplayName("User 생성 - null 사용자명으로 실패")
@@ -151,15 +151,16 @@ class UserTest {
         boolean isDeleted = false;
 
         // when
-        User user = User.of(userId, username, email, encryptedPassword, createdAt, updatedAt, isDeleted);
+        LocalDateTime lastActiveAt = LocalDateTime.now();
+        User user = User.of(userId, username, email, encryptedPassword, createdAt, updatedAt, lastActiveAt, isDeleted);
 
         // then
-        assertEquals(userId, user.id());
-        assertEquals(username.trim(), user.username());
-        assertEquals(email.trim(), user.email());
-        assertEquals(encryptedPassword, user.password());
-        assertEquals(createdAt, user.createdAt());
-        assertEquals(updatedAt, user.updatedAt());
+        assertEquals(userId, user.getId());
+        assertEquals(username.trim(), user.getUsername());
+        assertEquals(email.trim(), user.getEmail());
+        assertEquals(encryptedPassword, user.getPassword());
+        assertEquals(createdAt, user.getCreatedAt());
+        assertEquals(updatedAt, user.getUpdatedAt());
         assertEquals(isDeleted, user.isDeleted());
     }
 
@@ -217,14 +218,14 @@ class UserTest {
 
         // then
         assertNotSame(originalUser, updatedUser); // 불변 객체이므로 다른 인스턴스
-        assertEquals(originalUser.id(), updatedUser.id());
-        assertEquals(originalUser.username(), updatedUser.username());
-        assertEquals(newEmail.trim(), updatedUser.email());
-        assertEquals(originalUser.password(), updatedUser.password());
-        assertEquals(originalUser.createdAt(), updatedUser.createdAt());
+        assertEquals(originalUser.getId(), updatedUser.getId());
+        assertEquals(originalUser.getUsername(), updatedUser.getUsername());
+        assertEquals(newEmail.trim(), updatedUser.getEmail());
+        assertEquals(originalUser.getPassword(), updatedUser.getPassword());
+        assertEquals(originalUser.getCreatedAt(), updatedUser.getCreatedAt());
         assertEquals(originalUser.isDeleted(), updatedUser.isDeleted());
-        assertTrue(updatedUser.updatedAt().isAfter(originalUser.updatedAt()) ||
-                  updatedUser.updatedAt().isEqual(originalUser.updatedAt()));
+        assertTrue(updatedUser.getUpdatedAt().isAfter(originalUser.getUpdatedAt()) ||
+                  updatedUser.getUpdatedAt().isEqual(originalUser.getUpdatedAt()));
     }
 
     @DisplayName("이메일 변경 - null 이메일로 실패")
@@ -255,14 +256,14 @@ class UserTest {
 
         // then
         assertNotSame(originalUser, updatedUser);
-        assertEquals(originalUser.id(), updatedUser.id());
-        assertEquals(originalUser.username(), updatedUser.username());
-        assertEquals(originalUser.email(), updatedUser.email());
-        assertEquals(newPassword, updatedUser.password());
-        assertEquals(originalUser.createdAt(), updatedUser.createdAt());
+        assertEquals(originalUser.getId(), updatedUser.getId());
+        assertEquals(originalUser.getUsername(), updatedUser.getUsername());
+        assertEquals(originalUser.getEmail(), updatedUser.getEmail());
+        assertEquals(newPassword, updatedUser.getPassword());
+        assertEquals(originalUser.getCreatedAt(), updatedUser.getCreatedAt());
         assertEquals(originalUser.isDeleted(), updatedUser.isDeleted());
-        assertTrue(updatedUser.updatedAt().isAfter(originalUser.updatedAt()) ||
-                  updatedUser.updatedAt().isEqual(originalUser.updatedAt()));
+        assertTrue(updatedUser.getUpdatedAt().isAfter(originalUser.getUpdatedAt()) ||
+                  updatedUser.getUpdatedAt().isEqual(originalUser.getUpdatedAt()));
     }
 
     @DisplayName("비밀번호 변경 - null 비밀번호로 실패")
@@ -292,14 +293,14 @@ class UserTest {
 
         // then
         assertNotSame(originalUser, deletedUser);
-        assertEquals(originalUser.id(), deletedUser.id());
-        assertEquals(originalUser.username(), deletedUser.username());
-        assertEquals(originalUser.email(), deletedUser.email());
-        assertEquals(originalUser.password(), deletedUser.password());
-        assertEquals(originalUser.createdAt(), deletedUser.createdAt());
+        assertEquals(originalUser.getId(), deletedUser.getId());
+        assertEquals(originalUser.getUsername(), deletedUser.getUsername());
+        assertEquals(originalUser.getEmail(), deletedUser.getEmail());
+        assertEquals(originalUser.getPassword(), deletedUser.getPassword());
+        assertEquals(originalUser.getCreatedAt(), deletedUser.getCreatedAt());
         assertTrue(deletedUser.isDeleted());
-        assertTrue(deletedUser.updatedAt().isAfter(originalUser.updatedAt()) ||
-                  deletedUser.updatedAt().isEqual(originalUser.updatedAt()));
+        assertTrue(deletedUser.getUpdatedAt().isAfter(originalUser.getUpdatedAt()) ||
+                  deletedUser.getUpdatedAt().isEqual(originalUser.getUpdatedAt()));
     }
 
     @DisplayName("삭제 여부 확인 - 활성 사용자")
@@ -335,8 +336,8 @@ class UserTest {
         User user = User.create(username, email, encryptedPassword);
 
         // then
-        assertEquals("testuser", user.username());
-        assertEquals("test@example.com", user.email());
+        assertEquals("testuser", user.getUsername());
+        assertEquals("test@example.com", user.getEmail());
     }
 
     @DisplayName("equals 메서드 - 같은 ID")

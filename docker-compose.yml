@@ -1,5 +1,23 @@
 
 services:
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: puppytalk-redis
+    restart: unless-stopped
+    command: redis-server
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - puppytalk-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 10s
+      retries: 5
+      interval: 30s
+
   # MySQL Database
   mysql:
     image: mysql:8.0
@@ -33,6 +51,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       # Spring Profile
       SPRING_PROFILES_ACTIVE: docker
@@ -44,10 +64,18 @@ services:
       DB_USERNAME: ${DB_USERNAME:-puppytalk}
       DB_PASSWORD: ${DB_PASSWORD:-puppytalk123}
       
+      # Redis Configuration
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      
+      # JWT Configuration
+      JWT_SECRET: ${JWT_SECRET:-puppytalk-super-secret-key-for-jwt-token-generation-minimum-256-bits}
+      
       # JVM Options
       JAVA_OPTS: "-Xmx512m -Xms256m"
     ports:
-      - "8080:8080"
+      - "8081:8080"
     networks:
       - puppytalk-network
     healthcheck:
@@ -59,6 +87,8 @@ services:
 
 volumes:
   mysql_data:
+    driver: local
+  redis_data:
     driver: local
 
 networks:

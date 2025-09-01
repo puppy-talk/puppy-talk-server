@@ -15,11 +15,11 @@ public record UserResult(
 ) {
     public static UserResult from(User user) {
         return new UserResult(
-            user.id().value(),
-            user.username(),
-            user.email(),
+            user.getId().value(),
+            user.getUsername(),
+            user.getEmail(),
             user.isDeleted(),
-            user.createdAt()
+            user.getCreatedAt()
         );
     }
 }

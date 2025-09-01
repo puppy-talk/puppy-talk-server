@@ -120,7 +120,7 @@ public class UserDomainService {
      */
     public boolean checkPassword(User user, String rawPassword) {
         Preconditions.requireNonBlank(rawPassword, "Password");
-        return passwordEncoder.matches(rawPassword, user.password());
+        return passwordEncoder.matches(rawPassword, user.getPassword());
     }
     
     /**

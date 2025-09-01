@@ -23,14 +23,14 @@ public class UserRepositoryImpl implements UserRepository {
     
     @Override
     public UserId save(User user) {
-        if (user.id() != null && user.id().isStored()) {
+        if (user.getId() != null && user.getId().isStored()) {
             // 기존 사용자 업데이트
-            UserJpaEntity existingEntity = userJpaRepository.findById(user.id().getValue())
-                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다: " + user.id().getValue()));
+            UserJpaEntity existingEntity = userJpaRepository.findById(user.getId().getValue())
+                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다: " + user.getId().getValue()));
             
             existingEntity.update(user);
             userJpaRepository.save(existingEntity);
-            return user.id();
+            return user.getId();
         } else {
             // 새로운 사용자 생성
             UserJpaEntity entity = UserJpaEntity.from(user);

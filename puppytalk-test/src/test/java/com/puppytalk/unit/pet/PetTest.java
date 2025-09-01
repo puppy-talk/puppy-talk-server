@@ -35,14 +35,14 @@ class PetTest {
             
             // then
             assertThat(pet).isNotNull();
-            assertThat(pet.id()).isNull(); // 아직 저장되지 않음
-            assertThat(pet.ownerId()).isEqualTo(ownerId);
-            assertThat(pet.name()).isEqualTo(name);
-            assertThat(pet.persona()).isEqualTo(persona);
+            assertThat(pet.getId()).isNull(); // 아직 저장되지 않음
+            assertThat(pet.getOwnerId()).isEqualTo(ownerId);
+            assertThat(pet.getName()).isEqualTo(name);
+            assertThat(pet.getPersona()).isEqualTo(persona);
             assertThat(pet.isDeleted()).isFalse();
             assertThat(pet.getStatusName()).isEqualTo("ACTIVE");
-            assertThat(pet.createdAt()).isNotNull();
-            assertThat(pet.updatedAt()).isNotNull();
+            assertThat(pet.getCreatedAt()).isNotNull();
+            assertThat(pet.getUpdatedAt()).isNotNull();
         }
         
         @DisplayName("Pet 생성 - 이름과 페르소나는 공백을 그대로 보존")
@@ -57,8 +57,8 @@ class PetTest {
             Pet pet = Pet.create(ownerId, name, persona);
             
             // then
-            assertThat(pet.name()).isEqualTo("  버디  ");
-            assertThat(pet.persona()).isEqualTo("  친근하고 활발한 강아지  ");
+            assertThat(pet.getName()).isEqualTo("  버디  ");
+            assertThat(pet.getPersona()).isEqualTo("  친근하고 활발한 강아지  ");
         }
         
         @DisplayName("Pet.of 생성자 - 성공")
@@ -76,12 +76,12 @@ class PetTest {
             Pet pet = Pet.of(petId, ownerId, name, persona, createdAt, isDeleted);
             
             // then
-            assertThat(pet.id()).isEqualTo(petId);
-            assertThat(pet.ownerId()).isEqualTo(ownerId);
-            assertThat(pet.name()).isEqualTo(name);
-            assertThat(pet.persona()).isEqualTo(persona);
-            assertThat(pet.createdAt()).isEqualTo(createdAt);
-            assertThat(pet.updatedAt()).isEqualTo(createdAt); // Pet.of에서 updatedAt은 createdAt과 동일
+            assertThat(pet.getId()).isEqualTo(petId);
+            assertThat(pet.getOwnerId()).isEqualTo(ownerId);
+            assertThat(pet.getName()).isEqualTo(name);
+            assertThat(pet.getPersona()).isEqualTo(persona);
+            assertThat(pet.getCreatedAt()).isEqualTo(createdAt);
+            assertThat(pet.getUpdatedAt()).isEqualTo(createdAt); // Pet.of에서 updatedAt은 createdAt과 동일
             assertThat(pet.isDeleted()).isEqualTo(isDeleted);
         }
     }
@@ -165,11 +165,11 @@ class PetTest {
             
             // then
             assertThat(deletedPet).isNotEqualTo(pet);  // 불변 객체이므로 새로운 인스턴스
-            assertThat(deletedPet.id()).isEqualTo(pet.id());
-            assertThat(deletedPet.ownerId()).isEqualTo(pet.ownerId());
-            assertThat(deletedPet.name()).isEqualTo(pet.name());
-            assertThat(deletedPet.persona()).isEqualTo(pet.persona());
-            assertThat(deletedPet.createdAt()).isEqualTo(pet.createdAt());
+            assertThat(deletedPet.getId()).isEqualTo(pet.getId());
+            assertThat(deletedPet.getOwnerId()).isEqualTo(pet.getOwnerId());
+            assertThat(deletedPet.getName()).isEqualTo(pet.getName());
+            assertThat(deletedPet.getPersona()).isEqualTo(pet.getPersona());
+            assertThat(deletedPet.getCreatedAt()).isEqualTo(pet.getCreatedAt());
             assertThat(deletedPet.isDeleted()).isTrue();
             assertThat(deletedPet.getStatusName()).isEqualTo("DELETED");
         }
@@ -201,11 +201,11 @@ class PetTest {
             
             // then
             assertThat(renamedPet).isNotEqualTo(pet);  // 불변 객체이므로 새로운 인스턴스
-            assertThat(renamedPet.name()).isEqualTo(newName);
-            assertThat(renamedPet.id()).isEqualTo(pet.id());
-            assertThat(renamedPet.ownerId()).isEqualTo(pet.ownerId());
-            assertThat(renamedPet.persona()).isEqualTo(pet.persona());
-            assertThat(renamedPet.createdAt()).isEqualTo(pet.createdAt());
+            assertThat(renamedPet.getName()).isEqualTo(newName);
+            assertThat(renamedPet.getId()).isEqualTo(pet.getId());
+            assertThat(renamedPet.getOwnerId()).isEqualTo(pet.getOwnerId());
+            assertThat(renamedPet.getPersona()).isEqualTo(pet.getPersona());
+            assertThat(renamedPet.getCreatedAt()).isEqualTo(pet.getCreatedAt());
             assertThat(renamedPet.isDeleted()).isEqualTo(pet.isDeleted());
         }
     }

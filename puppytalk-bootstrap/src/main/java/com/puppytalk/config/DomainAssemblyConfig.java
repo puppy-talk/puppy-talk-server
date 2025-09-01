@@ -1,5 +1,8 @@
 package com.puppytalk.config;
 
+import com.puppytalk.auth.AuthenticationDomainService;
+import com.puppytalk.auth.TokenProvider;
+import com.puppytalk.auth.TokenStore;
 import com.puppytalk.chat.ChatDomainService;
 import com.puppytalk.chat.ChatRoomRepository;
 import com.puppytalk.chat.MessageRepository;
@@ -42,5 +45,12 @@ public class DomainAssemblyConfig {
     @Bean
     public NotificationDomainService notificationDomainService(NotificationRepository notificationRepository) {
         return new NotificationDomainService(notificationRepository);
+    }
+    
+    @Bean
+    public AuthenticationDomainService authenticationDomainService(UserDomainService userDomainService, 
+                                                                    TokenProvider tokenProvider,
+                                                                    TokenStore tokenStore) {
+        return new AuthenticationDomainService(userDomainService, tokenProvider, tokenStore);
     }
 }

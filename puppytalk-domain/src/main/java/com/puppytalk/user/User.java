@@ -99,32 +99,31 @@ public class User {
 
 
     // getter
-    public UserId id() {
+    public UserId getId() {
         return id;
     }
 
-    public String username() {
+    public String getUsername() {
         return username;
     }
 
-    public String email() {
+    public String getEmail() {
         return email;
     }
 
-    public String password() {
+    public String getPassword() {
         return password;
     }
 
-
-    public LocalDateTime createdAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public LocalDateTime updatedAt() {
+    public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
 
-    public LocalDateTime lastActiveAt() {
+    public LocalDateTime getLastActiveAt() {
         return lastActiveAt;
     }
 
@@ -140,21 +139,21 @@ public class User {
         if (!(obj instanceof User other)) {
             return false;
         }
-        return Objects.equals(id, other.id);
+        return Objects.equals(getId(), other.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hashCode(getId());
     }
 
     @Override
     public String toString() {
         return "User{" +
-            "id=" + id +
-            ", username='" + username + '\'' +
-            ", email='" + email + '\'' +
-            ", isDeleted=" + isDeleted +
+            "id=" + getId() +
+            ", username='" + getUsername() + '\'' +
+            ", email='" + getEmail() + '\'' +
+            ", isDeleted=" + isDeleted() +
             '}';
     }
 }

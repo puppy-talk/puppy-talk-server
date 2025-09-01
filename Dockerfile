@@ -15,6 +15,7 @@ COPY puppytalk-application/build.gradle puppytalk-application/
 COPY puppytalk-infrastructure/build.gradle puppytalk-infrastructure/
 COPY puppytalk-api/build.gradle puppytalk-api/
 COPY puppytalk-bootstrap/build.gradle puppytalk-bootstrap/
+COPY puppytalk-scheduler/build.gradle puppytalk-scheduler/
 COPY puppytalk-test/build.gradle puppytalk-test/
 
 RUN gradle dependencies --no-daemon
@@ -25,22 +26,23 @@ COPY puppytalk-application/src puppytalk-application/src
 COPY puppytalk-infrastructure/src puppytalk-infrastructure/src
 COPY puppytalk-api/src puppytalk-api/src
 COPY puppytalk-bootstrap/src puppytalk-bootstrap/src
+COPY puppytalk-scheduler/src puppytalk-scheduler/src
 COPY puppytalk-test/src puppytalk-test/src
 
-# JAR 빌드 (테스트 포함)
-RUN gradle clean build --no-daemon
+# JAR 빌드 (테스트 제외)
+RUN gradle clean build -x test --no-daemon
 
 # Production runtime image
-FROM openjdk:17-jre-slim
+FROM amazoncorretto:17-alpine
 
 # 일반 계정 사용(보안)
-RUN groupadd -g 1001 puppytalk && \
-    useradd -u 1001 -g puppytalk puppytalk
+RUN addgroup -g 1001 puppytalk && \
+    adduser -u 1001 -G puppytalk -s /bin/sh -D puppytalk
 
 WORKDIR /app
 
 # health checks를 위한 curl 설치
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache curl
 
 COPY --from=builder /app/puppytalk-bootstrap/build/libs/puppytalk-bootstrap-*.jar app.jar
 

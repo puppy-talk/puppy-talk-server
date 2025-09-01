@@ -23,7 +23,7 @@ public class PetRepositoryImpl implements PetRepository {
     @Override
     public Pet create(Pet pet) {
         Assert.notNull(pet, "Pet must not be null");
-        Assert.isTrue(pet.id() == null || !pet.id().isStored(), "New pet must not have stored ID");
+        Assert.isTrue(pet.getId() == null || !pet.getId().isStored(), "New pet must not have stored ID");
         
         PetJpaEntity entity = PetJpaEntity.from(pet);
         PetJpaEntity savedEntity = petJpaRepository.save(entity);
@@ -34,11 +34,11 @@ public class PetRepositoryImpl implements PetRepository {
     @Override
     public Pet delete(Pet pet) {
         Assert.notNull(pet, "Pet must not be null");
-        Assert.notNull(pet.id(), "Pet ID must not be null for deletion");
-        Assert.isTrue(pet.id().isStored(), "Pet ID must be stored for deletion");
+        Assert.notNull(pet.getId(), "Pet ID must not be null for deletion");
+        Assert.isTrue(pet.getId().isStored(), "Pet ID must be stored for deletion");
         
-        PetJpaEntity petEntity = petJpaRepository.findById(pet.id().getValue())
-            .orElseThrow(() -> new IllegalArgumentException("반려동물을 찾을 수 없습니다: " + pet.id()));
+        PetJpaEntity petEntity = petJpaRepository.findById(pet.getId().getValue())
+            .orElseThrow(() -> new IllegalArgumentException("반려동물을 찾을 수 없습니다: " + pet.getId()));
 
         petEntity.update(pet);
         PetJpaEntity savedEntity = petJpaRepository.save(petEntity);

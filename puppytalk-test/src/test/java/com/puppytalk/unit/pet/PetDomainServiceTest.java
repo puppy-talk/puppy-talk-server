@@ -125,9 +125,9 @@ class PetDomainServiceTest {
         assertTrue(mockRepository.isCreateCalled());
         Pet createdPet = mockRepository.getLastCreatedPet();
         assertNotNull(createdPet);
-        assertEquals(ownerId, createdPet.ownerId());
-        assertEquals(petName.trim(), createdPet.name());
-        assertEquals(persona.trim(), createdPet.persona());
+        assertEquals(ownerId, createdPet.getOwnerId());
+        assertEquals(petName.trim(), createdPet.getName());
+        assertEquals(persona.trim(), createdPet.getPersona());
         assertFalse(createdPet.isDeleted());
     }
     
@@ -225,8 +225,8 @@ class PetDomainServiceTest {
         
         Pet deletedPet = mockRepository.getLastDeletedPet();
         assertNotNull(deletedPet);
-        assertEquals(petId, deletedPet.id());
-        assertEquals(ownerId, deletedPet.ownerId());
+        assertEquals(petId, deletedPet.getId());
+        assertEquals(ownerId, deletedPet.getOwnerId());
     }
     
     @DisplayName("생성자 - null 레포지토리로 실패")

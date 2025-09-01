@@ -123,6 +123,20 @@ public enum ErrorCode {
                             ErrorResponse.ErrorCategory.SERVER_ERROR),
 
     // === 보안 관련 오류 ===
+    UNAUTHORIZED("UNAUTHORIZED", 
+                "인증이 필요합니다", 
+                HttpStatus.UNAUTHORIZED, 
+                ErrorResponse.ErrorCategory.SECURITY_ERROR),
+    
+    INVALID_TOKEN("INVALID_TOKEN", 
+                 "유효하지 않은 토큰입니다", 
+                 HttpStatus.UNAUTHORIZED, 
+                 ErrorResponse.ErrorCategory.SECURITY_ERROR),
+    
+    INVALID_CREDENTIALS("INVALID_CREDENTIALS", 
+                       "잘못된 인증 정보입니다", 
+                       HttpStatus.UNAUTHORIZED, 
+                       ErrorResponse.ErrorCategory.SECURITY_ERROR),
     
     INVALID_SECURITY_HEADERS("INVALID_SECURITY_HEADERS", 
                            "보안 헤더가 올바르지 않습니다", 

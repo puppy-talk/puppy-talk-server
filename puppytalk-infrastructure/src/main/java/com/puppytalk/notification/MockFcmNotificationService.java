@@ -2,6 +2,7 @@ package com.puppytalk.notification;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 /**
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
  * - 개발/테스트 환경에서 사용
  */
 @Service
+@Profile({"local", "test", "docker"})
 public class MockFcmNotificationService implements NotificationSender {
     
     private static final Logger log = LoggerFactory.getLogger(MockFcmNotificationService.class);

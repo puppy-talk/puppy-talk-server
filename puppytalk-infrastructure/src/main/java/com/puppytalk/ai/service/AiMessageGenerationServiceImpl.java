@@ -52,12 +52,12 @@ public class AiMessageGenerationServiceImpl implements AiMessageGenerationServic
     @Override
     public String generateInactivityNotification(ChatRoom chatRoom, Pet pet,
                                                int hoursSinceLastActivity, List<Message> lastMessages) {
-        log.info("Generating inactivity notification for userId: {}, petId: {}", chatRoom.getUserId(), pet.id());
+        log.info("Generating inactivity notification for userId: {}, petId: {}", chatRoom.getUserId(), pet.getId());
 
         InactivityNotificationRequest request = new InactivityNotificationRequest(
             chatRoom.getUserId().getValue().intValue(),
-            pet.id().getValue().intValue(),
-            pet.persona(),
+            pet.getId().getValue().intValue(),
+            pet.getPersona(),
             convertToAiChatMessage(lastMessages),
             hoursSinceLastActivity,
             getCurrentTimeOfDay()

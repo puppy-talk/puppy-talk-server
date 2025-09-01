@@ -2,7 +2,7 @@ package com.puppytalk.scheduler;
 
 import com.puppytalk.NotificationScheduler;
 import com.puppytalk.notification.InactivityNotificationFacade;
-import com.puppytalk.notification.MockFcmNotificationService;
+import com.puppytalk.notification.NotificationService;
 import com.puppytalk.notification.NotificationFacade;
 import com.puppytalk.notification.dto.response.NotificationListResult;
 import com.puppytalk.notification.dto.response.NotificationResult;
@@ -28,7 +28,7 @@ class NotificationSchedulerTest {
     private InactivityNotificationFacade inactivityNotificationFacade;
     
     @Mock
-    private MockFcmNotificationService mockFcmNotificationService;
+    private NotificationService mockFcmNotificationService;
 
     @Mock
     private PetFacade petFacade;

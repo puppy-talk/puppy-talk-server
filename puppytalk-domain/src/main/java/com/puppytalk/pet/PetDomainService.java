@@ -86,7 +86,7 @@ public class PetDomainService {
             throw new PetNotFoundException(ownerId);
         }
 
-        return pets.get(0).id().getValue();
+        return pets.get(0).getId().getValue();
     }
     
     /**

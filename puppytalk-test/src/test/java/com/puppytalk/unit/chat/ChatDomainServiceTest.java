@@ -704,25 +704,6 @@ class ChatDomainServiceTest {
             return findByChatRoomIdAndCreatedAtAfterResult;
         }
         
-        @Override
-        public Optional<Message> findLatestByChatRoomId(ChatRoomId chatRoomId) {
-            return Optional.empty();
-        }
-        
-        @Override
-        public long countByChatRoomId(ChatRoomId chatRoomId) {
-            return 0;
-        }
-        
-        @Override
-        public long countByChatRoomIdAndType(ChatRoomId chatRoomId, MessageType type) {
-            return 0;
-        }
-        
-        @Override
-        public boolean existsById(MessageId id) {
-            return false;
-        }
         
         // Test helper methods
         public void setCreateResult(Message result) {

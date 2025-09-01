@@ -50,12 +50,12 @@ public class UserJpaEntity extends BaseEntity {
      */
     public static UserJpaEntity from(User user) {
         return new UserJpaEntity(
-            user.id() != null ? user.id().getValue() : null,
-            user.username(),
-            user.email(),
-            user.password(),
+            user.getId() != null ? user.getId().getValue() : null,
+            user.getUsername(),
+            user.getEmail(),
+            user.getPassword(),
             user.isDeleted(),
-            user.createdAt(),
+            user.getCreatedAt(),
             LocalDateTime.now()
         );
     }
@@ -88,9 +88,9 @@ public class UserJpaEntity extends BaseEntity {
      * 개별 setter 사용을 방지하여 불변성 보장
      */
     public void update(User user) {
-        this.username = user.username();
-        this.email = user.email();
-        this.password = user.password();
+        this.username = user.getUsername();
+        this.email = user.getEmail();
+        this.password = user.getPassword();
         this.isDeleted = user.isDeleted();
         this.updatedAt = LocalDateTime.now();
     }
