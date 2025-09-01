@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
  * - 개발/테스트 환경에서 사용
  */
 @Service
-public class MockFcmNotificationService implements NotificationService {
+public class MockFcmNotificationService implements NotificationSender {
     
     private static final Logger log = LoggerFactory.getLogger(MockFcmNotificationService.class);
     
@@ -21,11 +21,11 @@ public class MockFcmNotificationService implements NotificationService {
     private static final double FAILURE_RATE = 0.1;
     
     @Override
-    public boolean sendPushNotification(Long userId, String title, String message, Long notificationId) {
+    public boolean sendPushNotification(Long userId, String title, String content, Long notificationId) {
         log.info("📱 FCM Mock - Sending push notification:");
         log.info("   User: {}", userId);
         log.info("   Title: {}", title);
-        log.info("   Message: {}", message);
+        log.info("   Message: {}", content);
         log.info("   NotificationId: {}", notificationId);
         
         try {
@@ -54,8 +54,4 @@ public class MockFcmNotificationService implements NotificationService {
         return true;
     }
     
-    @Override
-    public String getServiceType() {
-        return "FCM_MOCK";
-    }
 }

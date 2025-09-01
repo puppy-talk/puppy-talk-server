@@ -1,34 +1,22 @@
 package com.puppytalk.notification;
 
+import org.springframework.stereotype.Component;
+
 /**
- * 알림 발송 서비스 인터페이스
- * 
- * FCM, SMS, Email 등 다양한 알림 채널을 추상화
+ * FCM 알림 서비스 구현체
  */
-public interface NotificationService {
+@Component
+public class FcmNotificationService implements NotificationSender {
     
-    /**
-     * 푸시 알림 발송
-     * 
-     * @param userId 사용자 ID
-     * @param title 알림 제목
-     * @param message 알림 내용
-     * @param notificationId 알림 ID (추적용)
-     * @return 발송 성공 여부
-     */
-    boolean sendPushNotification(Long userId, String title, String message, Long notificationId);
+    @Override
+    public boolean sendPushNotification(Long userId, String title, String content, Long notificationId) {
+        // FCM 발송 구현
+        return true; // 임시 구현
+    }
     
-    /**
-     * 서비스 상태 확인
-     * 
-     * @return 서비스 사용 가능 여부
-     */
-    boolean isAvailable();
-    
-    /**
-     * 서비스 타입 반환
-     * 
-     * @return 서비스 타입 (FCM, SMS, EMAIL 등)
-     */
-    String getServiceType();
+    @Override
+    public boolean isAvailable() {
+        // FCM 서비스 가용성 확인
+        return true; // 임시 구현
+    }
 }
