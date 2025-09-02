@@ -8,6 +8,7 @@ import com.puppytalk.auth.dto.request.LoginRequest;
 import com.puppytalk.auth.dto.response.ActiveTokensResponse;
 import com.puppytalk.auth.dto.response.TokenResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import com.puppytalk.auth.CurrentUser;
 import com.puppytalk.user.User;
 import com.puppytalk.user.UserId;
 import com.puppytalk.support.ApiResponse;
@@ -48,8 +49,7 @@ public class AuthController {
     
     @Operation(summary = "로그아웃", description = "현재 토큰을 무효화하고 로그아웃합니다.")
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest request) {
-        User currentUser = getCurrentUser(request);
+    public ResponseEntity<ApiResponse<Void>> logout(@CurrentUser User currentUser, HttpServletRequest request) {
         String accessToken = extractAccessToken(request);
         
         LogoutCommand command = LogoutCommand.singleLogout(currentUser.getId(), accessToken);
@@ -60,9 +60,7 @@ public class AuthController {
     
     @Operation(summary = "전체 로그아웃", description = "모든 디바이스에서 로그아웃합니다.")
     @PostMapping("/logout-all")
-    public ResponseEntity<ApiResponse<Void>> logoutAll(HttpServletRequest request) {
-        User currentUser = getCurrentUser(request);
-        
+    public ResponseEntity<ApiResponse<Void>> logoutAll(@CurrentUser User currentUser) {
         LogoutCommand command = LogoutCommand.logoutAll(currentUser.getId());
         authenticationFacade.logout(command);
         
@@ -71,17 +69,11 @@ public class AuthController {
     
     @Operation(summary = "활성 세션 조회", description = "사용자의 모든 활성 세션을 조회합니다.")
     @GetMapping("/sessions")
-    public ResponseEntity<ApiResponse<ActiveTokensResponse>> getActiveSessions(HttpServletRequest request) {
-        User currentUser = getCurrentUser(request);
-        
+    public ResponseEntity<ApiResponse<ActiveTokensResponse>> getActiveSessions(@CurrentUser User currentUser) {
         ActiveTokensResult result = authenticationFacade.getActiveTokens(currentUser.getId());
         ActiveTokensResponse response = ActiveTokensResponse.from(result);
         
         return ResponseEntity.ok(ApiResponse.success("활성 세션을 조회했습니다.", response));
-    }
-    
-    private User getCurrentUser(HttpServletRequest request) {
-        return (User) request.getAttribute("currentUser");
     }
     
     private String extractAccessToken(HttpServletRequest request) {

@@ -67,7 +67,7 @@ public class JwtTokenProvider implements TokenProvider {
         Long userId = claims.get(USER_ID_CLAIM, Long.class);
         
         if (userId == null) {
-            throw InvalidTokenException.invalid();
+            throw InvalidTokenException.invalidToken();
         }
         
         return UserId.from(userId);

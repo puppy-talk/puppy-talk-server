@@ -11,6 +11,8 @@ import com.puppytalk.pet.dto.response.PetsResponse;
 import com.puppytalk.pet.dto.response.PetListResult;
 import com.puppytalk.support.ApiResponse;
 import com.puppytalk.support.ApiSuccessMessage;
+import com.puppytalk.user.User;
+import com.puppytalk.auth.CurrentUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,7 +28,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Pet", description = "반려동물 관리 API")
@@ -64,14 +65,12 @@ public class PetController {
         @Parameter(
             description = "반려동물 생성 요청 정보 - 소유자 ID, 이름, 페르소나 포함", 
             required = true
-        )
-        @Valid @RequestBody PetCreateRequest request
+        ) @Valid @RequestBody PetCreateRequest request,
+        @CurrentUser User currentUser
     ) {
-        PetCreateCommand command = PetCreateCommand.of(
-            request.ownerId(),
-            request.name(),
-            request.persona()
-        );
+        Long ownerId = currentUser.getId().getValue();
+
+        PetCreateCommand command = PetCreateCommand.of(ownerId, request.name(), request.persona());
 
         petFacade.createPet(command);
 
@@ -85,11 +84,8 @@ public class PetController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
     @GetMapping
-    public ResponseEntity<ApiResponse<PetsResponse>> getPetList(
-        @Parameter(description = "반려동물 소유자 ID", required = true, example = "1")
-        @RequestParam Long ownerId
-    ) {
-        PetListQuery query = PetListQuery.of(ownerId);
+    public ResponseEntity<ApiResponse<PetsResponse>> getPetList(@CurrentUser User currentUser) {
+        PetListQuery query = PetListQuery.of(currentUser.getId().getValue());
         PetListResult result = petFacade.getPetList(query);
 
         return ResponseEntity.ok(
@@ -111,11 +107,9 @@ public class PetController {
     public ResponseEntity<ApiResponse<PetResponse>> getPet(
         @Parameter(description = "반려동물 ID", required = true, example = "1")
         @PathVariable Long petId,
-        @Parameter(description = "반려동물 소유자 ID", required = true, example = "1")
-        @RequestParam Long ownerId
+        @CurrentUser User currentUser
     ) {
-
-        PetGetQuery query = PetGetQuery.of(petId, ownerId);
+        PetGetQuery query = PetGetQuery.of(petId, currentUser.getId().getValue());
         PetResult petResult = petFacade.getPet(query);
         PetResponse response = PetResponse.from(petResult);
 
@@ -136,10 +130,8 @@ public class PetController {
     public ResponseEntity<ApiResponse<Void>> deletePet(
         @Parameter(description = "반려동물 ID", required = true, example = "1")
         @PathVariable Long petId,
-        @Parameter(description = "반려동물 소유자 ID", required = true, example = "1")
-        @RequestParam Long ownerId) {
-
-        PetDeleteCommand command = PetDeleteCommand.of(petId, ownerId);
+        @CurrentUser User currentUser) {
+        PetDeleteCommand command = PetDeleteCommand.of(petId, currentUser.getId().getValue());
         petFacade.deletePet(command);
 
         return ResponseEntity.ok(

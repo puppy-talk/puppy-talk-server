@@ -10,8 +10,7 @@ import jakarta.validation.constraints.Size;
  */
 @Schema(description = "반려동물 생성 요청")
 public record PetCreateRequest(
-    @Schema(description = "반려동물 소유자 ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "사용자 ID는 필수입니다")
+    @Schema(description = "반려동물 소유자 ID (인증된 사용자로 대체됨)", example = "1", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     Long ownerId,
     
     @Schema(description = "반려동물 이름", example = "뽀삐", requiredMode = Schema.RequiredMode.REQUIRED)

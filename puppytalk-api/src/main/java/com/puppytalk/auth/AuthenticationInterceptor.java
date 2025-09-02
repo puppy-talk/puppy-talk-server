@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -29,17 +28,15 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        // OPTIONS 요청은 통과
         if ("OPTIONS".equals(request.getMethod())) {
             return true;
         }
         
-        String token = extractTokenFromRequest(request);
+        String token = extractToken(request);
         
         if (!StringUtils.hasText(token)) {
             logger.debug("No JWT token found in request headers");
-            setUnauthorizedResponse(response, "토큰이 필요합니다");
-            return false;
+            throw new InvalidTokenException("토큰이 필요합니다");
         }
         
         try {
@@ -49,16 +46,14 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             return true;
         } catch (InvalidTokenException e) {
             logger.debug("Invalid JWT token: {}", e.getMessage());
-            setUnauthorizedResponse(response, e.getMessage());
-            return false;
+            throw e;
         } catch (Exception e) {
             logger.error("Authentication error: {}", e.getMessage(), e);
-            setUnauthorizedResponse(response, "인증 처리 중 오류가 발생했습니다");
-            return false;
+            throw new InvalidTokenException("인증 처리 중 오류가 발생했습니다", e);
         }
     }
     
-    private String extractTokenFromRequest(HttpServletRequest request) {
+    private String extractToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
         
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
@@ -68,18 +63,5 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         return null;
     }
     
-    private void setUnauthorizedResponse(HttpServletResponse response, String message) {
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.setContentType("application/json;charset=UTF-8");
-        
-        try {
-            String jsonResponse = String.format(
-                "{\"success\":false,\"message\":\"%s\",\"data\":null}",
-                message
-            );
-            response.getWriter().write(jsonResponse);
-        } catch (Exception e) {
-            logger.error("Error writing unauthorized response: {}", e.getMessage(), e);
-        }
-    }
+    // Standard 401 responses are handled by GlobalExceptionHandler via InvalidTokenException
 }

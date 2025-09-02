@@ -17,6 +17,8 @@ import com.puppytalk.chat.dto.response.NewMessageResult;
 import com.puppytalk.chat.dto.response.NewMessageListResponse;
 import com.puppytalk.support.ApiResponse;
 import com.puppytalk.support.ApiSuccessMessage;
+import com.puppytalk.user.User;
+import com.puppytalk.auth.CurrentUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -58,10 +60,11 @@ public class ChatController {
     @PostMapping("/rooms")
     public ResponseEntity<ApiResponse<ChatRoomResponse>> createChatRoom(
         @Parameter(description = "채팅방 생성 요청 정보", required = true)
-        @Valid @RequestBody ChatRoomCreateRequest request
+        @Valid @RequestBody ChatRoomCreateRequest request,
+        @CurrentUser User currentUser
     ) {
         ChatRoomCreateCommand command = ChatRoomCreateCommand.of(
-            request.userId(),
+            currentUser.getId().getValue(),
             request.petId()
         );
 
@@ -82,10 +85,9 @@ public class ChatController {
     })
     @GetMapping("/rooms")
     public ResponseEntity<ApiResponse<ChatRoomListResponse>> findChatRoomList(
-        @Parameter(description = "사용자 ID", required = true, example = "1")
-        @RequestParam @Positive(message = "사용자 ID는 양수여야 합니다") Long userId
+        @CurrentUser User currentUser
     ) {
-        ChatRoomListQuery query = ChatRoomListQuery.of(userId);
+        ChatRoomListQuery query = ChatRoomListQuery.of(currentUser.getId().getValue());
         ChatRoomListResult result = chatFacade.findChatRoomList(query);
 
         return ResponseEntity.ok(
@@ -107,14 +109,13 @@ public class ChatController {
     public ResponseEntity<ApiResponse<Void>> sendMessage(
         @Parameter(description = "채팅방 ID", required = true, example = "1")
         @PathVariable @Positive(message = "채팅방 ID는 양수여야 합니다") Long chatRoomId,
-        @Parameter(description = "사용자 ID", required = true, example = "1")
-        @RequestParam @Positive(message = "user ID는 양수여야 합니다") Long userId,
         @Parameter(description = "메시지 전송 요청 정보", required = true)
-        @Valid @RequestBody MessageSendRequest request
+        @Valid @RequestBody MessageSendRequest request,
+        @CurrentUser User currentUser
     ) {
         MessageSendCommand command = MessageSendCommand.of(
             chatRoomId,
-            userId,
+            currentUser.getId().getValue(),
             request.content()
         );
 
@@ -136,14 +137,13 @@ public class ChatController {
     public ResponseEntity<ApiResponse<MessageListResponse>> findMessageList(
         @Parameter(description = "채팅방 ID", required = true, example = "1")
         @PathVariable @Positive(message = "채팅방 ID는 양수여야 합니다") Long chatRoomId,
-        @Parameter(description = "사용자 ID", required = true, example = "1")
-        @RequestParam @Positive(message = "사용자 ID는 양수여야 합니다") Long userId,
         @Parameter(description = "커서 (이전 조회의 nextCursor 값, 첫 조회시 생략)", example = "123")
         @RequestParam(required = false) @Positive(message = "커서는 양수여야 합니다") Long cursor,
         @Parameter(description = "조회할 메시지 개수 (기본: 20, 최대: 100)", example = "20")
-        @RequestParam(required = false) @Positive(message = "사이즈는 양수여야 합니다") Integer size
+        @RequestParam(required = false) @Positive(message = "사이즈는 양수여야 합니다") Integer size,
+        @CurrentUser User currentUser
     ) {
-        MessageListQuery query = MessageListQuery.of(chatRoomId, userId, cursor, size);
+        MessageListQuery query = MessageListQuery.of(chatRoomId, currentUser.getId().getValue(), cursor, size);
         MessageListResult result = chatFacade.findMessageList(query);
 
         return ResponseEntity.ok(
@@ -164,15 +164,12 @@ public class ChatController {
     public ResponseEntity<ApiResponse<NewMessageListResponse>> findNewMessages( // TODO: MessagesResponse로 하면 안 되나?
         @Parameter(description = "채팅방 ID", required = true, example = "1")
         @PathVariable @Positive(message = "채팅방 ID는 양수여야 합니다") Long chatRoomId,
-
-        @Parameter(description = "사용자 ID", required = true, example = "1")
-        @RequestParam @Positive(message = "사용자 ID는 양수여야 합니다") Long userId,
-
         @Parameter(description = "기준 시간 (이 시간 이후의 메시지 조회)", required = true,
                   example = "2023-12-01T15:30:00")
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime since
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime since,
+        @CurrentUser User currentUser
     ) {
-        NewMessageQuery query = NewMessageQuery.of(chatRoomId, userId, since);
+        NewMessageQuery query = NewMessageQuery.of(chatRoomId, currentUser.getId().getValue(), since);
         NewMessageResult result = chatFacade.findNewMessages(query);
 
         return ResponseEntity.ok(

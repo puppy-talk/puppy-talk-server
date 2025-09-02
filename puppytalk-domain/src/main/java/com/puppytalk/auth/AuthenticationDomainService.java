@@ -72,11 +72,11 @@ public class AuthenticationDomainService {
         
         // Redis에서 토큰 활성 상태 확인
         if (!tokenStore.isTokenActive(accessToken)) {
-            throw InvalidTokenException.invalid();
+            throw InvalidTokenException.invalidToken();
         }
         
         if (!tokenProvider.validateToken(accessToken)) {
-            throw InvalidTokenException.invalid();
+            throw InvalidTokenException.invalidToken();
         }
         
         var userId = tokenProvider.getUserIdFromToken(accessToken);

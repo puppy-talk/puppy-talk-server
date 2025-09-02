@@ -10,9 +10,7 @@ import jakarta.validation.constraints.Positive;
 @Schema(description = "채팅방 생성 요청")
 public record ChatRoomCreateRequest(
     
-    @Schema(description = "사용자 ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "사용자 ID는 필수입니다")
-    @Positive(message = "사용자 ID는 양수여야 합니다")
+    @Schema(description = "사용자 ID (인증된 사용자로 대체됨)", example = "1", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     Long userId,
     
     @Schema(description = "반려동물 ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
