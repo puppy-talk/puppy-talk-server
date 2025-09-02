@@ -3,6 +3,7 @@ package com.puppytalk.auth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.puppytalk.user.UserId;
+import java.util.Map;
 import org.redisson.api.RBucket;
 import org.redisson.api.RKeys;
 import org.redisson.api.RedissonClient;
@@ -94,8 +95,7 @@ public class RedisTokenStore implements TokenStore {
             }
             
             // HashMap으로 역직렬화하여 토큰 정보 확인
-            @SuppressWarnings("unchecked")
-            java.util.Map<String, Object> tokenInfoMap = objectMapper.readValue(tokenJson, java.util.Map.class);
+            Map<String, Object> tokenInfoMap = objectMapper.readValue(tokenJson, java.util.Map.class);
             
             String tokenExpiryStr = (String) tokenInfoMap.get("tokenExpiry");
             LocalDateTime tokenExpiry = LocalDateTime.parse(tokenExpiryStr);
@@ -124,7 +124,7 @@ public class RedisTokenStore implements TokenStore {
                 
                 if (tokenJson != null) {
                     @SuppressWarnings("unchecked")
-                    java.util.Map<String, Object> tokenInfoMap = objectMapper.readValue(tokenJson, java.util.Map.class);
+                    Map<String, Object> tokenInfoMap = objectMapper.readValue(tokenJson, java.util.Map.class);
                     
                     String accessToken = (String) tokenInfoMap.get("accessToken");
                     String tokenExpiryStr = (String) tokenInfoMap.get("tokenExpiry");
@@ -159,7 +159,7 @@ public class RedisTokenStore implements TokenStore {
             
             if (tokenJson != null) {
                 @SuppressWarnings("unchecked")
-                java.util.Map<String, Object> tokenInfoMap = objectMapper.readValue(tokenJson, java.util.Map.class);
+                Map<String, Object> tokenInfoMap = objectMapper.readValue(tokenJson, java.util.Map.class);
                 
                 String tokenExpiryStr = (String) tokenInfoMap.get("tokenExpiry");
                 LocalDateTime tokenExpiry = LocalDateTime.parse(tokenExpiryStr);
@@ -198,7 +198,7 @@ public class RedisTokenStore implements TokenStore {
                 
                 if (tokenJson != null) {
                     @SuppressWarnings("unchecked")
-                    java.util.Map<String, Object> tokenInfoMap = objectMapper.readValue(tokenJson, java.util.Map.class);
+                    Map<String, Object> tokenInfoMap = objectMapper.readValue(tokenJson, java.util.Map.class);
                     
                     Long userIdValue = Long.valueOf(tokenInfoMap.get("userId").toString());
                     String accessToken = (String) tokenInfoMap.get("accessToken");
@@ -271,7 +271,7 @@ public class RedisTokenStore implements TokenStore {
             
             if (tokenJson != null) {
                 @SuppressWarnings("unchecked")
-                java.util.Map<String, Object> tokenInfoMap = objectMapper.readValue(tokenJson, java.util.Map.class);
+                Map<String, Object> tokenInfoMap = objectMapper.readValue(tokenJson, java.util.Map.class);
                 
                 Long userIdValue = Long.valueOf(tokenInfoMap.get("userId").toString());
                 return Optional.of(UserId.from(userIdValue));

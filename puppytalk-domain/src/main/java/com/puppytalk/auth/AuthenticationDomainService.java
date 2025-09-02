@@ -17,12 +17,14 @@ public class AuthenticationDomainService {
     private final TokenProvider tokenProvider;
     private final TokenStore tokenStore;
     
-    public AuthenticationDomainService(UserDomainService userDomainService, 
-                                     TokenProvider tokenProvider,
-                                     TokenStore tokenStore) {
-        this.userDomainService = Preconditions.requireNonNull(userDomainService, "UserDomainService");
-        this.tokenProvider = Preconditions.requireNonNull(tokenProvider, "TokenProvider");
-        this.tokenStore = Preconditions.requireNonNull(tokenStore, "TokenStore");
+    public AuthenticationDomainService(
+        UserDomainService userDomainService,
+        TokenProvider tokenProvider,
+        TokenStore tokenStore
+    ) {
+        this.userDomainService = userDomainService;
+        this.tokenProvider = tokenProvider;
+        this.tokenStore = tokenStore;
     }
     
     /**
@@ -49,7 +51,7 @@ public class AuthenticationDomainService {
         
         JwtToken token = tokenProvider.generateToken(user.getId(), user.getUsername());
         
-        // 토큰을 Redis에 저장
+        // 토큰 저장
         tokenStore.storeToken(
             user.getId(),
             token.accessToken(),
@@ -60,30 +62,40 @@ public class AuthenticationDomainService {
     }
     
     /**
-     * 토큰을 검증하고 사용자 정보를 반환한다
+     * 토큰의 유효성을 검증한다
+     * 
+     * @param accessToken 액세스 토큰
+     * @throws InvalidTokenException 토큰이 유효하지 않은 경우
+     */
+    public void validateToken(String accessToken) {
+        Preconditions.requireNonBlank(accessToken, "AccessToken");
+        
+        // 토큰 활성 상태 확인
+        if (!tokenStore.isTokenActive(accessToken)) {
+            throw InvalidTokenException.invalidToken();
+        }
+        
+        // JWT 토큰 서명 및 만료 시간 검증
+        if (!tokenProvider.validateToken(accessToken)) {
+            throw InvalidTokenException.invalidToken();
+        }
+    }
+    
+    /**
+     * 토큰에서 사용자 정보를 추출한다
      * 
      * @param accessToken 액세스 토큰
      * @return 사용자 정보
      * @throws InvalidTokenException 토큰이 유효하지 않은 경우
      * @throws UserNotFoundException 사용자가 존재하지 않는 경우
      */
-    public User validateTokenAndGetUser(String accessToken) {
+    public User getUserFromToken(String accessToken) {
         Preconditions.requireNonBlank(accessToken, "AccessToken");
-        
-        // Redis에서 토큰 활성 상태 확인
-        if (!tokenStore.isTokenActive(accessToken)) {
-            throw InvalidTokenException.invalidToken();
-        }
-        
-        if (!tokenProvider.validateToken(accessToken)) {
-            throw InvalidTokenException.invalidToken();
-        }
         
         var userId = tokenProvider.getUserIdFromToken(accessToken);
         return userDomainService.getUserById(userId);
     }
-    
-    
+
     /**
      * 사용자의 모든 토큰을 무효화한다 (전체 로그아웃)
      * 

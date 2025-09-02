@@ -31,26 +31,20 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         if ("OPTIONS".equals(request.getMethod())) {
             return true;
         }
-        
+
+        // 1. 토큰 추출
         String token = extractToken(request);
-        
-        if (!StringUtils.hasText(token)) {
-            logger.debug("No JWT token found in request headers");
-            throw new InvalidTokenException("토큰이 필요합니다");
-        }
-        
-        try {
-            User user = authenticationDomainService.validateTokenAndGetUser(token);
-            request.setAttribute(CURRENT_USER_ATTRIBUTE, user);
-            logger.debug("JWT token validated successfully for user: {}", user.getUsername());
-            return true;
-        } catch (InvalidTokenException e) {
-            logger.debug("Invalid JWT token: {}", e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            logger.error("Authentication error: {}", e.getMessage(), e);
-            throw new InvalidTokenException("인증 처리 중 오류가 발생했습니다", e);
-        }
+
+        // 2. 토큰 유효성 검사
+        authenticationDomainService.validateToken(token);
+
+        // 3. 토큰으로 사용자 정보 조회
+        User user = authenticationDomainService.getUserFromToken(token);
+
+        // 4. request 객체에 사용자 정보 등록
+        request.setAttribute(CURRENT_USER_ATTRIBUTE, user);
+        logger.debug("JWT token validated successfully for user: {}", user.getUsername());
+        return true;
     }
     
     private String extractToken(HttpServletRequest request) {
@@ -60,8 +54,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             return bearerToken.substring(BEARER_PREFIX.length());
         }
         
-        return null;
+        logger.debug("No JWT token found in request headers");
+        throw new InvalidTokenException("토큰이 필요합니다");
     }
-    
-    // Standard 401 responses are handled by GlobalExceptionHandler via InvalidTokenException
 }

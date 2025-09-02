@@ -4,7 +4,6 @@ import com.puppytalk.auth.dto.request.LoginCommand;
 import com.puppytalk.auth.dto.request.LogoutCommand;
 import com.puppytalk.auth.dto.response.ActiveTokensResult;
 import com.puppytalk.auth.dto.response.TokenResult;
-import com.puppytalk.user.User;
 import com.puppytalk.user.UserId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,16 +34,6 @@ public class AuthenticationFacade {
         JwtToken token = authenticationDomainService.login(command.username(), command.password());
         return TokenResult.from(token);
     }
-    
-    /**
-     * 토큰을 검증하고 사용자 정보를 반환한다
-     */
-    public User validateTokenAndGetUser(String accessToken) {
-        Assert.hasText(accessToken, "Access token must not be null or empty");
-        
-        return authenticationDomainService.validateTokenAndGetUser(accessToken);
-    }
-    
     
     /**
      * 로그아웃을 처리한다
