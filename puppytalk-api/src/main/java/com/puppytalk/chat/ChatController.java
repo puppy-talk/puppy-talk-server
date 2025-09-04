@@ -64,7 +64,7 @@ public class ChatController {
         @CurrentUser User currentUser
     ) {
         ChatRoomCreateCommand command = ChatRoomCreateCommand.of(
-            currentUser.getId().getValue(),
+            currentUser.getId().value(),
             request.petId()
         );
 
@@ -87,7 +87,7 @@ public class ChatController {
     public ResponseEntity<ApiResponse<ChatRoomListResponse>> findChatRoomList(
         @CurrentUser User currentUser
     ) {
-        ChatRoomListQuery query = ChatRoomListQuery.of(currentUser.getId().getValue());
+        ChatRoomListQuery query = ChatRoomListQuery.of(currentUser.getId().value());
         ChatRoomListResult result = chatFacade.findChatRoomList(query);
 
         return ResponseEntity.ok(
@@ -115,7 +115,7 @@ public class ChatController {
     ) {
         MessageSendCommand command = MessageSendCommand.of(
             chatRoomId,
-            currentUser.getId().getValue(),
+            currentUser.getId().value(),
             request.content()
         );
 
@@ -143,7 +143,7 @@ public class ChatController {
         @RequestParam(required = false) @Positive(message = "사이즈는 양수여야 합니다") Integer size,
         @CurrentUser User currentUser
     ) {
-        MessageListQuery query = MessageListQuery.of(chatRoomId, currentUser.getId().getValue(), cursor, size);
+        MessageListQuery query = MessageListQuery.of(chatRoomId, currentUser.getId().value(), cursor, size);
         MessageListResult result = chatFacade.findMessageList(query);
 
         return ResponseEntity.ok(
@@ -169,7 +169,7 @@ public class ChatController {
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime since,
         @CurrentUser User currentUser
     ) {
-        NewMessageQuery query = NewMessageQuery.of(chatRoomId, currentUser.getId().getValue(), since);
+        NewMessageQuery query = NewMessageQuery.of(chatRoomId, currentUser.getId().value(), since);
         NewMessageResult result = chatFacade.findNewMessages(query);
 
         return ResponseEntity.ok(

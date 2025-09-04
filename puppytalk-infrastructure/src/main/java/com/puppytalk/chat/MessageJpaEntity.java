@@ -45,7 +45,7 @@ public class MessageJpaEntity extends BaseEntity {
      */
     public static MessageJpaEntity from(Message message) {
         return new MessageJpaEntity(
-            message.getChatRoomId().getValue(),
+            message.getChatRoomId().value(),
             message.getType(),
             message.getContent()
         );
@@ -56,7 +56,7 @@ public class MessageJpaEntity extends BaseEntity {
      * 개별 setter 사용을 방지하여 불변성 보장
      */
     public void update(Message message) {
-        this.chatRoomId = message.getChatRoomId().getValue();
+        this.chatRoomId = message.getChatRoomId().value();
         this.type = message.getType();
         this.content = message.getContent();
     }

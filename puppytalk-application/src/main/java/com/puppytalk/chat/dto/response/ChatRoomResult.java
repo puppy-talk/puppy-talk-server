@@ -16,9 +16,9 @@ public record ChatRoomResult(
     
     public static ChatRoomResult from(ChatRoom chatRoom) {
         return new ChatRoomResult(
-            chatRoom.getId().getValue(),
-            chatRoom.getUserId().getValue(),
-            chatRoom.getPetId().getValue(),
+            chatRoom.getId().value(),
+            chatRoom.getUserId().value(),
+            chatRoom.getPetId().value(),
             chatRoom.getCreatedAt(),
             chatRoom.getLastMessageAt()
         );

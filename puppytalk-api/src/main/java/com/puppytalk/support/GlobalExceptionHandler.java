@@ -7,7 +7,6 @@ import com.puppytalk.chat.exception.ChatRoomAccessDeniedException;
 import com.puppytalk.chat.exception.MessageNotFoundException;
 import com.puppytalk.chat.exception.MessageValidationException;
 import com.puppytalk.notification.NotificationException;
-import com.puppytalk.support.exception.DomainException;
 import com.puppytalk.user.UserNotFoundException;
 import com.puppytalk.pet.PetNotFoundException;
 import com.puppytalk.chat.exception.ChatRoomNotFoundException;

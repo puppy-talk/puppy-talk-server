@@ -50,7 +50,7 @@ public class UserJpaEntity extends BaseEntity {
      */
     public static UserJpaEntity from(User user) {
         return new UserJpaEntity(
-            user.getId() != null ? user.getId().getValue() : null,
+            user.getId() != null ? user.getId().value() : null,
             user.getUsername(),
             user.getEmail(),
             user.getPassword(),

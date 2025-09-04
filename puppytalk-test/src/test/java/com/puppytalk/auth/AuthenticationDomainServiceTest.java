@@ -94,7 +94,7 @@ class AuthenticationDomainServiceTest {
 
             // then
             assertThat(token).isNotNull();
-            assertThat(token.accessToken()).isEqualTo("generated_token_" + user.getId().getValue());
+            assertThat(token.accessToken()).isEqualTo("generated_token_" + user.getId().value());
             assertThat(userDomainService.updateLastActiveTimeCalled).isTrue();
             assertThat(tokenStore.storedTokens).hasSize(1);
             
@@ -406,7 +406,7 @@ class AuthenticationDomainServiceTest {
 
         @Override
         public JwtToken generateToken(UserId userId, String username) {
-            String tokenValue = "generated_token_" + userId.getValue();
+            String tokenValue = "generated_token_" + userId.value();
             generatedTokens.put(userId, tokenValue);
             tokenUserIds.put(tokenValue, userId);
             return new JwtToken(tokenValue, LocalDateTime.now().plusHours(1));

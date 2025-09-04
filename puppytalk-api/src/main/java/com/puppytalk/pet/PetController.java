@@ -68,7 +68,7 @@ public class PetController {
         ) @Valid @RequestBody PetCreateRequest request,
         @CurrentUser User currentUser
     ) {
-        Long ownerId = currentUser.getId().getValue();
+        Long ownerId = currentUser.getId().value();
 
         PetCreateCommand command = PetCreateCommand.of(ownerId, request.name(), request.persona());
 
@@ -85,7 +85,7 @@ public class PetController {
     })
     @GetMapping
     public ResponseEntity<ApiResponse<PetsResponse>> getPetList(@CurrentUser User currentUser) {
-        PetListQuery query = PetListQuery.of(currentUser.getId().getValue());
+        PetListQuery query = PetListQuery.of(currentUser.getId().value());
         PetListResult result = petFacade.getPetList(query);
 
         return ResponseEntity.ok(
@@ -109,7 +109,7 @@ public class PetController {
         @PathVariable Long petId,
         @CurrentUser User currentUser
     ) {
-        PetGetQuery query = PetGetQuery.of(petId, currentUser.getId().getValue());
+        PetGetQuery query = PetGetQuery.of(petId, currentUser.getId().value());
         PetResult petResult = petFacade.getPet(query);
         PetResponse response = PetResponse.from(petResult);
 
@@ -131,7 +131,7 @@ public class PetController {
         @Parameter(description = "반려동물 ID", required = true, example = "1")
         @PathVariable Long petId,
         @CurrentUser User currentUser) {
-        PetDeleteCommand command = PetDeleteCommand.of(petId, currentUser.getId().getValue());
+        PetDeleteCommand command = PetDeleteCommand.of(petId, currentUser.getId().value());
         petFacade.deletePet(command);
 
         return ResponseEntity.ok(

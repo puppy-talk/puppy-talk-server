@@ -55,8 +55,8 @@ public class AiMessageGenerationServiceImpl implements AiMessageGenerationServic
         log.info("Generating inactivity notification for userId: {}, petId: {}", chatRoom.getUserId(), pet.getId());
 
         InactivityNotificationRequest request = new InactivityNotificationRequest(
-            chatRoom.getUserId().getValue().intValue(),
-            pet.getId().getValue().intValue(),
+            chatRoom.getUserId().value().intValue(),
+            pet.getId().value().intValue(),
             pet.getPersona(),
             convertToAiChatMessage(lastMessages),
             hoursSinceLastActivity,

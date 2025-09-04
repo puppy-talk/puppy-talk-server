@@ -102,8 +102,8 @@ public class ChatFacade {
 
         // 3. AI 응답 생성 및 저장
         ChatContext chatContext = new ChatContext(
-            chatRoom.getUserId().getValue(),
-            pet.getId().getValue(),
+            chatRoom.getUserId().value(),
+            pet.getId().value(),
             pet.getPersona(),
             command.content(),
             conversationHistory

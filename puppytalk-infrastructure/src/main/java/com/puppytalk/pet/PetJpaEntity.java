@@ -48,8 +48,8 @@ public class PetJpaEntity extends BaseEntity {
      */
     public static PetJpaEntity from(Pet pet) {
         return new PetJpaEntity(
-            pet.getId() != null && pet.getId().isStored() ? pet.getId().getValue() : null,
-            pet.getOwnerId().getValue(),
+            pet.getId() != null && pet.getId().value() != null ? pet.getId().value() : null,
+            pet.getOwnerId().value(),
             pet.getName(),
             pet.getPersona(),
             pet.isDeleted(),

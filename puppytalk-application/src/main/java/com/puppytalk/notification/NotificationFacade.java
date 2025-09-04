@@ -120,7 +120,7 @@ public class NotificationFacade {
             inactiveUsers);
 
         return targetUserList.stream()
-            .map(UserId::getValue)
+            .map(UserId::value)
             .toList();
     }
 

@@ -17,8 +17,8 @@ public record MessageResult(
     
     public static MessageResult from(Message message) {
         return new MessageResult(
-            message.getId().getValue(),
-            message.getChatRoomId().getValue(),
+            message.getId().value(),
+            message.getChatRoomId().value(),
             message.getType(),
             message.getContent(),
             message.getCreatedAt()

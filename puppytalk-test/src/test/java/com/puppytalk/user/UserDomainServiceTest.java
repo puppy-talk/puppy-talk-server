@@ -399,7 +399,7 @@ class UserDomainServiceTest {
             savedUsers.add(user);
             if (user.getId() == null) {
                 UserId newId = nextId;
-                nextId = UserId.from(nextId.getValue() + 1);
+                nextId = UserId.from(nextId.value() + 1);
                 return newId;
             }
             return user.getId();
@@ -436,6 +436,11 @@ class UserDomainServiceTest {
         }
 
         @Override
+        public List<User> findDeletedUsers() {
+            return List.of();
+        }
+
+        @Override
         public List<Long> findInactiveUsers(LocalDateTime cutoffTime) {
             return inactiveUserIds;
         }
@@ -456,6 +461,11 @@ class UserDomainServiceTest {
         public boolean matches(String rawPassword, String encodedPassword) {
             matchesCalled = true;
             return matchesResult;
+        }
+
+        @Override
+        public String getAlgorithm() {
+            return "";
         }
     }
 }

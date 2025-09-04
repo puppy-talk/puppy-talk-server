@@ -98,10 +98,10 @@ public class NotificationJpaEntity extends BaseEntity {
      */
     public static NotificationJpaEntity from(Notification notification) {
         return new NotificationJpaEntity(
-            notification.getId() != null ? notification.getId().getValue() : null,
-            notification.getUserId().getValue(),
-            notification.getPetId() != null ? notification.getPetId().getValue() : null,
-            notification.getChatRoomId() != null ? notification.getChatRoomId().getValue() : null,
+            notification.getId() != null ? notification.getId().value() : null,
+            notification.getUserId().value(),
+            notification.getPetId() != null ? notification.getPetId().value() : null,
+            notification.getChatRoomId() != null ? notification.getChatRoomId().value() : null,
             notification.getType(),
             notification.getTitle(),
             notification.getContent(),
