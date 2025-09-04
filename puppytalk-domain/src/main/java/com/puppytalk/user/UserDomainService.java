@@ -1,6 +1,5 @@
 package com.puppytalk.user;
 
-import com.puppytalk.support.validation.Preconditions;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -21,8 +20,8 @@ public class UserDomainService {
      * @throws IllegalArgumentException 파라미터가 null인 경우
      */
     public UserDomainService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = Preconditions.requireNonNull(userRepository, "UserRepository");
-        this.passwordEncoder = Preconditions.requireNonNull(passwordEncoder, "PasswordEncoder");
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
     
     /**
@@ -35,9 +34,6 @@ public class UserDomainService {
      * @throws DuplicateUserException 사용자명 또는 이메일이 중복된 경우
      */
     public UserId registerUser(String username, String email, String rawPassword) {
-        Preconditions.requireNonBlank(username, "Username");
-        Preconditions.requireNonBlank(email, "Email");
-        Preconditions.requireNonBlank(rawPassword, "Password");
         
         validateUniqueUsername(username.trim());
         validateUniqueEmail(email.trim());
@@ -56,7 +52,6 @@ public class UserDomainService {
      * @throws UserNotFoundException 사용자가 존재하지 않는 경우
      */
     public User getUserById(UserId userId) {
-        Preconditions.requireValidId(userId, "UserId");
         
         return userRepository.findById(userId)
             .orElseThrow(() -> UserNotFoundException.byId(userId));
@@ -70,7 +65,6 @@ public class UserDomainService {
      * @throws UserNotFoundException 사용자가 존재하지 않는 경우
      */
     public User getUserByUsername(String username) {
-        Preconditions.requireNonBlank(username, "Username");
         
         return userRepository.findByUsername(username.trim())
             .orElseThrow(() -> UserNotFoundException.byUsername(username));
@@ -93,7 +87,6 @@ public class UserDomainService {
      * @throws UserNotFoundException 사용자가 존재하지 않는 경우
      */
     public User getUserByEmail(String email) {
-        Preconditions.requireNonBlank(email, "Email");
         
         return userRepository.findByEmail(email.trim().toLowerCase())
             .orElseThrow(() -> UserNotFoundException.byEmail(email));
@@ -119,7 +112,6 @@ public class UserDomainService {
      * @return 비밀번호가 일치하면 true
      */
     public boolean checkPassword(User user, String rawPassword) {
-        Preconditions.requireNonBlank(rawPassword, "Password");
         return passwordEncoder.matches(rawPassword, user.getPassword());
     }
     
@@ -131,7 +123,6 @@ public class UserDomainService {
      * @throws UserNotFoundException 사용자가 존재하지 않는 경우
      */
     public void changePassword(UserId userId, String newRawPassword) {
-        Preconditions.requireNonBlank(newRawPassword, "Password");
         
         User user = getUserById(userId);
         String newEncryptedPassword = passwordEncoder.encode(newRawPassword);
@@ -158,7 +149,6 @@ public class UserDomainService {
      * @return 비활성 사용자 ID 목록
      */
     public List<Long> findInactiveUsers(LocalDateTime cutoffTime) {
-        Preconditions.requireNonNull(cutoffTime, "CutoffTime");
         return userRepository.findInactiveUsers(cutoffTime);
     }
     

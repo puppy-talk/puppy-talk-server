@@ -45,7 +45,7 @@ public class JwtTokenProvider implements TokenProvider {
         Date tokenExpiry = new Date(now.getTime() + accessTokenValidityInMilliseconds);
         
         Map<String, Object> claims = new HashMap<>();
-        claims.put(USER_ID_CLAIM, userId.getValue());
+        claims.put(USER_ID_CLAIM, userId.value());
         claims.put(USERNAME_CLAIM, username);
         
         String accessToken = Jwts.builder()

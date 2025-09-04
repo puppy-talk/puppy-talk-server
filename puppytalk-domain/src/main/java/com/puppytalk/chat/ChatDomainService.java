@@ -4,7 +4,6 @@ import com.puppytalk.chat.exception.ChatRoomAccessDeniedException;
 import com.puppytalk.chat.exception.ChatRoomNotFoundException;
 import com.puppytalk.chat.exception.MessageNotFoundException;
 import com.puppytalk.pet.PetId;
-import com.puppytalk.support.validation.Preconditions;
 import com.puppytalk.user.UserId;
 import java.util.List;
 import java.util.Optional;
@@ -32,8 +31,6 @@ public class ChatDomainService {
      * @throws IllegalArgumentException userId 또는 petId가 null인 경우
      */
     public ChatRoom createChatRoom(UserId userId, PetId petId) {
-        Preconditions.requireValidId(userId, "UserId");
-        Preconditions.requireValidId(petId, "PetId");
 
         Optional<ChatRoom> chatRoom = chatRoomRepository.findByUserIdAndPetId(userId, petId);
         return chatRoom.orElseGet(() -> chatRoomRepository.create(ChatRoom.create(userId, petId)));
@@ -44,8 +41,6 @@ public class ChatDomainService {
      * 채팅방 조회
      */
     public ChatRoom findChatRoom(ChatRoomId chatRoomId, UserId userId) {
-        Preconditions.requireValidId(chatRoomId, "ChatRoomId");
-        Preconditions.requireValidId(userId, "UserId");
 
         ChatRoom room = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new ChatRoomNotFoundException(chatRoomId));
@@ -61,7 +56,6 @@ public class ChatDomainService {
      * 사용자의 채팅방 목록 조회
      */
     public List<ChatRoom> findChatRoomList(UserId userId) {
-        Preconditions.requireValidId(userId, "UserId");
         return chatRoomRepository.findByUserId(userId);
     }
 
@@ -69,9 +63,6 @@ public class ChatDomainService {
      * 사용자 메시지 전송
      */
     public void sendUserMessage(ChatRoomId chatRoomId, UserId userId, String content) {
-        Preconditions.requireValidId(chatRoomId, "ChatRoomId");
-        Preconditions.requireValidId(userId, "UserId");
-        Preconditions.requireNonBlank(content, "Content");
 
         // 채팅방 존재 및 소유권 확인
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
@@ -92,8 +83,6 @@ public class ChatDomainService {
      * 반려동물 메시지 전송 (AI 응답)
      */
     public Message sendPetMessage(ChatRoomId chatRoomId, String content) {
-        Preconditions.requireValidId(chatRoomId, "ChatRoomId");
-        Preconditions.requireNonBlank(content, "Content");
 
         // 채팅방 존재 확인
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
@@ -146,8 +135,6 @@ public class ChatDomainService {
      * 특정 메시지 조회
      */
     public Message findMessage(MessageId messageId, UserId userId) {
-        Preconditions.requireValidId(messageId, "MessageId");
-        Preconditions.requireValidId(userId, "UserId");
 
         Message message = messageRepository.findById(messageId)
             .orElseThrow(() -> new MessageNotFoundException(messageId));
@@ -164,7 +151,6 @@ public class ChatDomainService {
      * @return 최신 메시지부터 정렬된 리스트
      */
     public List<Message> findRecentChatHistory(ChatRoomId chatRoomId, int limit) {
-        Preconditions.requireValidId(chatRoomId, "ChatRoomId");
         if (limit <= 0) {
             throw new IllegalArgumentException("Limit must be positive");
         }
@@ -193,8 +179,6 @@ public class ChatDomainService {
      * 사용자와 반려동물의 채팅방 조회
      */
     public Optional<ChatRoom> findChatRoomByUserIdAndPetId(UserId userId, PetId petId) {
-        Preconditions.requireValidId(userId, "UserId");
-        Preconditions.requireValidId(petId, "PetId");
         return chatRoomRepository.findByUserIdAndPetId(userId, petId);
     }
 
@@ -202,8 +186,6 @@ public class ChatDomainService {
      * 채팅방 접근 권한 검증
      */
     private void validateChatRoomAccess(ChatRoomId chatRoomId, UserId userId) {
-        Preconditions.requireValidId(chatRoomId, "ChatRoomId");
-        Preconditions.requireValidId(userId, "UserId");
 
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new ChatRoomNotFoundException("채팅방을 찾을 수 없습니다: " + chatRoomId));

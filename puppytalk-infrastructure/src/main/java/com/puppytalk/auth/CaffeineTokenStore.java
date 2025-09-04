@@ -2,7 +2,6 @@ package com.puppytalk.auth;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.puppytalk.support.validation.Preconditions;
 import com.puppytalk.user.UserId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,9 +49,6 @@ public class CaffeineTokenStore implements TokenStore {
     
     @Override
     public void storeToken(UserId userId, String accessToken, LocalDateTime tokenExpiry) {
-        Preconditions.requireValidId(userId, "UserId");
-        Preconditions.requireNonBlank(accessToken, "AccessToken");
-        Preconditions.requireNonNull(tokenExpiry, "TokenExpiry");
         
         ActiveTokenInfo tokenInfo = new ActiveTokenInfo(
             userId,
@@ -85,12 +81,11 @@ public class CaffeineTokenStore implements TokenStore {
             }
         });
         
-        logger.debug("Token stored for user: {}", userId.getValue());
+        logger.debug("Token stored for user: {}", userId.value());
     }
     
     @Override
     public boolean isTokenActive(String accessToken) {
-        Preconditions.requireNonBlank(accessToken, "AccessToken");
         
         ActiveTokenInfo tokenInfo = tokenCache.getIfPresent(accessToken);
         
@@ -110,7 +105,6 @@ public class CaffeineTokenStore implements TokenStore {
     
     @Override
     public void invalidateAllTokensForUser(UserId userId) {
-        Preconditions.requireValidId(userId, "UserId");
         
         List<String> userTokens = userTokensMap.get(userId);
         if (userTokens != null) {
@@ -121,13 +115,12 @@ public class CaffeineTokenStore implements TokenStore {
             userTokensMap.remove(userId);
             
             logger.debug("All tokens invalidated for user: {}, token count: {}", 
-                userId.getValue(), userTokens.size());
+                userId.value(), userTokens.size());
         }
     }
     
     @Override
     public void invalidateToken(String accessToken) {
-        Preconditions.requireNonBlank(accessToken, "AccessToken");
         
         // 토큰 정보를 먼저 조회해서 사용자 정보를 얻음
         ActiveTokenInfo tokenInfo = tokenCache.getIfPresent(accessToken);
@@ -144,7 +137,6 @@ public class CaffeineTokenStore implements TokenStore {
     
     @Override
     public List<ActiveTokenInfo> getActiveTokensForUser(UserId userId) {
-        Preconditions.requireValidId(userId, "UserId");
         
         List<String> userTokens = userTokensMap.get(userId);
         if (userTokens == null) {
@@ -194,7 +186,6 @@ public class CaffeineTokenStore implements TokenStore {
     
     @Override
     public Optional<UserId> getUserIdByToken(String accessToken) {
-        Preconditions.requireNonBlank(accessToken, "AccessToken");
         
         ActiveTokenInfo tokenInfo = tokenCache.getIfPresent(accessToken);
         

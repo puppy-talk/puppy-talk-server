@@ -1,6 +1,5 @@
 package com.puppytalk.pet;
 
-import com.puppytalk.support.validation.Preconditions;
 import com.puppytalk.user.UserId;
 import java.util.List;
 
@@ -19,7 +18,7 @@ public class PetDomainService {
      * @throws IllegalArgumentException petRepository가 null인 경우
      */
     public PetDomainService(PetRepository petRepository) {
-        this.petRepository = Preconditions.requireNonNull(petRepository, "PetRepository");
+        this.petRepository = petRepository;
     }
 
     /**
@@ -32,8 +31,6 @@ public class PetDomainService {
      * @throws PetNotFoundException 반려동물이 존재하지 않거나 소유자가 다른 경우
      */
     public Pet getPet(PetId petId, UserId ownerId) {
-        Preconditions.requireValidId(petId, "PetId");
-        Preconditions.requireValidId(ownerId, "OwnerId");
 
         return petRepository.findByIdAndOwnerId(petId, ownerId)
             .orElseThrow(() -> new PetNotFoundException(petId));
@@ -49,9 +46,6 @@ public class PetDomainService {
      * @throws RuntimeException 생성 실패 시
      */
     public void createPet(UserId ownerId, String petName, String persona) {
-        Preconditions.requireValidId(ownerId, "OwnerId");
-        Preconditions.requireNonBlank(petName, "PetName");
-        Preconditions.requireNonBlank(persona, "Persona");
 
         Pet pet = Pet.create(ownerId, petName, persona);
         petRepository.create(pet);
@@ -66,7 +60,6 @@ public class PetDomainService {
      * @throws RuntimeException 조회 실패 시
      */
     public List<Pet> findPetList(UserId ownerId) {
-        Preconditions.requireValidId(ownerId, "OwnerId");
         return petRepository.findByOwnerId(ownerId);
     }
     
@@ -78,7 +71,6 @@ public class PetDomainService {
      * @throws IllegalArgumentException ownerId가 유효하지 않은 경우
      */
     public Long findFirstPetId(UserId ownerId) {
-        Preconditions.requireValidId(ownerId, "OwnerId");
         
         List<Pet> pets = petRepository.findByOwnerId(ownerId);
 
@@ -86,7 +78,7 @@ public class PetDomainService {
             throw new PetNotFoundException(ownerId);
         }
 
-        return pets.get(0).getId().getValue();
+        return pets.get(0).getId().value();
     }
     
     /**

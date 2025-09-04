@@ -1,7 +1,6 @@
 package com.puppytalk.chat;
 
 import com.puppytalk.pet.PetId;
-import com.puppytalk.support.validation.Preconditions;
 import com.puppytalk.user.UserId;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -28,8 +27,6 @@ public class ChatRoom {
     }
 
     public static ChatRoom create(UserId userId, PetId petId) {
-        Preconditions.requireValidId(userId, "UserId");
-        Preconditions.requireValidId(petId, "PetId");
         
         LocalDateTime now = LocalDateTime.now();
         return new ChatRoom(
@@ -48,9 +45,6 @@ public class ChatRoom {
         LocalDateTime createdAt,
         LocalDateTime lastMessageAt
     ) {
-        Preconditions.requireValidId(id, "ChatRoomId");
-        Preconditions.requireValidId(userId, "UserId");
-        Preconditions.requireValidId(petId, "PetId");
 
         if (createdAt == null) {
             throw new IllegalArgumentException("생성 시각은 필수입니다");

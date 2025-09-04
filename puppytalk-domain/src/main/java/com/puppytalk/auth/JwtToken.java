@@ -1,6 +1,5 @@
 package com.puppytalk.auth;
 
-import com.puppytalk.support.validation.Preconditions;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -15,7 +14,6 @@ public record JwtToken(
     public static final int ACCESS_TOKEN_VALIDITY_HOURS = 24;  // 24시간으로 연장
     
     public JwtToken {
-        Preconditions.requireNonBlank(accessToken, "AccessToken");
         Objects.requireNonNull(expiresAt, "ExpiresAt must not be null");
     }
     

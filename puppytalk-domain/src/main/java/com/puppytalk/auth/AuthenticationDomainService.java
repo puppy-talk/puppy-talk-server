@@ -1,6 +1,5 @@
 package com.puppytalk.auth;
 
-import com.puppytalk.support.validation.Preconditions;
 import com.puppytalk.user.User;
 import com.puppytalk.user.UserId;
 import com.puppytalk.user.UserDomainService;
@@ -37,8 +36,6 @@ public class AuthenticationDomainService {
      * @throws InvalidCredentialsException 인증 정보가 올바르지 않은 경우
      */
     public JwtToken login(String username, String password) {
-        Preconditions.requireNonBlank(username, "Username");
-        Preconditions.requireNonBlank(password, "Password");
         
         User user = userDomainService.getUserByUsername(username.trim());
         
@@ -68,7 +65,6 @@ public class AuthenticationDomainService {
      * @throws InvalidTokenException 토큰이 유효하지 않은 경우
      */
     public void validateToken(String accessToken) {
-        Preconditions.requireNonBlank(accessToken, "AccessToken");
         
         // 토큰 활성 상태 확인
         if (!tokenStore.isTokenActive(accessToken)) {
@@ -90,7 +86,6 @@ public class AuthenticationDomainService {
      * @throws UserNotFoundException 사용자가 존재하지 않는 경우
      */
     public User getUserFromToken(String accessToken) {
-        Preconditions.requireNonBlank(accessToken, "AccessToken");
         
         var userId = tokenProvider.getUserIdFromToken(accessToken);
         return userDomainService.getUserById(userId);
@@ -102,7 +97,6 @@ public class AuthenticationDomainService {
      * @param userId 사용자 ID
      */
     public void logout(UserId userId) {
-        Preconditions.requireValidId(userId, "UserId");
         tokenStore.invalidateAllTokensForUser(userId);
     }
     
@@ -112,7 +106,6 @@ public class AuthenticationDomainService {
      * @param accessToken 액세스 토큰
      */
     public void logoutToken(String accessToken) {
-        Preconditions.requireNonBlank(accessToken, "AccessToken");
         tokenStore.invalidateToken(accessToken);
     }
     
@@ -123,7 +116,6 @@ public class AuthenticationDomainService {
      * @return 활성 토큰 정보 목록
      */
     public List<ActiveTokenInfo> getActiveTokens(UserId userId) {
-        Preconditions.requireValidId(userId, "UserId");
         return tokenStore.getActiveTokensForUser(userId);
     }
 }

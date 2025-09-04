@@ -48,7 +48,7 @@ public class RedisTokenStore implements TokenStore {
             
             // 간단한 토큰 정보 맵을 생성하여 JSON 직렬화 문제 방지
             var tokenInfoMap = new java.util.HashMap<String, Object>();
-            tokenInfoMap.put("userId", userId.getValue());
+            tokenInfoMap.put("userId", userId.value());
             tokenInfoMap.put("accessToken", accessToken);
             tokenInfoMap.put("tokenExpiry", tokenExpiry.toString());
             tokenInfoMap.put("issuedAt", now.toString());
@@ -64,16 +64,16 @@ public class RedisTokenStore implements TokenStore {
                 accessBucket.set(tokenJson, accessTtl.toSeconds(), TimeUnit.SECONDS);
                 
                 // 사용자별 토큰 목록에 추가
-                String userTokensKey = USER_TOKENS_KEY_PREFIX + userId.getValue();
+                String userTokensKey = USER_TOKENS_KEY_PREFIX + userId.value();
                 RBucket<String> userTokensBucket = redissonClient.getBucket(userTokensKey + ":" + accessToken);
                 userTokensBucket.set(tokenJson, accessTtl.toSeconds(), TimeUnit.SECONDS);
             } else {
-                logger.warn("Token TTL is invalid: {} seconds for user: {}", accessTtl.toSeconds(), userId.getValue());
+                logger.warn("Token TTL is invalid: {} seconds for user: {}", accessTtl.toSeconds(), userId.value());
             }
             
-            logger.debug("JWT token stored for user: {}", userId.getValue());
+            logger.debug("JWT token stored for user: {}", userId.value());
         } catch (Exception e) {
-            logger.error("Failed to store JWT token for user: {}", userId.getValue(), e);
+            logger.error("Failed to store JWT token for user: {}", userId.value(), e);
             throw new TokenStoreException("토큰 저장에 실패했습니다", e);
         }
     }
@@ -112,7 +112,7 @@ public class RedisTokenStore implements TokenStore {
     @Override
     public void invalidateAllTokensForUser(UserId userId) {
         try {
-            String pattern = USER_TOKENS_KEY_PREFIX + userId.getValue() + ":*";
+            String pattern = USER_TOKENS_KEY_PREFIX + userId.value() + ":*";
             RKeys keys = redissonClient.getKeys();
             
             Iterable<String> userTokenKeys = keys.getKeysByPattern(pattern);
@@ -144,9 +144,9 @@ public class RedisTokenStore implements TokenStore {
                 keys.delete(keysToDelete.toArray(new String[0]));
             }
             
-            logger.info("All tokens invalidated for user: {}", userId.getValue());
+            logger.info("All tokens invalidated for user: {}", userId.value());
         } catch (Exception e) {
-            logger.error("Failed to invalidate all tokens for user: {}", userId.getValue(), e);
+            logger.error("Failed to invalidate all tokens for user: {}", userId.value(), e);
             throw new TokenStoreException("사용자 토큰 무효화에 실패했습니다", e);
         }
     }
@@ -187,7 +187,7 @@ public class RedisTokenStore implements TokenStore {
         List<ActiveTokenInfo> activeTokens = new ArrayList<>();
         
         try {
-            String pattern = USER_TOKENS_KEY_PREFIX + userId.getValue() + ":*";
+            String pattern = USER_TOKENS_KEY_PREFIX + userId.value() + ":*";
             RKeys keys = redissonClient.getKeys();
             
             Iterable<String> userTokenKeys = keys.getKeysByPattern(pattern);
@@ -223,7 +223,7 @@ public class RedisTokenStore implements TokenStore {
                 }
             }
         } catch (Exception e) {
-            logger.error("Failed to get active tokens for user: {}", userId.getValue(), e);
+            logger.error("Failed to get active tokens for user: {}", userId.value(), e);
         }
         
         return activeTokens;

@@ -2,7 +2,6 @@ package com.puppytalk.notification;
 
 import com.puppytalk.chat.ChatRoomId;
 import com.puppytalk.pet.PetId;
-import com.puppytalk.support.validation.Preconditions;
 import com.puppytalk.user.UserId;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,8 +34,6 @@ public class NotificationDomainService {
         String aiGeneratedTitle,
         String aiGeneratedContent
     ) {
-        Preconditions.requireValidId(userId, "UserId");
-        Preconditions.requireValidId(petId, "PetId");
 
         // 중복 알림 방지
         if (existsByUserId(userId)) {
@@ -83,7 +80,6 @@ public class NotificationDomainService {
      * 사용자 미읽은 알림 개수 조회
      */
     public long getUnreadCount(UserId userId) {
-        Preconditions.requireValidId(userId, "UserId");
 
         return notificationRepository.countUnreadByUserId(userId);
     }
@@ -156,7 +152,6 @@ public class NotificationDomainService {
 
     private void updateNotificationStatus(NotificationId notificationId,
         NotificationStatus status) {
-        Preconditions.requireValidId(notificationId, "NotificationId");
         if (status == null) {
             throw new IllegalArgumentException("NotificationStatus must not be null");
         }

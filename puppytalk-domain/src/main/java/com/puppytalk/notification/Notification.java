@@ -73,7 +73,7 @@ public class Notification {
                                  LocalDateTime scheduledAt, LocalDateTime sentAt, LocalDateTime readAt,
                                  LocalDateTime createdAt, LocalDateTime updatedAt) {
 
-        if (id == null || !id.isStored()) {
+        if (id == null || id.value() == null || id.value() <= 0) {
             throw new IllegalArgumentException("저장된 알림 ID가 필요합니다");
         }
 
