@@ -19,7 +19,7 @@ public class NotificationException extends RuntimeException {
     }
     
     public static NotificationException notFound(NotificationId id) {
-        return new NotificationException("알림을 찾을 수 없습니다: " + id.getValue());
+        return new NotificationException("알림을 찾을 수 없습니다: " + id.value());
     }
     
     public static NotificationException dailyLimitExceeded() {

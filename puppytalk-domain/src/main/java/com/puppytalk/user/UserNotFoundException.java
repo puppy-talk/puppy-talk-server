@@ -1,11 +1,9 @@
 package com.puppytalk.user;
 
-import com.puppytalk.support.exception.DomainException;
-
 /**
  * 사용자를 찾을 수 없는 경우의 예외
  */
-public class UserNotFoundException extends DomainException {
+public class UserNotFoundException extends RuntimeException {
     
     public UserNotFoundException(String message) {
         super(message);
@@ -15,7 +13,7 @@ public class UserNotFoundException extends DomainException {
      * 사용자 ID로 예외 생성
      */
     public static UserNotFoundException byId(UserId userId) {
-        return new UserNotFoundException("사용자를 찾을 수 없습니다. ID: " + userId.getValue());
+        return new UserNotFoundException("사용자를 찾을 수 없습니다. ID: " + userId.value());
     }
     
     /**
@@ -32,8 +30,4 @@ public class UserNotFoundException extends DomainException {
         return new UserNotFoundException("사용자를 찾을 수 없습니다. 이메일: " + email);
     }
     
-    @Override
-    public String getDomainCategory() {
-        return "USER_NOT_FOUND";
-    }
 }

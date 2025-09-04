@@ -1,11 +1,9 @@
 package com.puppytalk.auth;
 
-import com.puppytalk.support.exception.DomainException;
-
 /**
  * JWT 토큰이 유효하지 않을 때 발생하는 예외
  */
-public class InvalidTokenException extends DomainException {
+public class InvalidTokenException extends RuntimeException {
     
     public InvalidTokenException(String message) {
         super(message);
@@ -23,8 +21,4 @@ public class InvalidTokenException extends DomainException {
         return new InvalidTokenException("유효하지 않은 토큰입니다");
     }
 
-    @Override
-    public String getDomainCategory() {
-        return "AUTH";
-    }
 }
