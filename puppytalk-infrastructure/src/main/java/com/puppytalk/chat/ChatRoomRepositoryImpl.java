@@ -31,9 +31,9 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
     public ChatRoom update(ChatRoom chatRoom) {
         Assert.notNull(chatRoom, "ChatRoom must not be null");
         Assert.notNull(chatRoom.getId(), "ChatRoom ID must not be null");
-        Assert.isTrue(chatRoom.getId().isStored(), "ChatRoom ID must be stored");
+        Assert.isTrue(chatRoom.getId().value() != null, "ChatRoom ID must be stored");
         
-        ChatRoomJpaEntity entity = jpaRepository.findById(chatRoom.getId().getValue())
+        ChatRoomJpaEntity entity = jpaRepository.findById(chatRoom.getId().value())
                 .orElseThrow(() -> new ChatRoomNotFoundException(chatRoom.getId()));
         
         entity.update(chatRoom);
@@ -47,11 +47,11 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
     public Optional<ChatRoom> findById(ChatRoomId id) {
         Assert.notNull(id, "ChatRoomId must not be null");
         
-        if (!id.isStored()) {
+        if (id.value() == null) {
             return Optional.empty();
         }
         
-        return jpaRepository.findById(id.getValue())
+        return jpaRepository.findById(id.value())
                 .map(ChatRoomJpaEntity::toDomain);
     }
     
@@ -60,11 +60,11 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
         Assert.notNull(userId, "UserId must not be null");
         Assert.notNull(petId, "PetId must not be null");
         
-        if (!userId.isStored() || !petId.isStored()) {
+        if (userId.value() == null || petId.value() == null) {
             return Optional.empty();
         }
         
-        return jpaRepository.findByUserIdAndPetId(userId.getValue(), petId.getValue())
+        return jpaRepository.findByUserIdAndPetId(userId.value(), petId.value())
                 .map(ChatRoomJpaEntity::toDomain);
     }
     
@@ -72,11 +72,11 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
     public List<ChatRoom> findByUserId(UserId userId) {
         Assert.notNull(userId, "UserId must not be null");
         
-        if (!userId.isStored()) {
+        if (userId.value() == null) {
             return List.of();
         }
         
-        return jpaRepository.findByUserIdOrderByLastMessageAtDesc(userId.getValue())
+        return jpaRepository.findByUserIdOrderByLastMessageAtDesc(userId.value())
                 .stream()
                 .map(ChatRoomJpaEntity::toDomain)
                 .toList();
@@ -86,11 +86,11 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
     public Optional<ChatRoom> findByPetId(PetId petId) {
         Assert.notNull(petId, "PetId must not be null");
         
-        if (!petId.isStored()) {
+        if (petId.value() == null) {
             return Optional.empty();
         }
         
-        return jpaRepository.findByPetId(petId.getValue())
+        return jpaRepository.findByPetId(petId.value())
                 .map(ChatRoomJpaEntity::toDomain);
     }
     
@@ -98,11 +98,11 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
     public boolean existsById(ChatRoomId id) {
         Assert.notNull(id, "ChatRoomId must not be null");
         
-        if (!id.isStored()) {
+        if (id.value() == null) {
             return false;
         }
         
-        return jpaRepository.existsById(id.getValue());
+        return jpaRepository.existsById(id.value());
     }
     
     @Override
@@ -110,22 +110,22 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
         Assert.notNull(userId, "UserId must not be null");
         Assert.notNull(petId, "PetId must not be null");
         
-        if (!userId.isStored() || !petId.isStored()) {
+        if (userId.value() == null || petId.value() == null) {
             return false;
         }
         
-        return jpaRepository.existsByUserIdAndPetId(userId.getValue(), petId.getValue());
+        return jpaRepository.existsByUserIdAndPetId(userId.value(), petId.value());
     }
     
     @Override
     public long countByUserId(UserId userId) {
         Assert.notNull(userId, "UserId must not be null");
         
-        if (!userId.isStored()) {
+        if (userId.value() == null) {
             return 0;
         }
         
-        return jpaRepository.countByUserId(userId.getValue());
+        return jpaRepository.countByUserId(userId.value());
     }
     
     

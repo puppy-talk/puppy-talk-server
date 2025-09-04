@@ -29,9 +29,9 @@ public class MessageRepositoryImpl implements MessageRepository {
     public Message update(Message message) {
         Assert.notNull(message, "Message must not be null");
         Assert.notNull(message.getId(), "Message ID must not be null for update");
-        Assert.isTrue(message.getId().isStored(), "Message must be stored for update");
+        Assert.isTrue(message.getId().value() != null, "Message must be stored for update");
 
-        MessageJpaEntity entity = jpaRepository.findById(message.getId().getValue())
+        MessageJpaEntity entity = jpaRepository.findById(message.getId().value())
             .orElseThrow(() -> new IllegalArgumentException("메시지를 찾을 수 없습니다"));
 
         entity.update(message);
@@ -44,8 +44,8 @@ public class MessageRepositoryImpl implements MessageRepository {
     public Optional<Message> findById(MessageId id) {
         Assert.notNull(id, "MessageId must not be null");
 
-        if (id.isStored()) {
-            return jpaRepository.findById(id.getValue())
+        if (id.value() != null) {
+            return jpaRepository.findById(id.value())
                 .map(MessageJpaEntity::toDomain);
         }
 
@@ -56,7 +56,7 @@ public class MessageRepositoryImpl implements MessageRepository {
     public List<Message> findByChatRoomIdWithCursor(ChatRoomId chatRoomId) {
         Assert.notNull(chatRoomId, "ChatRoomId must not be null");
 
-        return jpaRepository.findByChatRoomIdOrderByCreatedAtAsc(chatRoomId.getValue())
+        return jpaRepository.findByChatRoomIdOrderByCreatedAtAsc(chatRoomId.value())
             .stream()
             .map(MessageJpaEntity::toDomain)
             .toList();
@@ -68,9 +68,9 @@ public class MessageRepositoryImpl implements MessageRepository {
         Assert.notNull(chatRoomId, "ChatRoomId must not be null");
         Assert.isTrue(size > 0, "Size must be positive");
 
-        Long cursor = (messageId != null && messageId.isStored()) ? messageId.getValue() : null;
+        Long cursor = (messageId != null && messageId.value() != null) ? messageId.value() : null;
 
-        return jpaRepository.findByChatRoomIdWithCursor(chatRoomId.getValue(), cursor, size)
+        return jpaRepository.findByChatRoomIdWithCursor(chatRoomId.value(), cursor, size)
             .stream()
             .map(MessageJpaEntity::toDomain)
             .toList();
@@ -81,11 +81,11 @@ public class MessageRepositoryImpl implements MessageRepository {
         Assert.notNull(chatRoomId, "ChatRoomId must not be null");
         Assert.isTrue(limit > 0, "Limit must be positive");
 
-        if (!chatRoomId.isStored()) {
+        if (chatRoomId.value() == null) {
             return List.of();
         }
 
-        return jpaRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId.getValue(), limit)
+        return jpaRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId.value(), limit)
             .stream()
             .map(MessageJpaEntity::toDomain)
             .toList();
@@ -97,8 +97,8 @@ public class MessageRepositoryImpl implements MessageRepository {
         Assert.notNull(chatRoomId, "ChatRoomId must not be null");
         Assert.notNull(since, "Since time must not be null");
 
-        if (chatRoomId.isStored()) {
-            return jpaRepository.findByChatRoomIdAndCreatedAtAfter(chatRoomId.getValue(), since)
+        if (chatRoomId.value() != null) {
+            return jpaRepository.findByChatRoomIdAndCreatedAtAfter(chatRoomId.value(), since)
                 .stream()
                 .map(MessageJpaEntity::toDomain)
                 .toList();

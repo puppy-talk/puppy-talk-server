@@ -23,7 +23,7 @@ public class PetRepositoryImpl implements PetRepository {
     @Override
     public Pet create(Pet pet) {
         Assert.notNull(pet, "Pet must not be null");
-        Assert.isTrue(pet.getId() == null || !pet.getId().isStored(), "New pet must not have stored ID");
+        Assert.isTrue(pet.getId() == null || pet.getId().value() == null, "New pet must not have stored ID");
         
         PetJpaEntity entity = PetJpaEntity.from(pet);
         PetJpaEntity savedEntity = petJpaRepository.save(entity);
@@ -35,9 +35,9 @@ public class PetRepositoryImpl implements PetRepository {
     public Pet delete(Pet pet) {
         Assert.notNull(pet, "Pet must not be null");
         Assert.notNull(pet.getId(), "Pet ID must not be null for deletion");
-        Assert.isTrue(pet.getId().isStored(), "Pet ID must be stored for deletion");
+        Assert.isTrue(pet.getId().value() != null, "Pet ID must be stored for deletion");
         
-        PetJpaEntity petEntity = petJpaRepository.findById(pet.getId().getValue())
+        PetJpaEntity petEntity = petJpaRepository.findById(pet.getId().value())
             .orElseThrow(() -> new IllegalArgumentException("반려동물을 찾을 수 없습니다: " + pet.getId()));
 
         petEntity.update(pet);
@@ -50,11 +50,11 @@ public class PetRepositoryImpl implements PetRepository {
     public Optional<Pet> findById(PetId id) {
         Assert.notNull(id, "PetId must not be null");
         
-        if (!id.isStored()) {
+        if (id.value() == null) {
             return Optional.empty();
         }
         
-        return petJpaRepository.findById(id.getValue())
+        return petJpaRepository.findById(id.value())
             .map(PetJpaEntity::toDomain);
     }
 
@@ -63,11 +63,11 @@ public class PetRepositoryImpl implements PetRepository {
         Assert.notNull(id, "PetId must not be null");
         Assert.notNull(ownerId, "OwnerId must not be null");
         
-        if (!id.isStored() || !ownerId.isStored()) {
+        if (id.value() == null || ownerId.value() == null) {
             return Optional.empty();
         }
         
-        return petJpaRepository.findByIdAndOwnerId(id.getValue(), ownerId.getValue())
+        return petJpaRepository.findByIdAndOwnerId(id.value(), ownerId.value())
             .map(PetJpaEntity::toDomain);
     }
 
@@ -75,11 +75,11 @@ public class PetRepositoryImpl implements PetRepository {
     public List<Pet> findByOwnerId(UserId ownerId) {
         Assert.notNull(ownerId, "OwnerId must not be null");
         
-        if (!ownerId.isStored()) {
+        if (ownerId.value() == null) {
             return List.of();
         }
         
-        return petJpaRepository.findByOwnerIdAndIsDeleted(ownerId.getValue(), false)
+        return petJpaRepository.findByOwnerIdAndIsDeleted(ownerId.value(), false)
             .stream()
             .map(PetJpaEntity::toDomain)
             .toList();
@@ -90,21 +90,21 @@ public class PetRepositoryImpl implements PetRepository {
     public boolean existsById(PetId id) {
         Assert.notNull(id, "PetId must not be null");
         
-        if (!id.isStored()) {
+        if (id.value() == null) {
             return false;
         }
         
-        return petJpaRepository.existsById(id.getValue());
+        return petJpaRepository.existsById(id.value());
     }
 
     @Override
     public long countByOwnerId(UserId ownerId) {
         Assert.notNull(ownerId, "OwnerId must not be null");
         
-        if (!ownerId.isStored()) {
+        if (ownerId.value() == null) {
             return 0;
         }
         
-        return petJpaRepository.countByOwnerIdAndIsDeleted(ownerId.getValue(), false);
+        return petJpaRepository.countByOwnerIdAndIsDeleted(ownerId.value(), false);
     }
 }

@@ -35,7 +35,7 @@ public class NotificationRepositoryImpl implements NotificationRepository {
     
     @Override
     public Optional<Notification> findById(NotificationId id) {
-        return jpaRepository.findById(id.getValue())
+        return jpaRepository.findById(id.value())
             .map(NotificationJpaEntity::toDomain);
     }
     
@@ -53,7 +53,7 @@ public class NotificationRepositoryImpl implements NotificationRepository {
     @Override
     public List<Notification> findByUserIdOrderByCreatedAtDesc(UserId userId, int offset, int limit) {
         Pageable pageable = PageRequest.of(offset / limit, limit);
-        return jpaRepository.findByUserIdOrderByCreatedAtDesc(userId.getValue(), pageable)
+        return jpaRepository.findByUserIdOrderByCreatedAtDesc(userId.value(), pageable)
             .stream()
             .map(NotificationJpaEntity::toDomain)
             .toList();
@@ -61,7 +61,7 @@ public class NotificationRepositoryImpl implements NotificationRepository {
     
     @Override
     public long countUnreadByUserId(UserId userId) {
-        return jpaRepository.countUnreadByUserId(userId.getValue());
+        return jpaRepository.countUnreadByUserId(userId.value());
     }
     
     @Override
@@ -75,20 +75,20 @@ public class NotificationRepositoryImpl implements NotificationRepository {
     
     @Override
     public void updateStatus(NotificationId id, NotificationStatus status) {
-        Optional<NotificationJpaEntity> entity = jpaRepository.findById(id.getValue());
+        Optional<NotificationJpaEntity> entity = jpaRepository.findById(id.value());
         if (entity.isPresent()) {
             NotificationJpaEntity notification = entity.get();
             notification.updateStatus(status);
             jpaRepository.save(notification);
         } else {
-            throw new NotificationException("알림을 찾을 수 없습니다: " + id.getValue());
+            throw new NotificationException("알림을 찾을 수 없습니다: " + id.value());
         }
     }
     
     @Override
     public void updateStatusBatch(List<NotificationId> ids, NotificationStatus status) {
         List<Long> longIds = ids.stream()
-            .map(NotificationId::getValue)
+            .map(NotificationId::value)
             .toList();
         jpaRepository.updateStatusBatch(longIds, status);
     }
@@ -121,12 +121,12 @@ public class NotificationRepositoryImpl implements NotificationRepository {
         LocalDateTime endOfDay = startOfDay.plusDays(1);
         
         return jpaRepository.countSentNotificationsByUserAndDate(
-            userId.getValue(), startOfDay, endOfDay
+            userId.value(), startOfDay, endOfDay
         );
     }
     
     @Override
     public boolean existsByUserIdAndTypeAndStatus(UserId userId, NotificationType type, NotificationStatus status) {
-        return jpaRepository.existsByUserIdAndTypeAndStatus(userId.getValue(), type, status);
+        return jpaRepository.existsByUserIdAndTypeAndStatus(userId.value(), type, status);
     }
 }

@@ -23,10 +23,10 @@ public class UserRepositoryImpl implements UserRepository {
     
     @Override
     public UserId save(User user) {
-        if (user.getId() != null && user.getId().isStored()) {
+        if (user.getId() != null && user.getId().value() != null) {
             // 기존 사용자 업데이트
-            UserJpaEntity existingEntity = userJpaRepository.findById(user.getId().getValue())
-                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다: " + user.getId().getValue()));
+            UserJpaEntity existingEntity = userJpaRepository.findById(user.getId().value())
+                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다: " + user.getId().value()));
             
             existingEntity.update(user);
             userJpaRepository.save(existingEntity);
@@ -43,11 +43,11 @@ public class UserRepositoryImpl implements UserRepository {
     public Optional<User> findById(UserId userId) {
         Assert.notNull(userId, "UserId must not be null");
         
-        if (!userId.isStored()) {
+        if (userId.value() == null) {
             return Optional.empty();
         }
         
-        return userJpaRepository.findById(userId.getValue())
+        return userJpaRepository.findById(userId.value())
             .map(UserJpaEntity::toDomain);
     }
     
