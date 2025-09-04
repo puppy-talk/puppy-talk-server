@@ -82,7 +82,7 @@ public class MessageRepositoryImpl implements MessageRepository {
         Assert.isTrue(limit > 0, "Limit must be positive");
 
         if (chatRoomId.value() == null) {
-            return List.of();
+            throw new IllegalArgumentException("채팅방 ID 값은 필수입니다");
         }
 
         return jpaRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId.value(), limit)
@@ -97,13 +97,14 @@ public class MessageRepositoryImpl implements MessageRepository {
         Assert.notNull(chatRoomId, "ChatRoomId must not be null");
         Assert.notNull(since, "Since time must not be null");
 
-        if (chatRoomId.value() != null) {
-            return jpaRepository.findByChatRoomIdAndCreatedAtAfter(chatRoomId.value(), since)
-                .stream()
-                .map(MessageJpaEntity::toDomain)
-                .toList();
+        if (chatRoomId.value() == null) {
+            throw new IllegalArgumentException("채팅방 ID 값은 필수입니다");
         }
-        return List.of();
+        
+        return jpaRepository.findByChatRoomIdAndCreatedAtAfter(chatRoomId.value(), since)
+            .stream()
+            .map(MessageJpaEntity::toDomain)
+            .toList();
 
     }
 }

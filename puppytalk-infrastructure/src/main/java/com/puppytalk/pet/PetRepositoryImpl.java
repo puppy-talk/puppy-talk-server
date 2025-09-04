@@ -76,7 +76,7 @@ public class PetRepositoryImpl implements PetRepository {
         Assert.notNull(ownerId, "OwnerId must not be null");
         
         if (ownerId.value() == null) {
-            return List.of();
+            throw new IllegalArgumentException("소유자 ID 값은 필수입니다");
         }
         
         return petJpaRepository.findByOwnerIdAndIsDeleted(ownerId.value(), false)

@@ -90,7 +90,11 @@ public class NotificationDomainService {
      * Application layer에서 비활성 사용자 목록을 전달받아 필터링
      */
     public List<UserId> filterUsersForNotification(List<UserId> candidateUsers) {
-        if (candidateUsers == null || candidateUsers.isEmpty()) {
+        if (candidateUsers == null) {
+            throw new IllegalArgumentException("후보 사용자 목록은 필수입니다");
+        }
+        
+        if (candidateUsers.isEmpty()) {
             return List.of();
         }
 

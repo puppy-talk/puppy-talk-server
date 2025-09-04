@@ -73,7 +73,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
         Assert.notNull(userId, "UserId must not be null");
         
         if (userId.value() == null) {
-            return List.of();
+            throw new IllegalArgumentException("사용자 ID 값은 필수입니다");
         }
         
         return jpaRepository.findByUserIdOrderByLastMessageAtDesc(userId.value())

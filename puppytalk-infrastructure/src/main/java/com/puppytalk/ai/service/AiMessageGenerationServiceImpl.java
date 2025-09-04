@@ -74,7 +74,9 @@ public class AiMessageGenerationServiceImpl implements AiMessageGenerationServic
 
 
     private List<ChatMessage> convertToAiChatMessage(List<Message> messages) {
-        if (messages == null) return List.of();
+        if (messages == null) {
+            throw new IllegalArgumentException("메시지 목록은 필수입니다");
+        }
         
         return messages.stream()
             .map(message -> new ChatMessage(
