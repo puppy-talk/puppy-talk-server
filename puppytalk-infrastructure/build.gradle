@@ -32,6 +32,9 @@ dependencies {
     // Caffeine Cache
     implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
     
+    // Spring Security Crypto (standalone BCrypt without full Spring Security)
+    implementation 'org.springframework.security:spring-security-crypto'
+    
     // Database
     runtimeOnly 'com.mysql:mysql-connector-j'
     runtimeOnly 'com.h2database:h2'
