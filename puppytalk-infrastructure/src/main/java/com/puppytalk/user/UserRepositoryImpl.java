@@ -99,8 +99,9 @@ public class UserRepositoryImpl implements UserRepository {
     public List<Long> findInactiveUsers(LocalDateTime cutoffTime) {
         Assert.notNull(cutoffTime, "Cutoff time must not be null");
         
-        // For now, return empty list as we don't have lastActiveAt field in the database
-        // This would need to be implemented when we add proper user activity tracking
-        return List.of();
+        return userJpaRepository.findByLastActiveAtBeforeAndIsDeletedFalse(cutoffTime)
+            .stream()
+            .map(UserJpaEntity::getId)
+            .toList();
     }
 }

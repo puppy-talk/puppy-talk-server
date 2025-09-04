@@ -1,6 +1,7 @@
 package com.puppytalk.notification;
 
 import com.puppytalk.user.UserDomainService;
+import com.puppytalk.user.UserFacade;
 import com.puppytalk.chat.ChatRoomId;
 import com.puppytalk.pet.PetId;
 import com.puppytalk.notification.dto.request.NotificationCreateCommand;
@@ -27,14 +28,17 @@ public class NotificationFacade {
     private final NotificationDomainService notificationDomainService;
     private final UserDomainService userDomainService;
     private final NotificationSender notificationSender;
+    private final UserFacade userFacade;
 
     public NotificationFacade(
         NotificationDomainService notificationDomainService,
         UserDomainService userDomainService,
+        UserFacade userFacade,
         NotificationSender notificationSender
     ) {
         this.notificationDomainService = notificationDomainService;
         this.userDomainService = userDomainService;
+        this.userFacade = userFacade;
         this.notificationSender = notificationSender;
     }
 
@@ -104,20 +108,19 @@ public class NotificationFacade {
 
     /**
      * 비활성 사용자 목록 조회 (알림 대상)
+     * 2시간 이상 비활성이지만 4주 미만(휴면 계정 아님)인 사용자만 포함
      */
     @Transactional(readOnly = true)
     public List<Long> findInactiveUsersForNotification() {
         LocalDateTime twoHoursAgo = LocalDateTime.now().minusHours(LAST_ACTIVITY_HOURS);
-        List<Long> inactiveUserIds = userDomainService.findInactiveUsers(twoHoursAgo);
+        List<UserId> inactiveUsers = userDomainService.findInactiveUsers(twoHoursAgo);
 
-        // UserId 리스트로 변환하여 필터링
-        List<UserId> inactiveUsers = inactiveUserIds.stream()
-            .map(UserId::from)
-            .toList();
+        // 휴면 계정 및 삭제된 계정 제외 (알림 수신 가능한 사용자만 필터링)
+        List<UserId> notificationEligibleUsers = userFacade.findNotificationEligibleUsers(inactiveUsers);
 
-        // 알림 가능 사용자 필터링
+        // 중복 알림 방지 필터링
         List<UserId> targetUserList = notificationDomainService.filterUsersForNotification(
-            inactiveUsers);
+            notificationEligibleUsers);
 
         return targetUserList.stream()
             .map(UserId::value)

@@ -174,12 +174,13 @@ class UserTest {
         String encryptedPassword = "encrypted_password";
         LocalDateTime createdAt = LocalDateTime.now();
         LocalDateTime updatedAt = LocalDateTime.now();
+        LocalDateTime lastActiveAt = LocalDateTime.now();
         boolean isDeleted = false;
 
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> User.of(userId, username, email, encryptedPassword, createdAt, updatedAt, isDeleted)
+            () -> User.of(userId, username, email, encryptedPassword, createdAt, updatedAt, lastActiveAt, isDeleted)
         );
 
         assertTrue(exception.getMessage().contains("UserId"));
@@ -195,12 +196,13 @@ class UserTest {
         String encryptedPassword = "encrypted_password";
         LocalDateTime createdAt = null;
         LocalDateTime updatedAt = LocalDateTime.now();
+        LocalDateTime lastActiveAt = LocalDateTime.now();
         boolean isDeleted = false;
 
         // when & then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> User.of(userId, username, email, encryptedPassword, createdAt, updatedAt, isDeleted)
+            () -> User.of(userId, username, email, encryptedPassword, createdAt, updatedAt, lastActiveAt, isDeleted)
         );
 
         assertEquals("CreatedAt must not be null", exception.getMessage());
@@ -345,10 +347,11 @@ class UserTest {
     void equals_SameId_ReturnsTrue() {
         // given
         UserId userId = UserId.from(1L);
+        LocalDateTime now = LocalDateTime.now();
         User user1 = User.of(userId, "user1", "user1@test.com", "pass1", 
-                           LocalDateTime.now(), LocalDateTime.now(), false);
+                           now, now, now, false);
         User user2 = User.of(userId, "user2", "user2@test.com", "pass2", 
-                           LocalDateTime.now(), LocalDateTime.now(), false);
+                           now, now, now, false);
 
         // when & then
         assertEquals(user1, user2); // 같은 ID이면 equals
@@ -361,10 +364,11 @@ class UserTest {
         // given
         UserId userId1 = UserId.from(1L);
         UserId userId2 = UserId.from(2L);
+        LocalDateTime now = LocalDateTime.now();
         User user1 = User.of(userId1, "user1", "user1@test.com", "pass1", 
-                           LocalDateTime.now(), LocalDateTime.now(), false);
+                           now, now, now, false);
         User user2 = User.of(userId2, "user1", "user1@test.com", "pass1", 
-                           LocalDateTime.now(), LocalDateTime.now(), false);
+                           now, now, now, false);
 
         // when & then
         assertNotEquals(user1, user2); // 다른 ID이면 not equals

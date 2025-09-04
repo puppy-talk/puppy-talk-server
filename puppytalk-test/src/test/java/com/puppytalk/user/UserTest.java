@@ -1,6 +1,5 @@
 package com.puppytalk.user;
 
-import com.puppytalk.support.validation.Preconditions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

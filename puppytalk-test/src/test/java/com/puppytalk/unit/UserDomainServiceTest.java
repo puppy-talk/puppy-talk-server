@@ -526,6 +526,11 @@ class UserDomainServiceTest {
         public String getLastFindByEmailParam() { return lastFindByEmailParam; }
         public String getLastExistsByUsernameParam() { return lastExistsByUsernameParam; }
         public String getLastExistsByEmailParam() { return lastExistsByEmailParam; }
+        
+        @Override
+        public List<Long> findInactiveUsers(LocalDateTime cutoffTime) {
+            return List.of(); // Mock 구현: 빈 리스트 반환
+        }
     }
     
     /**

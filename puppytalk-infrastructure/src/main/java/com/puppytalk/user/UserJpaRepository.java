@@ -3,6 +3,7 @@ package com.puppytalk.user;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,4 +50,9 @@ public interface UserJpaRepository extends JpaRepository<UserJpaEntity, Long> {
      */
     @Query("SELECT COUNT(u) FROM UserJpaEntity u WHERE u.isDeleted = true")
     long countDeletedUsers();
+    
+    /**
+     * 특정 시간 이전에 활동한 비활성 사용자 목록 조회 (삭제되지 않은 사용자만)
+     */
+    List<UserJpaEntity> findByLastActiveAtBeforeAndIsDeletedFalse(LocalDateTime cutoffTime);
 }

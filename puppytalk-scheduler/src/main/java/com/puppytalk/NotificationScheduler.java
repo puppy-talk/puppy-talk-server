@@ -3,6 +3,7 @@ package com.puppytalk;
 import com.puppytalk.notification.InactivityNotificationFacade;
 import com.puppytalk.notification.NotificationFacade;
 import com.puppytalk.pet.PetFacade;
+import com.puppytalk.user.UserFacade;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,15 +20,18 @@ public class NotificationScheduler {
     private final NotificationFacade notificationFacade;
     private final InactivityNotificationFacade inactivityNotificationFacade;
     private final PetFacade petFacade;
+    private final UserFacade userFacade;
 
     public NotificationScheduler(
         NotificationFacade notificationFacade,
         InactivityNotificationFacade inactivityNotificationFacade,
-        PetFacade petFacade
+        PetFacade petFacade,
+        UserFacade userFacade
     ) {
         this.notificationFacade = notificationFacade;
         this.inactivityNotificationFacade = inactivityNotificationFacade;
         this.petFacade = petFacade;
+        this.userFacade = userFacade;
     }
 
     /**
@@ -94,6 +98,22 @@ public class NotificationScheduler {
 
         } catch (Exception e) {
             log.error("Error during notification cleanup: {}", e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * 휴면 사용자 배치 처리 (매일 새벽 2시)
+     */
+    @Scheduled(cron = "0 0 2 * * *")
+    public void processDormantUsers() {
+        log.info("Starting dormant user processing");
+
+        try {
+            int processedCount = userFacade.processDormantUsers();
+            log.info("Processed {} dormant users", processedCount);
+            
+        } catch (Exception e) {
+            log.error("Error during dormant user processing: {}", e.getMessage(), e);
         }
     }
 

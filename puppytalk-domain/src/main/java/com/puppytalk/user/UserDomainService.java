@@ -143,13 +143,61 @@ public class UserDomainService {
     }
     
     /**
-     * 비활성 사용자 목록을 조회한다.
+     * 비활성 사용자 ID 목록을 조회한다.
      * 
      * @param cutoffTime 기준 시간 (이 시간 이전에 활동한 사용자들을 비활성으로 간주)
      * @return 비활성 사용자 ID 목록
      */
-    public List<Long> findInactiveUsers(LocalDateTime cutoffTime) {
-        return userRepository.findInactiveUsers(cutoffTime);
+    public List<UserId> findInactiveUsers(LocalDateTime cutoffTime) {
+        return userRepository.findInactiveUsers(cutoffTime)
+            .stream()
+            .map(UserId::from)
+            .toList();
+    }
+    
+    /**
+     * 휴면 대상 사용자들을 찾아서 휴면 처리한다.
+     * 
+     * @return 처리된 휴면 사용자 수
+     */
+    public int processDormantUsers() {
+        LocalDateTime cutoffTime = LocalDateTime.now().minusDays(User.DORMANT_DAYS);
+        List<UserId> dormantCandidates = findInactiveUsers(cutoffTime);
+        
+        int processedCount = 0;
+        
+        for (UserId userId : dormantCandidates) {
+            try {
+                User user = getUserById(userId);
+                
+                // 이미 삭제된 사용자는 제외
+                if (user.isDeleted()) {
+                    continue;
+                }
+                
+                // 실제로 휴면 상태인지 확인 (이중 검증)
+                if (user.isDormant()) {
+                    // 현재는 별도의 휴면 처리 없이 실시간 계산 방식 사용
+                    // 필요시 여기에 휴면 상태 저장 로직 추가 가능
+                    processedCount++;
+                }
+            } catch (UserNotFoundException e) {
+                // 사용자가 존재하지 않으면 스킵
+                continue;
+            }
+        }
+        
+        return processedCount;
+    }
+    
+    /**
+     * 휴면 해제 처리 (사용자 활동 시 호출)
+     * 
+     * @param userId 사용자 ID
+     */
+    public void activateUser(UserId userId) {
+        updateLastActiveTime(userId);
+        // 필요시 추가 휴면 해제 로직
     }
     
     

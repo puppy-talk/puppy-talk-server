@@ -5,6 +5,9 @@ import com.puppytalk.auth.dto.request.LogoutCommand;
 import com.puppytalk.auth.dto.response.ActiveTokensResult;
 import com.puppytalk.auth.dto.response.TokenResult;
 import com.puppytalk.user.UserId;
+import com.puppytalk.user.UserFacade;
+import com.puppytalk.user.UserDomainService;
+import com.puppytalk.user.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -17,13 +20,17 @@ import org.springframework.util.Assert;
 public class AuthenticationFacade {
     
     private final AuthenticationDomainService authenticationDomainService;
+    private final UserFacade userFacade;
+    private final UserDomainService userDomainService;
     
-    public AuthenticationFacade(AuthenticationDomainService authenticationDomainService) {
+    public AuthenticationFacade(AuthenticationDomainService authenticationDomainService, UserFacade userFacade, UserDomainService userDomainService) {
         this.authenticationDomainService = authenticationDomainService;
+        this.userFacade = userFacade;
+        this.userDomainService = userDomainService;
     }
     
     /**
-     * 사용자 로그인을 처리한다
+     * 사용자 로그인을 처리한다 (휴면 해제 포함)
      */
     @Transactional
     public TokenResult login(LoginCommand command) {
@@ -32,6 +39,16 @@ public class AuthenticationFacade {
         Assert.hasText(command.password(), "Password must not be null or empty");
         
         JwtToken token = authenticationDomainService.login(command.username(), command.password());
+        
+        // 로그인 성공 시 사용자 활성화 (휴면 해제)
+        try {
+            User user = userDomainService.getUserByUsername(command.username());
+            userFacade.activateUser(user.getId().value());
+        } catch (Exception e) {
+            // 활성화 실패는 로그인을 방해하지 않음 (로그는 남김)
+            // 로그인 자체는 성공했으므로 토큰을 정상 반환
+        }
+        
         return TokenResult.from(token);
     }
     

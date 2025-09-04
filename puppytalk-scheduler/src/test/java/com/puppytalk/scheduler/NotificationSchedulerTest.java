@@ -2,11 +2,11 @@ package com.puppytalk.scheduler;
 
 import com.puppytalk.NotificationScheduler;
 import com.puppytalk.notification.InactivityNotificationFacade;
-import com.puppytalk.notification.NotificationService;
 import com.puppytalk.notification.NotificationFacade;
 import com.puppytalk.notification.dto.response.NotificationListResult;
 import com.puppytalk.notification.dto.response.NotificationResult;
 import com.puppytalk.pet.PetFacade;
+import com.puppytalk.user.UserFacade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,16 +28,16 @@ class NotificationSchedulerTest {
     private InactivityNotificationFacade inactivityNotificationFacade;
     
     @Mock
-    private NotificationService mockFcmNotificationService;
-
-    @Mock
     private PetFacade petFacade;
+    
+    @Mock
+    private UserFacade userFacade;
 
     private NotificationScheduler notificationScheduler;
 
     @BeforeEach
     void setUp() {
-        notificationScheduler = new NotificationScheduler(notificationFacade, inactivityNotificationFacade, mockFcmNotificationService, petFacade);
+        notificationScheduler = new NotificationScheduler(notificationFacade, inactivityNotificationFacade, petFacade, userFacade);
     }
 
     @Test
@@ -76,20 +76,14 @@ class NotificationSchedulerTest {
     @Test
     void 대기중인_알림_처리_테스트() {
         // Given
-        NotificationResult mockNotification = createMockNotification(1L);
-        NotificationListResult mockResult = new NotificationListResult(
-            List.of(mockNotification),
-            1
-        );
-        when(notificationFacade.findPendingNotifications(100))
-            .thenReturn(mockResult);
+        // NotificationFacade의 processPendingNotifications 메서드를 mock
+        doNothing().when(notificationFacade).processPendingNotifications(100);
 
         // When
         notificationScheduler.processPendingNotifications();
 
         // Then
-        verify(notificationFacade).findPendingNotifications(100);
-        verify(notificationFacade).updateNotificationStatus(any());
+        verify(notificationFacade).processPendingNotifications(100);
     }
 
 
@@ -105,6 +99,18 @@ class NotificationSchedulerTest {
         // Then
         verify(notificationFacade).cleanupExpiredNotifications();
         verify(notificationFacade).cleanupOldNotifications();
+    }
+
+    @Test
+    void 휴면_사용자_처리_테스트() {
+        // Given
+        when(userFacade.processDormantUsers()).thenReturn(3);
+
+        // When
+        notificationScheduler.processDormantUsers();
+
+        // Then
+        verify(userFacade).processDormantUsers();
     }
 
     private NotificationResult createMockNotification(Long id) {

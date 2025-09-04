@@ -5,6 +5,10 @@ import java.util.Objects;
 
 public class User {
 
+    /**
+     * 휴면 계정 판단 기준 (일)
+     */
+    public static final int DORMANT_DAYS = 28;
 
     private final UserId id;
     private final String username;
@@ -72,6 +76,40 @@ public class User {
      */
     public User updateLastActiveTime() {
         return new User(id, username, email, password, createdAt, LocalDateTime.now(), LocalDateTime.now(), isDeleted);
+    }
+
+    /**
+     * 현재 사용자 상태 계산
+     */
+    public UserStatus getCurrentStatus() {
+        if (isDeleted) {
+            return UserStatus.DELETED;
+        }
+        
+        if (isDormant()) {
+            return UserStatus.DORMANT;
+        }
+        
+        return UserStatus.ACTIVE;
+    }
+
+    /**
+     * 휴면 계정 여부 확인
+     */
+    public boolean isDormant() {
+        if (lastActiveAt == null) {
+            return false;
+        }
+        
+        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(DORMANT_DAYS);
+        return lastActiveAt.isBefore(cutoffDate);
+    }
+
+    /**
+     * 알림 수신 가능 여부 확인
+     */
+    public boolean canReceiveNotifications() {
+        return getCurrentStatus().canReceiveNotifications();
     }
 
 
