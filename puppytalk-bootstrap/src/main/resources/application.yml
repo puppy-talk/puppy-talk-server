@@ -49,10 +49,21 @@ spring:
 server:
   port: 8080
 
+# 로컬 개발용 로그 설정
 logging:
   level:
+    root: INFO
     com.puppytalk: DEBUG
-    org.springframework.web: DEBUG
+    com.puppytalk.scheduler: DEBUG
+    com.puppytalk.user: DEBUG
+    com.puppytalk.auth: DEBUG
+    com.puppytalk.notification: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %clr(%-5level){faint} %clr(%logger{36}){cyan} %clr([%X{requestId:-}]){magenta} %clr([%X{userId:-}]){blue} - %msg%n"
 
 # JWT Configuration
 app:
@@ -92,10 +103,17 @@ spring:
     console:
       enabled: false
 
+# 운영 환경 로그 설정 (JSON 구조화 로그)
 logging:
   level:
+    root: INFO
     com.puppytalk: INFO
-    root: WARN
+    com.puppytalk.scheduler: INFO
+    com.puppytalk.user: INFO
+    com.puppytalk.auth: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+  # logback-spring.xml에서 JSON 형태로 로그 출력 설정됨
 
 ---
 spring:
@@ -131,11 +149,18 @@ spring:
 server:
   port: 8080
 
+# Docker 환경 로그 설정
 logging:
   level:
+    root: INFO
     com.puppytalk: INFO
+    com.puppytalk.scheduler: DEBUG
+    com.puppytalk.user: DEBUG
+    com.puppytalk.auth: INFO
+    org.springframework: WARN
     org.springframework.web: INFO
-    root: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %clr(%-5level){faint} %clr(%logger{36}){cyan} %clr([%X{requestId:-}]){magenta} %clr([%X{userId:-}]){blue} - %msg%n"
 
 management:
   endpoints:

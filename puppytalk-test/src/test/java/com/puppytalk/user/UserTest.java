@@ -1,12 +1,12 @@
 package com.puppytalk.user;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.time.LocalDateTime;
-
-import static org.assertj.core.api.Assertions.*;
 
 @DisplayName("User 도메인 모델 테스트")
 class UserTest {
@@ -97,7 +97,7 @@ class UserTest {
         @DisplayName("username이 최대 길이를 초과하면 예외가 발생한다")
         void createUser_WithTooLongUsername_ThrowsException() {
             // given
-            String longUsername = "a".repeat(User.MAX_USERNAME_LENGTH + 1);
+            String longUsername = "a".repeat(10);
             String email = "test@example.com";
             String password = "encrypted_password_123";
 

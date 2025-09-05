@@ -3,7 +3,9 @@ package com.puppytalk;
 import com.puppytalk.notification.InactivityNotificationFacade;
 import com.puppytalk.notification.NotificationFacade;
 import com.puppytalk.pet.PetFacade;
+import com.puppytalk.scheduler.LogFormats;
 import com.puppytalk.user.UserFacade;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,25 +41,38 @@ public class NotificationScheduler {
      */
     @Scheduled(fixedRate = INTERVAL_30_MINUTES)
     public void detectInactiveUsersAndCreateNotifications() {
+        long startTime = System.currentTimeMillis();
+        log.info(LogFormats.SCHEDULER_START, "detectInactiveUsersAndCreateNotifications", LocalDateTime.now());
 
-        // 1. 2시간 동안 접속하지 않은 사용자 탐색
-        List<Long> inactiveUserIds = notificationFacade.findInactiveUsersForNotification();
+        try {
+            // 1. 2시간 동안 접속하지 않은 사용자 탐색
+            List<Long> inactiveUserIds = notificationFacade.findInactiveUsersForNotification();
+            
+            log.info(LogFormats.INACTIVE_USER_DETECTION_START, 2, inactiveUserIds.size());
 
-        if (inactiveUserIds.isEmpty()) {
-            log.info("No inactive users found for notification");
-            return;
-        }
-
-        log.info("Found {} inactive users for notification", inactiveUserIds.size());
-
-        for (Long userId : inactiveUserIds) {
-            try {
-                // AI 서비스를 호출하여 개인화된 메시지를 생성
-                createInactivityNotificationForUser(userId);
-            } catch (Exception e) {
-                log.error("Failed to create inactivity notification for user {}: {}", userId,
-                    e.getMessage());
+            if (inactiveUserIds.isEmpty()) {
+                long duration = System.currentTimeMillis() - startTime;
+                log.info(LogFormats.INACTIVE_USER_DETECTION_COMPLETE, 0, 0, duration);
+                return;
             }
+
+            int createdNotifications = 0;
+            for (Long userId : inactiveUserIds) {
+                try {
+                    // AI 서비스를 호출하여 개인화된 메시지를 생성
+                    createInactivityNotificationForUser(userId);
+                    createdNotifications++;
+                } catch (Exception e) {
+                    log.error("Failed to create inactivity notification for user {}: {}", userId, e.getMessage(), e);
+                }
+            }
+            
+            long duration = System.currentTimeMillis() - startTime;
+            log.info(LogFormats.INACTIVE_USER_DETECTION_COMPLETE, inactiveUserIds.size(), createdNotifications, duration);
+            
+        } catch (Exception e) {
+            long duration = System.currentTimeMillis() - startTime;
+            log.error(LogFormats.SCHEDULER_ERROR, "detectInactiveUsersAndCreateNotifications", e.getMessage(), duration, e);
         }
     }
 
@@ -66,13 +81,19 @@ public class NotificationScheduler {
      */
     @Scheduled(fixedRate = INTERVAL_5_MINUTES)
     public void processPendingNotifications() {
-        log.debug("Processing pending notifications");
+        long startTime = System.currentTimeMillis();
+        log.info(LogFormats.NOTIFICATION_SCHEDULER_START, "processPendingNotifications", 100);
 
         try {
             // NotificationFacade에 위임하여 처리
             notificationFacade.processPendingNotifications(100);
+            
+            long duration = System.currentTimeMillis() - startTime;
+            log.info(LogFormats.NOTIFICATION_BATCH_PROCESSED, "processPendingNotifications", 100, 0);
+            
         } catch (Exception e) {
-            log.error("Error during pending notification processing: {}", e.getMessage(), e);
+            long duration = System.currentTimeMillis() - startTime;
+            log.error(LogFormats.SCHEDULER_ERROR, "processPendingNotifications", e.getMessage(), duration, e);
         }
     }
 
@@ -82,22 +103,22 @@ public class NotificationScheduler {
      */
     @Scheduled(cron = "0 0 3 * * *")
     public void cleanupNotifications() {
-        log.info("Starting notification cleanup");
+        long startTime = System.currentTimeMillis();
+        log.info(LogFormats.SCHEDULER_START, "cleanupNotifications", LocalDateTime.now());
 
         try {
             // 만료된 알림 정리
             int expiredCount = notificationFacade.cleanupExpiredNotifications();
-            log.info("Cleaned up {} expired notifications", expiredCount);
 
             // 오래된 완료 알림 정리
             int oldCount = notificationFacade.cleanupOldNotifications();
-            log.info("Cleaned up {} old completed notifications", oldCount);
 
-            log.info("Notification cleanup completed. Total cleaned: {}",
-                expiredCount + oldCount);
+            long duration = System.currentTimeMillis() - startTime;
+            log.info(LogFormats.NOTIFICATION_CLEANUP_COMPLETE, expiredCount, oldCount, duration);
 
         } catch (Exception e) {
-            log.error("Error during notification cleanup: {}", e.getMessage(), e);
+            long duration = System.currentTimeMillis() - startTime;
+            log.error(LogFormats.SCHEDULER_ERROR, "cleanupNotifications", e.getMessage(), duration, e);
         }
     }
     
@@ -106,14 +127,18 @@ public class NotificationScheduler {
      */
     @Scheduled(cron = "0 0 2 * * *")
     public void processDormantUsers() {
-        log.info("Starting dormant user processing");
+        long startTime = System.currentTimeMillis();
+        log.info(LogFormats.SCHEDULER_START, "processDormantUsers", LocalDateTime.now());
 
         try {
             int processedCount = userFacade.processDormantUsers();
-            log.info("Processed {} dormant users", processedCount);
+            
+            long duration = System.currentTimeMillis() - startTime;
+            log.info(LogFormats.SCHEDULER_COMPLETE, "processDormantUsers", duration, processedCount);
             
         } catch (Exception e) {
-            log.error("Error during dormant user processing: {}", e.getMessage(), e);
+            long duration = System.currentTimeMillis() - startTime;
+            log.error(LogFormats.SCHEDULER_ERROR, "processDormantUsers", e.getMessage(), duration, e);
         }
     }
 
@@ -126,15 +151,23 @@ public class NotificationScheduler {
      * 5. 알림 생성<br>
      */
     private void createInactivityNotificationForUser(Long userId) {
-        // 1. 사용자의 반려동물 조회
-        Long petId = petFacade.findFirstPetByUserId(userId);
+        try {
+            // 1. 사용자의 반려동물 조회
+            Long petId = petFacade.findFirstPetByUserId(userId);
 
-        if (petId == null) {
-            return;
+            if (petId == null) {
+                log.warn("No pet found for user: userId={}", userId);
+                return;
+            }
+
+            // 2. 알림 생성
+            inactivityNotificationFacade.createInactivityNotification(userId, petId);
+            log.info(LogFormats.INACTIVE_NOTIFICATION_CREATED, userId, petId, "INACTIVITY");
+            
+        } catch (Exception e) {
+            log.error("Failed to create inactivity notification: userId={}, error={}", userId, e.getMessage(), e);
+            throw e;
         }
-
-        // 2. 알림 생성
-        inactivityNotificationFacade.createInactivityNotification(userId, petId);
     }
 
 }
