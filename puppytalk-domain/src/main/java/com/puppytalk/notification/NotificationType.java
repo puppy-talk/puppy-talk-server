@@ -8,10 +8,14 @@ package com.puppytalk.notification;
 public enum NotificationType {
     
     /**
+     * 반려동물 메시지 (반려동물이 보내는 메시지)
+     */
+    PET_MESSAGE("반려동물 메시지"),
+    
+    /**
      * 비활성 사용자 알림 (반려동물이 보내는 메시지)
      */
     INACTIVITY_MESSAGE("비활성 사용자 메시지"),
-    
     
     /**
      * 채팅 알림 (실시간 메시지)
@@ -44,13 +48,13 @@ public enum NotificationType {
      * 배치 처리 가능한 알림인지 판단
      */
     public boolean isBatchable() {
-        return this == INACTIVITY_MESSAGE || this == PET_STATUS;
+        return this == PET_MESSAGE || this == INACTIVITY_MESSAGE || this == PET_STATUS;
     }
     
     /**
      * AI 생성이 필요한 알림인지 판단
      */
     public boolean requiresAiGeneration() {
-        return this == INACTIVITY_MESSAGE;
+        return this == PET_MESSAGE || this == INACTIVITY_MESSAGE;
     }
 }
