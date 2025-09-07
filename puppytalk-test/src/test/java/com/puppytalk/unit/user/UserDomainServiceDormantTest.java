@@ -1,6 +1,7 @@
 package com.puppytalk.unit.user;
 
 import com.puppytalk.user.*;
+import com.puppytalk.user.exception.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

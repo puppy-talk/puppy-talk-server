@@ -1,11 +1,11 @@
 package com.puppytalk.unit.user;
 
-import com.puppytalk.user.DuplicateUserException;
+import com.puppytalk.user.exception.DuplicateUserException;
 import com.puppytalk.user.PasswordEncoder;
 import com.puppytalk.user.User;
 import com.puppytalk.user.UserDomainService;
 import com.puppytalk.user.UserId;
-import com.puppytalk.user.UserNotFoundException;
+import com.puppytalk.user.exception.UserNotFoundException;
 import com.puppytalk.user.UserRepository;
 
 import org.junit.jupiter.api.BeforeEach;

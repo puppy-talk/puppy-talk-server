@@ -3,7 +3,7 @@ package com.puppytalk.unit.pet;
 import com.puppytalk.pet.Pet;
 import com.puppytalk.pet.PetDomainService;
 import com.puppytalk.pet.PetId;
-import com.puppytalk.pet.PetNotFoundException;
+import com.puppytalk.pet.exception.PetNotFoundException;
 import com.puppytalk.pet.PetRepository;
 import com.puppytalk.user.UserId;
 
