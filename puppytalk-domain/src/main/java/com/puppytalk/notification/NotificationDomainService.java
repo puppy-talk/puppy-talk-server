@@ -1,6 +1,7 @@
 package com.puppytalk.notification;
 
 import com.puppytalk.chat.ChatRoomId;
+import com.puppytalk.notification.exception.NotificationException;
 import com.puppytalk.pet.PetId;
 import com.puppytalk.user.UserId;
 import java.time.LocalDateTime;

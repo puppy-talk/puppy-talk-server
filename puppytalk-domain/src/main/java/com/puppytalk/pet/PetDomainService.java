@@ -1,5 +1,6 @@
 package com.puppytalk.pet;
 
+import com.puppytalk.pet.exception.PetNotFoundException;
 import com.puppytalk.user.UserId;
 import java.util.List;
 

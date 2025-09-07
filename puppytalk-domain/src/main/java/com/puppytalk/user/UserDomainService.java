@@ -1,5 +1,7 @@
 package com.puppytalk.user;
 
+import com.puppytalk.user.exception.DuplicateUserException;
+import com.puppytalk.user.exception.UserNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
 

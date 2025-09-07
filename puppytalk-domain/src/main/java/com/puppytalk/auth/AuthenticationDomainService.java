@@ -1,9 +1,11 @@
 package com.puppytalk.auth;
 
+import com.puppytalk.auth.exception.InvalidCredentialsException;
+import com.puppytalk.auth.exception.InvalidTokenException;
 import com.puppytalk.user.User;
 import com.puppytalk.user.UserId;
 import com.puppytalk.user.UserDomainService;
-import com.puppytalk.user.UserNotFoundException;
+import com.puppytalk.user.exception.UserNotFoundException;
 import java.util.List;
 
 /**

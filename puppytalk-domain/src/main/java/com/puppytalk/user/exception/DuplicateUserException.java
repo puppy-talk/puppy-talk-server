@@ -1,4 +1,4 @@
-package com.puppytalk.user;
+package com.puppytalk.user.exception;
 
 public class DuplicateUserException extends RuntimeException {
     

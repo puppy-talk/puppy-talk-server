@@ -1,4 +1,6 @@
-package com.puppytalk.notification;
+package com.puppytalk.notification.exception;
+
+import com.puppytalk.notification.NotificationId;
 
 public class NotificationException extends RuntimeException {
     

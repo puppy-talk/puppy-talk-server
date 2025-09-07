@@ -1,5 +1,6 @@
-package com.puppytalk.pet;
+package com.puppytalk.pet.exception;
 
+import com.puppytalk.pet.PetId;
 import com.puppytalk.user.UserId;
 
 /**

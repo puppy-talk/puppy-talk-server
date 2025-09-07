@@ -11,7 +11,7 @@ public record ActiveTokenInfo(
     String accessToken,
     LocalDateTime tokenExpiry,
     LocalDateTime issuedAt,
-    String clientInfo  // 클라이언트 정보 (IP, User-Agent 등)
+    String clientInfo
 ) {
     
     /**
