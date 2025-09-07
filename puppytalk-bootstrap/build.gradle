@@ -1,7 +1,6 @@
 plugins {
     id 'org.springframework.boot'
     id 'io.spring.dependency-management'
-    id 'org.flywaydb.flyway' version '10.8.1'
 }
 
 dependencies {
@@ -18,15 +17,4 @@ dependencies {
     // Database
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
     testRuntimeOnly 'com.h2database:h2'
-    
-    // Database migration
-    implementation 'org.flywaydb:flyway-core'
-    implementation 'org.flywaydb:flyway-mysql'
-}
-
-flyway {
-    url = 'jdbc:mariadb://localhost:3306/puppytalk'
-    user = 'puppytalk'
-    password = 'puppytalk'
-    locations = ['filesystem:src/main/resources/db/migration']
 }
