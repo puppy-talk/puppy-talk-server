@@ -1,5 +1,6 @@
 package com.puppytalk.auth;
 
+import com.puppytalk.auth.exception.InvalidTokenException;
 import com.puppytalk.user.UserId;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

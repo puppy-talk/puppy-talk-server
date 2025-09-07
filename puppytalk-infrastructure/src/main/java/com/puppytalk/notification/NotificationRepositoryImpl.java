@@ -1,5 +1,6 @@
 package com.puppytalk.notification;
 
+import com.puppytalk.notification.exception.NotificationException;
 import com.puppytalk.user.UserId;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

@@ -1,14 +1,14 @@
 package com.puppytalk.support;
 
-import com.puppytalk.auth.InvalidCredentialsException;
-import com.puppytalk.auth.InvalidTokenException;
+import com.puppytalk.auth.exception.InvalidCredentialsException;
+import com.puppytalk.auth.exception.InvalidTokenException;
 
 import com.puppytalk.chat.exception.ChatRoomAccessDeniedException;
 import com.puppytalk.chat.exception.MessageNotFoundException;
 import com.puppytalk.chat.exception.MessageValidationException;
-import com.puppytalk.notification.NotificationException;
-import com.puppytalk.user.UserNotFoundException;
-import com.puppytalk.pet.PetNotFoundException;
+import com.puppytalk.notification.exception.NotificationException;
+import com.puppytalk.user.exception.UserNotFoundException;
+import com.puppytalk.pet.exception.PetNotFoundException;
 import com.puppytalk.chat.exception.ChatRoomNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
@@ -16,10 +16,8 @@ import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -32,7 +30,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 전역 예외 처리기
