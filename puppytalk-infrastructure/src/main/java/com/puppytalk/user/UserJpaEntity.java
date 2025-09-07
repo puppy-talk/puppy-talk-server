@@ -30,17 +30,21 @@ public class UserJpaEntity extends BaseEntity {
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
     
+    @Column(name = "last_active_at", nullable = false)
+    private LocalDateTime lastActiveAt;
+    
     protected UserJpaEntity() {
         // JPA 전용 기본 생성자
     }
     
     private UserJpaEntity(Long id, String username, String email, String password, boolean isDeleted,
-                         LocalDateTime createdAt, LocalDateTime updatedAt) {
+                         LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime lastActiveAt) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
         this.isDeleted = isDeleted;
+        this.lastActiveAt = lastActiveAt;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -56,7 +60,8 @@ public class UserJpaEntity extends BaseEntity {
             user.getPassword(),
             user.isDeleted(),
             user.getCreatedAt(),
-            LocalDateTime.now()
+            LocalDateTime.now(),
+            user.getLastActiveAt()
         );
     }
     
@@ -71,7 +76,7 @@ public class UserJpaEntity extends BaseEntity {
             this.password,
             this.createdAt,
             this.updatedAt,
-            this.createdAt, // using createdAt as lastActiveAt since we don't have it stored
+            this.lastActiveAt,
             this.isDeleted
         );
     }
@@ -82,6 +87,7 @@ public class UserJpaEntity extends BaseEntity {
     public String getEmail() { return email; }
     public String getPassword() { return password; }
     public boolean isDeleted() { return isDeleted; }
+    public LocalDateTime getLastActiveAt() { return lastActiveAt; }
     
     /**
      * updateFromDomain 패턴 - 도메인 객체로부터 일괄 업데이트
@@ -92,6 +98,7 @@ public class UserJpaEntity extends BaseEntity {
         this.email = user.getEmail();
         this.password = user.getPassword();
         this.isDeleted = user.isDeleted();
+        this.lastActiveAt = user.getLastActiveAt();
         this.updatedAt = LocalDateTime.now();
     }
     
