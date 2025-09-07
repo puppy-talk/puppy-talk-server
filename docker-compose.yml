@@ -75,7 +75,7 @@ services:
       # JVM Options
       JAVA_OPTS: "-Xmx512m -Xms256m"
     ports:
-      - "8081:8080"
+      - "8080:8080"
     networks:
       - puppytalk-network
     healthcheck:
