@@ -1,73 +1,40 @@
-# Backup directory
-backup/
+# Compiled class files
+*.class
+
+# Build outputs
+**/build/
+**/target/
+**/out/
+.gradle/
 
 # IDE
-.DS_Store
-.gradle/
 .idea/
-
-# Gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-# IntelliJ IDEA
-*.iws
 *.iml
 *.ipr
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
-
-# Eclipse
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
-
-# NetBeans
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-# VS Code
+*.iws
 .vscode/
 
-# Mac
+# OS
 .DS_Store
-
-# Windows
 Thumbs.db
-ehthumbs.db
-Desktop.ini
 
-# Log files
+# Logs
 *.log
 
-# Package Files
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
-# JVM Crash Logs
-hs_err_pid*
-
-# Application specific
-application-*.yml
-!application-sample.yml
-
-# Docker
+# Environment configs
+application-local.yml
+application-dev.yml
+application-prod.yml
 .env
+
+# Security
+*.key
+*.pem
+*.jks
+
+# Build artifacts only (keep gradle wrapper)
+**/build/**/*.jar
+**/target/**/*.jar
+
+# Keep gradle wrapper
+!gradle/wrapper/gradle-wrapper.jar
